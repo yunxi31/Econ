@@ -6,29 +6,52 @@
              xmlns:local="clr-namespace:MotorTestSystem.Views"
              xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              xmlns:conv="clr-namespace:MotorTestSystem.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1000">
+             d:DesignHeight="700" d:DesignWidth="1100">
     
     <UserControl.Resources>
-        <conv:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+        <!-- Capsule ProgressBar Style -->
+        <Style TargetType="ProgressBar" x:Key="CapsuleProgressBarStyle">
+            <Setter Property="Height" Value="6"/>
+            <Setter Property="Background" Value="#2A2D3C"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid x:Name="TemplateRoot">
+                            <Border x:Name="PART_Track" Background="{TemplateBinding Background}" CornerRadius="3"/>
+                            <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="3" HorizontalAlignment="Left"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
+
     <Grid Background="#12141A">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="3*"/>
+            <RowDefinition Height="125"/>
+            <RowDefinition Height="1.1*"/>
+            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
         <!-- TITLE / HEADER -->
-        <TextBlock Text="生产监控数据看板" 
-                   Foreground="White" 
-                   FontSize="22" 
-                   FontWeight="Bold" 
-                   Margin="20,15,20,10" 
-                   Grid.Row="0"/>
+        <Grid Grid.Row="0" Margin="20,15,20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="4" Height="18" Background="#00DFFF" CornerRadius="2" Margin="0,0,10,0"/>
+                <TextBlock Text="生产监控数据看板" Foreground="White" FontSize="20" FontWeight="Bold"/>
+            </StackPanel>
+            <TextBlock Grid.Column="1" Text="数据实时更新 (每5秒)" Foreground="#6E7C8A" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+        </Grid>
 
         <!-- STATS CARDS -->
-        <Grid Grid.Row="1" Margin="20,5,20,15">
+        <Grid Grid.Row="1" Margin="20,5,20,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
@@ -36,150 +59,262 @@
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Card 1: Total Tested -->
-            <Border Grid.Column="0" Background="#1B1E26" BorderBrush="#2B303C" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0">
-                <Grid Margin="15">
+            <!-- Card 1: 累计加工总数 -->
+            <Border Grid.Column="0" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="0,0,8,0">
+                <Grid Margin="15,12,15,12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="总测试数 (pcs)" Foreground="#A0AAB2" FontSize="13" VerticalAlignment="Top"/>
-                    <TextBlock Grid.Row="1" Text="{Binding TotalChecked}" Foreground="White" FontSize="32" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,10,0,0"/>
-                </Grid>
-            </Border>
-
-            <!-- Card 2: OK Count -->
-            <Border Grid.Column="1" Background="#1B1E26" BorderBrush="#00FFB2" BorderThickness="0,0,0,3" CornerRadius="8" Margin="10,0,10,0">
-                <Grid Margin="15">
-                    <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Text="合格数 (OK)" Foreground="#A0AAB2" FontSize="13"/>
-                    <TextBlock Grid.Row="1" Text="{Binding OkCount}" Foreground="#00FFB2" FontSize="32" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,10,0,0"/>
-                </Grid>
-            </Border>
-
-            <!-- Card 3: NG Count -->
-            <Border Grid.Column="2" Background="#1B1E26" BorderBrush="#FF3366" BorderThickness="0,0,0,3" CornerRadius="8" Margin="10,0,10,0">
-                <Grid Margin="15">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="不合格数 (NG)" Foreground="#A0AAB2" FontSize="13"/>
-                    <TextBlock Grid.Row="1" Text="{Binding NgCount}" Foreground="#FF3366" FontSize="32" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,10,0,0"/>
-                </Grid>
-            </Border>
-
-            <!-- Card 4: Pass Rate -->
-            <Border Grid.Column="3" Background="#1B1E26" BorderBrush="#00DFFF" BorderThickness="0,0,0,3" CornerRadius="8" Margin="10,0,0,0">
-                <Grid Margin="15">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="一次性合格率" Foreground="#A0AAB2" FontSize="13"/>
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="0,10,0,0">
-                        <TextBlock Text="{Binding PassRate, StringFormat={}{0:F2}}" Foreground="#00DFFF" FontSize="32" FontWeight="Bold"/>
-                        <TextBlock Text="%" Foreground="#00DFFF" FontSize="16" VerticalAlignment="Bottom" Margin="3,0,0,5" FontWeight="Bold"/>
+                    <TextBlock Text="累计加工总数" Foreground="#8E9AA7" FontSize="12" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Row="1" Text="{Binding TotalChecked, StringFormat={}{0:N0}}" Foreground="#00DFFF" FontSize="28" FontWeight="Bold" VerticalAlignment="Center"/>
+                    
+                    <!-- Progress Bar (approx 70% filled) -->
+                    <StackPanel Grid.Row="2" Margin="0,4,0,0">
+                        <ProgressBar Value="70" Foreground="#00DFFF" Style="{StaticResource CapsuleProgressBarStyle}"/>
+                        <Grid Margin="0,4,0,0">
+                            <TextBlock Text="完成进度" Foreground="#6E7C8A" FontSize="10"/>
+                            <TextBlock Text="70%" Foreground="#00DFFF" FontSize="10" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                        </Grid>
                     </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Card 2: 合格总数 -->
+            <Border Grid.Column="1" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="8,0,8,0">
+                <Grid Margin="15,12,15,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="合格总数" Foreground="#8E9AA7" FontSize="12" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Row="1" Text="{Binding OkCount, StringFormat={}{0:N0}}" Foreground="#00FFB2" FontSize="28" FontWeight="Bold" VerticalAlignment="Center"/>
+                    
+                    <!-- Bottom trend text -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0">
+                        <materialDesign:PackIcon Kind="TrendingUp" Foreground="#00FFB2" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                        <TextBlock Text="+2.4%" Foreground="#00FFB2" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock Text=" vs prev shift" Foreground="#6E7C8A" FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Card 3: 不良总数 (Highlight Warn Red) -->
+            <Border Grid.Column="2" Background="#1B1E26" BorderBrush="#FF3366" BorderThickness="1.5" CornerRadius="8" Margin="8,0,8,0">
+                <Grid Margin="15,12,15,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <TextBlock Text="不良总数" Foreground="#8E9AA7" FontSize="12" FontWeight="SemiBold"/>
+                        <materialDesign:PackIcon Kind="AlertCircleOutline" Foreground="#FF3366" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </Grid>
+                    <TextBlock Grid.Row="1" Text="{Binding NgCount, StringFormat={}{0:N0}}" Foreground="#FF3366" FontSize="28" FontWeight="Bold" VerticalAlignment="Center"/>
+                    
+                    <!-- Bottom warning text -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0">
+                        <materialDesign:PackIcon Kind="TrendingDown" Foreground="#FF3366" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                        <TextBlock Text="需处理" Foreground="#FF3366" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock Text=" 缺陷件数超警戒" Foreground="#6E7C8A" FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Card 4: 今日良率 -->
+            <Border Grid.Column="3" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="8,0,0,0">
+                <Grid Margin="15,12,15,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="今日良率" Foreground="#8E9AA7" FontSize="12" FontWeight="SemiBold"/>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding PassRate, StringFormat={}{0:F1}}" Foreground="White" FontSize="28" FontWeight="Bold"/>
+                            <TextBlock Text="%" Foreground="White" FontSize="16" VerticalAlignment="Bottom" Margin="2,0,0,3" FontWeight="Bold"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="❙❙" Foreground="#00FFB2" FontSize="10" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <TextBlock Text=" 目标良率 98%" Foreground="#6E7C8A" FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Circular Progress Ring -->
+                    <Grid Grid.Column="1" Width="52" Height="52" VerticalAlignment="Center" Margin="5,0,0,0">
+                        <Ellipse Stroke="#252934" StrokeThickness="3.5" Width="44" Height="44"/>
+                        <Ellipse Stroke="#00FFB2" StrokeThickness="3.5" Width="44" Height="44"
+                                 StrokeDashArray="3.14 0.8" StrokeDashOffset="0.6" StrokeEndLineCap="Round"/>
+                        <TextBlock Text="95.5%" Foreground="#00FFB2" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
                 </Grid>
             </Border>
         </Grid>
 
-        <!-- MAIN LAYOUT: CHARTS + VIDEO -->
-        <Grid Grid.Row="2" Margin="20,0,20,20">
+        <!-- MIDDLE ROW: 2 CHARTS -->
+        <Grid Grid.Row="2" Margin="20,10,20,10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="6*"/>
-                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Charts Container -->
-            <Border Grid.Column="0" Background="#1B1E26" BorderBrush="#2B303C" BorderThickness="1" CornerRadius="8" Margin="0,0,10,0" Padding="15">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Text="生产统计趋势" Foreground="White" FontSize="15" FontWeight="Bold" Margin="0,0,0,10"/>
-                    
-                    <!-- Chart 1: Daily Production (Column) -->
-                    <Grid Grid.Row="1" Margin="0,5,0,5">
-                        <lvc:CartesianChart Series="{Binding OutputSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" TooltipFindingStrategy="CompareAllTakeClosest"/>
-                    </Grid>
-
-                    <!-- Chart 2: Pass Rate (Line) -->
-                    <Grid Grid.Row="2" Margin="0,5,0,5">
-                        <lvc:CartesianChart Series="{Binding PassRateSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"/>
-                    </Grid>
-                </Grid>
-            </Border>
-
-            <!-- Video Camera Container (Hikvision SDK Integration Area) -->
-            <Border Grid.Column="1" Background="#1B1E26" BorderBrush="#2B303C" BorderThickness="1" CornerRadius="8" Margin="10,0,0,0" Padding="15">
+            <!-- Chart 1: 小时生产统计 -->
+            <Border Grid.Column="0" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="0,0,8,0" Padding="15">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10" VerticalAlignment="Center">
-                        <Ellipse Width="8" Height="8" Fill="#FF3366" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBlock Text="视频监控集成 (海康威视 SDK)" Foreground="White" FontSize="15" FontWeight="Bold"/>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                        <Border Width="3" Height="14" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="小时生产统计 (pcs)" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <!-- Mock Player Area -->
-                    <Border Grid.Row="1" Background="Black" CornerRadius="4" BorderBrush="#2B303C" BorderThickness="1">
-                        <Grid>
-                            <!-- Simulation Video Content -->
-                            <Grid Visibility="{Binding IsCameraPlaying, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <!-- Grid lines overlay (representing camera overlay) -->
-                                <UniformGrid Rows="4" Columns="4" Opacity="0.15">
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                    <Border BorderBrush="#CCCCCC" BorderThickness="0.5"/>
-                                </UniformGrid>
-                                
-                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <!-- Play camera icon / status -->
-                                    <Path Data="M 12 2 C 6.48 2 2 6.48 2 12 C 2 17.52 6.48 22 12 22 C 17.52 22 22 17.52 22 12 C 22 6.48 17.52 2 12 2 Z M 16 13 L 10 17 L 10 7 L 16 12 L 16 13 Z"
-                                          Fill="#00FFB2" Width="40" Height="40" Stretch="Fill" HorizontalAlignment="Center" Opacity="0.7"/>
-                                    <TextBlock Text="[LIVE] 生产车间 01 通道" Foreground="#00FFB2" FontSize="12" Margin="0,10,0,0" HorizontalAlignment="Center"/>
-                                </StackPanel>
+                    <lvc:CartesianChart Grid.Row="1" Background="Transparent" Series="{Binding OutputSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" TooltipFindingStrategy="CompareAllTakeClosest" TooltipBackgroundPaint="{Binding TooltipBgPaint}" TooltipTextPaint="{Binding TooltipTextPaint}" TooltipTextSize="12"/>
+                </Grid>
+            </Border>
 
-                                <!-- Time Stamp Overlay -->
-                                <TextBlock Text="REC ● 192.168.1.200" Foreground="White" FontSize="10" Margin="10" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Courier New"/>
-                            </Grid>
+            <!-- Chart 2: 良率趋势图 -->
+            <Border Grid.Column="1" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="8,0,0,0" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                            <!-- Stopped state -->
-                            <Grid Visibility="{Binding IsCameraPlaying, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                <TextBlock Text="监控已暂停" Foreground="#A0AAB2" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Grid>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                        <Border Width="3" Height="14" Background="#00FFB2" CornerRadius="1.5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="良率趋势及目标对比 (%)" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <lvc:CartesianChart Grid.Row="1" Background="Transparent" Series="{Binding PassRateSeries}" XAxes="{Binding XAxes}" YAxes="{Binding PassRateYAxes}" TooltipBackgroundPaint="{Binding TooltipBgPaint}" TooltipTextPaint="{Binding TooltipTextPaint}" TooltipTextSize="12"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- BOTTOM ROW: 2 PANELS -->
+        <Grid Grid.Row="3" Margin="20,10,20,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Panel 1: 各阶段不良分布 -->
+            <Border Grid.Column="0" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="0,0,8,0" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                        <Border Width="3" Height="14" Background="#FFA500" CornerRadius="1.5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="各阶段不良占比与分布" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="5.5*"/>
+                            <ColumnDefinition Width="4.5*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left Progress Bars -->
+                        <ItemsControl Grid.Column="0" ItemsSource="{Binding DefectList}" VerticalAlignment="Center" Margin="5,0,15,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,8,0,8" VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="75"/>  <!-- Left Text -->
+                                            <ColumnDefinition Width="*"/>   <!-- Horizontal Capsule ProgressBar -->
+                                            <ColumnDefinition Width="40"/>  <!-- Right Percentage -->
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- 1. Left Text -->
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}" Foreground="#8E9AA7" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        
+                                        <!-- 2. Middle ProgressBar -->
+                                        <ProgressBar Grid.Column="1" Value="{Binding Percentage}" Foreground="{Binding ColorBrush}" Style="{StaticResource CapsuleProgressBarStyle}" Margin="10,0,10,0" VerticalAlignment="Center"/>
+                                        
+                                        <!-- 3. Right Percentage -->
+                                        <TextBlock Grid.Column="2" Text="{Binding Percentage, StringFormat={}{0}%}" Foreground="White" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Right Donut Chart (Clean and Thick) -->
+                        <Grid Grid.Column="1" Width="130" Height="130" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <lvc:PieChart Series="{Binding DefectDistributionSeries}"
+                                          LegendPosition="Hidden"
+                                          TooltipPosition="Hidden"
+                                          Background="Transparent"/>
                         </Grid>
-                    </Border>
+                    </Grid>
+                </Grid>
+            </Border>
 
-                    <!-- Camera Control Button -->
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
-                        <TextBlock Text="{Binding CameraStatus}" Foreground="#A0AAB2" FontSize="12" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                        <Button Content="播放/暂停" 
-                                Command="{Binding ToggleCameraCommand}"
-                                Width="80" Height="28" 
-                                Background="#00DFFF" Foreground="Black" 
-                                FontWeight="Bold" BorderThickness="0"/>
+            <!-- Panel 2: 前五项故障原因 -->
+            <Border Grid.Column="1" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="8,0,0,0" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                        <Border Width="3" Height="14" Background="#FF3366" CornerRadius="1.5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="故障类别 Top 5 排行" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
                     </StackPanel>
+
+                    <!-- Top 5 Fault List -->
+                    <ItemsControl Grid.Row="1" ItemsSource="{Binding TopFaultList}" VerticalAlignment="Center">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,5,0,5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <!-- Rank Number Badge -->
+                                    <Border Grid.Column="0" Background="#161920" Width="22" Height="22" CornerRadius="4" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Rank}" Foreground="#8E9AA7" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    
+                                    <!-- Fault Name (Left-aligned, secondary text color) -->
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#8E9AA7" FontSize="12.5" VerticalAlignment="Center" Margin="12,0,0,0" FontWeight="Medium"/>
+                                    
+                                    <!-- Frequency Count (Right-aligned, conditional highlight via DataTrigger) -->
+                                    <TextBlock Grid.Column="2" Text="{Binding Count, StringFormat={}{0} 次}" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Rank}" Value="01">
+                                                        <Setter Property="Foreground" Value="#FF3366"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Rank}" Value="02">
+                                                        <Setter Property="Foreground" Value="#FFA500"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </Grid>
             </Border>
         </Grid>

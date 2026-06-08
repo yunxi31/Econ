@@ -13,6 +13,9 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // 临时修改关机模式，防止关闭登录窗口导致整个进程直接退出
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
         var loginWindow = new LoginWindow();
         if (loginWindow.ShowDialog() == true)
         {
@@ -22,6 +25,11 @@ public partial class App : Application
             {
                 mainVM.CurrentUser = username;
             }
+            
+            // 绑定主窗口，并恢复默认的关机模式（主窗口关闭时退出程序）
+            MainWindow = mainWindow;
+            ShutdownMode = ShutdownMode.OnMainWindowClose;
+            
             mainWindow.Show();
         }
         else

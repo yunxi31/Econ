@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:MotorTestSystem"
         xmlns:vm="clr-namespace:MotorTestSystem.ViewModels"
         xmlns:views="clr-namespace:MotorTestSystem.Views"
+        xmlns:conv="clr-namespace:MotorTestSystem.Converters"
         mc:Ignorable="d"
         Title="电机电性能测试系统上位机" 
         Height="760" Width="1240"
@@ -26,141 +27,150 @@
         <DataTemplate DataType="{x:Type vm:ConfigViewModel}">
             <views:ConfigView/>
         </DataTemplate>
+        
+        <conv:ViewTypeToBoolConverter x:Key="ViewTypeToBoolConverter"/>
+
+        <!-- Sidebar RadioButton Tab Style -->
+        <Style TargetType="RadioButton" x:Key="SidebarTabStyle">
+            <Setter Property="Height" Value="68"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#8E9AA7"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="GroupName" Value="SidebarGroup"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" Background="{TemplateBinding Background}">
+                            <Grid>
+                                <!-- Selected Accent Left Strip -->
+                                <Border x:Name="leftAccent" HorizontalAlignment="Left" Width="3" Height="24" Background="#00DFFF" Visibility="Collapsed" CornerRadius="1.5" VerticalAlignment="Center"/>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1A1D24"/>
+                                <Setter Property="Foreground" Value="#00DFFF"/>
+                                <Setter TargetName="leftAccent" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#161920"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="80"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- LEFT SIDEBAR -->
-        <Border Grid.Column="0" Background="#161920" BorderBrush="#2B303C" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" Background="#111317" BorderBrush="#252934" BorderThickness="0,0,1,0">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="70"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- LOGO / HEADER -->
-                <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Ellipse Width="12" Height="12" Fill="#00DFFF" Margin="0,0,10,0"/>
-                    <TextBlock Text="MOTOR TEST" Foreground="White" FontSize="18" FontWeight="Bold"/>
-                </StackPanel>
+                <Border Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Path Data="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" 
+                          Fill="#00DFFF" Width="24" Height="24" Stretch="Fill"/>
+                </Border>
 
                 <!-- NAV BUTTONS -->
-                <StackPanel Grid.Row="1" Margin="10,20,10,0">
-                    <!-- Navigation Styles -->
-                    <StackPanel.Resources>
-                        <Style TargetType="Button">
-                            <Setter Property="Height" Value="45"/>
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Foreground" Value="#A0AAB2"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                            <Setter Property="Padding" Value="15,0,0,0"/>
-                            <Setter Property="Margin" Value="0,5,0,5"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="FontSize" Value="13"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4">
-                                            <Grid>
-                                                <!-- Selected Accent Left Strip -->
-                                                <Border x:Name="leftAccent" HorizontalAlignment="Left" Width="4" Height="20" Background="#00DFFF" Visibility="Collapsed" CornerRadius="2" Margin="5,0,0,0"/>
-                                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
-                                            </Grid>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="border" Property="Background" Value="#232733"/>
-                                                <Setter Property="Foreground" Value="White"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </StackPanel.Resources>
+                <StackPanel Grid.Row="1" VerticalAlignment="Top" Margin="0,10,0,0">
+                    <!-- Nav Button 1: 生产监控 -->
+                    <RadioButton Command="{Binding NavigateCommand}" 
+                                 CommandParameter="Monitor"
+                                 IsChecked="{Binding CurrentView, Mode=OneWay, Converter={StaticResource ViewTypeToBoolConverter}, ConverterParameter=Monitor}"
+                                 Style="{StaticResource SidebarTabStyle}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path Data="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" 
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" 
+                                  Width="20" Height="20" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                            <TextBlock Text="生产监控" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
 
-                    <!-- Nav Button 1 -->
-                    <Button Content="📊 生产看板" 
-                            Command="{Binding NavigateCommand}" 
-                            CommandParameter="Dashboard"/>
+                    <!-- Nav Button 2: 数据追溯 -->
+                    <RadioButton Command="{Binding NavigateCommand}" 
+                                 CommandParameter="History"
+                                 IsChecked="{Binding CurrentView, Mode=OneWay, Converter={StaticResource ViewTypeToBoolConverter}, ConverterParameter=History}"
+                                 Style="{StaticResource SidebarTabStyle}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path Data="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" 
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" 
+                                  Width="18" Height="18" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                            <TextBlock Text="数据追溯" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
 
-                    <!-- Nav Button 2 -->
-                    <Button Content="⚙️ 工位监视" 
-                            Command="{Binding NavigateCommand}" 
-                            CommandParameter="Monitor"/>
+                    <!-- Nav Button 3: 生产看板 -->
+                    <RadioButton Command="{Binding NavigateCommand}" 
+                                 CommandParameter="Dashboard"
+                                 IsChecked="{Binding CurrentView, Mode=OneWay, Converter={StaticResource ViewTypeToBoolConverter}, ConverterParameter=Dashboard}"
+                                 Style="{StaticResource SidebarTabStyle}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path Data="M4 4h6v6H4zm8 0h8v6h-8zm-8 8h6v8H4zm8 0h8v8h-8z" 
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" 
+                                  Width="18" Height="18" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                            <TextBlock Text="生产看板" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
 
-                    <!-- Nav Button 3 -->
-                    <Button Content="🔍 历史追溯" 
-                            Command="{Binding NavigateCommand}" 
-                            CommandParameter="History"/>
-
-                    <!-- Nav Button 4 -->
-                    <Button Content="🛠️ 通信配置" 
-                            Command="{Binding NavigateCommand}" 
-                            CommandParameter="Config"/>
+                    <!-- Nav Button 4: 通信配置 -->
+                    <RadioButton Command="{Binding NavigateCommand}" 
+                                 CommandParameter="Config"
+                                 IsChecked="{Binding CurrentView, Mode=OneWay, Converter={StaticResource ViewTypeToBoolConverter}, ConverterParameter=Config}"
+                                 Style="{StaticResource SidebarTabStyle}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z" 
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" 
+                                  Width="18" Height="18" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                            <TextBlock Text="通信配置" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
                 </StackPanel>
 
-                <!-- User Info Profile footer -->
-                <Border Grid.Row="2" Background="#1D222B" Margin="10" Padding="12" CornerRadius="6">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Ellipse Width="32" Height="32" Fill="#2B303C"/>
-                        <TextBlock Text="👤" Foreground="#00DFFF" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        
-                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                            <TextBlock Text="{Binding CurrentUser}" Foreground="White" FontSize="12" FontWeight="Bold"/>
-                            <TextBlock Text="客户端操作员" Foreground="#A0AAB2" FontSize="10" Margin="0,2,0,0"/>
+                <!-- Bottom Config / User Management Buttons -->
+                <StackPanel Grid.Row="2" Margin="0,0,0,15">
+                    <!-- Nav Button 5: 系统配置 -->
+                    <RadioButton Style="{StaticResource SidebarTabStyle}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path Data="M19.14,12.94c.04-.3.06-.61.06-.94c0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24,0-.43.17-.47.41l-.36,2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47,0-.59.22L2.74,8.87c-.12.21-.08.47.12.61l2.03,1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03,1.58c-.18.14-.23.41-.12.61l1.92,3.32c.12.22.37.29.59.22l2.39-.96c.5.38,1.03.7,1.62.94l.36,2.54c.05.24.24.41.48.41h3.84c.24,0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47,0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58ZM12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6s-1.62,3.6-3.6,3.6Z" 
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" 
+                                  Width="18" Height="18" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                            <TextBlock Text="系统配置" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                         </StackPanel>
-                    </Grid>
-                </Border>
+                    </RadioButton>
+
+                    <!-- Nav Button 6: 用户管理 -->
+                    <RadioButton Style="{StaticResource SidebarTabStyle}">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path Data="M12,5.5A2.5,2.5 0 0,1 14.5,8A2.5,2.5 0 0,1 12,10.5A2.5,2.5 0 0,1 9.5,8A2.5,2.5 0 0,1 12,5.5M12,12C14.73,12 20,13.33 20,16V18H4V16C4,13.33 9.27,12 12,12Z" 
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" 
+                                  Width="18" Height="18" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                            <TextBlock Text="用户管理" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
+                </StackPanel>
             </Grid>
         </Border>
 
         <!-- RIGHT PANEL -->
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="1" Background="#12141A">
             <Grid.RowDefinitions>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="0"/> <!-- Collapse the top status header to match 1:1 figma full-height -->
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
-            <!-- TOP STATUS HEADER -->
-            <Border Grid.Row="0" Background="#161920" BorderBrush="#2B303C" BorderThickness="0,0,0,1">
-                <Grid Margin="20,0,20,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="电机电性能测试系统" Foreground="White" FontSize="16" FontWeight="Bold"/>
-                        <Border Background="#2B303C" CornerRadius="4" Margin="12,0,0,0" Padding="6,2,6,2">
-                            <TextBlock Text="v1.0.0" Foreground="#A0AAB2" FontSize="10" FontWeight="Bold"/>
-                        </Border>
-                    </StackPanel>
-
-                    <!-- Connectivity state -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="机台连接状态: " Foreground="#A0AAB2" FontSize="12" Margin="0,0,5,0"/>
-                        <TextBlock Text="{Binding OnlineStationCount}" Foreground="#00FFB2" FontSize="12" FontWeight="Bold"/>
-                        <TextBlock Text="/" Foreground="#A0AAB2" FontSize="12"/>
-                        <TextBlock Text="{Binding TotalStationCount}" Foreground="White" FontSize="12" FontWeight="Bold"/>
-                        <TextBlock Text=" 在线" Foreground="#A0AAB2" FontSize="12" Margin="3,0,0,0"/>
-                    </StackPanel>
-
-                    <!-- Clock -->
-                    <TextBlock Grid.Column="2" Text="{Binding CurrentTime}" Foreground="#00DFFF" FontSize="14" FontWeight="Bold" FontFamily="Courier New" VerticalAlignment="Center"/>
-                </Grid>
-            </Border>
 
             <!-- CURRENT ACTIVE VIEW PANEL -->
             <ContentControl Grid.Row="1" Content="{Binding CurrentView}"/>
