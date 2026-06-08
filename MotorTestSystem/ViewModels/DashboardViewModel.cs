@@ -1,27 +1,31 @@
 using System;
-using System.Collections.ObjectModel;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
+using MotorTestSystem.Services;
 using SkiaSharp;
 
 namespace MotorTestSystem.ViewModels
 {
     public partial class DashboardViewModel : ViewModelBase
     {
-        [ObservableProperty]
-        private int _totalChecked = 1256;
+        private readonly IMotorTestRepository _repository;
+        private readonly DispatcherTimer _refreshTimer;
 
         [ObservableProperty]
-        private int _okCount = 1242;
+        private int _totalChecked;
 
         [ObservableProperty]
-        private int _ngCount = 14;
+        private int _okCount;
 
         [ObservableProperty]
-        private double _passRate = 98.88;
+        private int _ngCount;
+
+        [ObservableProperty]
+        private double _passRate;
 
         [ObservableProperty]
         private bool _isCameraPlaying = true;
@@ -35,16 +39,22 @@ namespace MotorTestSystem.ViewModels
         public Axis[] YAxes { get; set; }
 
         public DashboardViewModel()
+            : this(BackendRuntime.Shared.Repository)
         {
-            // Initialize Production Statistics Charts
+        }
+
+        public DashboardViewModel(IMotorTestRepository repository)
+        {
+            _repository = repository;
+
             OutputSeries = new ISeries[]
             {
                 new ColumnSeries<int>
                 {
                     Name = "日产量",
-                    Values = new int[] { 180, 210, 230, 195, 240, 280, 256 },
+                    Values = new[] { 180, 210, 230, 195, 240, 280, 256 },
                     Stroke = null,
-                    Fill = new SolidColorPaint(SKColor.Parse("#00FFB2")), // Premium Mint Green
+                    Fill = new SolidColorPaint(SKColor.Parse("#00FFB2")),
                     Padding = 4
                 }
             };
@@ -54,9 +64,9 @@ namespace MotorTestSystem.ViewModels
                 new LineSeries<double>
                 {
                     Name = "良品率 (%)",
-                    Values = new double[] { 98.2, 98.5, 97.8, 98.9, 99.1, 98.7, 98.88 },
-                    Stroke = new SolidColorPaint(SKColor.Parse("#00DFFF"), 3), // Cyan line
-                    Fill = new SolidColorPaint(SKColor.Parse("#1A00DFFF")), // Transparent Cyan fill
+                    Values = new[] { 98.2, 98.5, 97.8, 98.9, 99.1, 98.7, 98.88 },
+                    Stroke = new SolidColorPaint(SKColor.Parse("#00DFFF"), 3),
+                    Fill = new SolidColorPaint(SKColor.Parse("#1A00DFFF")),
                     GeometrySize = 8,
                     GeometryStroke = new SolidColorPaint(SKColor.Parse("#00DFFF"), 2)
                 }
@@ -66,7 +76,7 @@ namespace MotorTestSystem.ViewModels
             {
                 new Axis
                 {
-                    Labels = new string[] { "周一", "周二", "周三", "周四", "周五", "周六", "今天" },
+                    Labels = new[] { "周一", "周二", "周三", "周四", "周五", "周六", "今天" },
                     LabelsPaint = new SolidColorPaint(SKColor.Parse("#A0AAB2")),
                     SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#252830"))
                 }
@@ -80,6 +90,14 @@ namespace MotorTestSystem.ViewModels
                     SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#252830"))
                 }
             };
+
+            RefreshSummary();
+            _refreshTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(5)
+            };
+            _refreshTimer.Tick += (_, _) => RefreshSummary();
+            _refreshTimer.Start();
         }
 
         [RelayCommand]
@@ -87,6 +105,18 @@ namespace MotorTestSystem.ViewModels
         {
             IsCameraPlaying = !IsCameraPlaying;
             CameraStatus = IsCameraPlaying ? "连接正常 (192.168.1.200)" : "监控已暂停";
+        }
+
+        private void RefreshSummary()
+        {
+            DateTime start = DateTime.Now.Date;
+            DateTime end = start.AddDays(1).AddTicks(-1);
+            var summary = _repository.GetSummaryAsync(start, end).GetAwaiter().GetResult();
+
+            TotalChecked = summary.TotalChecked;
+            OkCount = summary.OkCount;
+            NgCount = summary.NgCount;
+            PassRate = summary.PassRate;
         }
     }
 }

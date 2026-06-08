@@ -1,12 +1,21 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MotorTestSystem.Models;
+using MotorTestSystem.Services;
 
 namespace MotorTestSystem.ViewModels
 {
     public partial class MainViewModel : ViewModelBase
     {
+        private readonly BackendRuntime _runtime;
+        private readonly Dictionary<string, bool> _onlineStations = new(StringComparer.OrdinalIgnoreCase);
+        private readonly DispatcherTimer _clockTimer;
+
         [ObservableProperty]
         private ViewModelBase _currentView;
 
@@ -17,29 +26,41 @@ namespace MotorTestSystem.ViewModels
         private string _currentUser = "管理员 (Admin)";
 
         [ObservableProperty]
-        private int _onlineStationCount = 5;
+        private int _onlineStationCount;
 
         [ObservableProperty]
-        private int _totalStationCount = 6;
+        private int _totalStationCount;
 
-        public DashboardViewModel DashboardVM { get; } = new();
-        public MonitorViewModel MonitorVM { get; } = new();
-        public HistoryViewModel HistoryVM { get; } = new();
-        public ConfigViewModel ConfigVM { get; } = new();
-
-        private readonly DispatcherTimer _clockTimer;
+        public DashboardViewModel DashboardVM { get; }
+        public MonitorViewModel MonitorVM { get; }
+        public HistoryViewModel HistoryVM { get; }
+        public ConfigViewModel ConfigVM { get; }
 
         public MainViewModel()
+            : this(BackendRuntime.Shared)
         {
-            // Set default view
+        }
+
+        public MainViewModel(BackendRuntime runtime)
+        {
+            _runtime = runtime;
+            TotalStationCount = _runtime.StationConfigs.Count;
+            OnlineStationCount = 0;
+
+            DashboardVM = new DashboardViewModel(_runtime.Repository);
+            MonitorVM = new MonitorViewModel(_runtime);
+            HistoryVM = new HistoryViewModel(_runtime.Repository);
+            ConfigVM = new ConfigViewModel(_runtime);
+
             _currentView = DashboardVM;
 
-            // Timer for current clock in header
+            _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
+
             _clockTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-            _clockTimer.Tick += (s, e) => CurrentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            _clockTimer.Tick += (_, _) => CurrentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             _clockTimer.Start();
         }
 
@@ -54,6 +75,24 @@ namespace MotorTestSystem.ViewModels
                 "Config" => ConfigVM,
                 _ => DashboardVM
             };
+        }
+
+        private void OnSnapshotReceived(object? sender, StationSnapshot snapshot)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null || dispatcher.CheckAccess())
+            {
+                ApplyOnlineState(snapshot);
+                return;
+            }
+
+            dispatcher.InvokeAsync(() => ApplyOnlineState(snapshot));
+        }
+
+        private void ApplyOnlineState(StationSnapshot snapshot)
+        {
+            _onlineStations[snapshot.StationId] = snapshot.IsOnline;
+            OnlineStationCount = _onlineStations.Count(kvp => kvp.Value);
         }
     }
 }

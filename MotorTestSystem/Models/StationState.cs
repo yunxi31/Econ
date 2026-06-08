@@ -5,6 +5,9 @@ namespace MotorTestSystem.Models
     public partial class StationState : ObservableObject
     {
         [ObservableProperty]
+        private string _id = string.Empty;
+
+        [ObservableProperty]
         private string _name = string.Empty;
 
         [ObservableProperty]

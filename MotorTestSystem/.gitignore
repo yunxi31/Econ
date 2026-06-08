@@ -1,0 +1,34 @@
+## Build output
+bin/
+obj/
+
+## Visual Studio
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+## NuGet
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Rider / ReSharper
+.idea/
+*.resharper
+
+## Local config (never commit credentials)
+appsettings.local.json
+appsettings.*.local.json
+
+## Hikvision SDK DLLs (vendor, do not commit binaries)
+HCNetSDK.dll
+HCNetSDKCom/
+PlayCtrl.dll
