@@ -1,0 +1,4 @@
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net10.0-windows\MotorTestSystem.csproj.AssemblyReference.cache
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net10.0-windows\App.g.cs
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net10.0-windows\MotorTestSystem_MarkupCompile.cache
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net10.0-windows\MotorTestSystem_MarkupCompile.lref
