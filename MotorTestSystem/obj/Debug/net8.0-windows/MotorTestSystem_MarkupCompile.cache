@@ -1,20 +1,20 @@
 ﻿MotorTestSystem
-1.0.0.0
+
 
 winexe
 C#
 .cs
-c:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\
 MotorTestSystem
 none
 false
-TRACE;DEBUG;NET;NET8_0;NETCOREAPP
-c:\Users\Yunxi\Desktop\Econ\MotorTestSystem\App.xaml
-5-723313253
+TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\App.xaml
+61947955227
+22-825766878
+36-1844680154
+212-1152679897
+LoginWindow.xaml;MainWindow.xaml;Views\ConfigView.xaml;Views\DashboardView.xaml;Views\HistoryView.xaml;Views\MonitorView.xaml;
 
-37-1090191229
-209125266393
-MainWindow.xaml;Views\ConfigView.xaml;Views\DashboardView.xaml;Views\HistoryView.xaml;Views\MonitorView.xaml;
-
-True
+False
 

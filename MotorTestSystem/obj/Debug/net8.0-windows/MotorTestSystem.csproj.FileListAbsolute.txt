@@ -50,3 +50,9 @@ C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\MotorTestSy
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\MotorTestSystem.genruntimeconfig.cache
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\ref\MotorTestSystem.dll
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\MotorTestSystem.sourcelink.json
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\bin\Debug\net8.0-windows\MaterialDesignColors.dll
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\bin\Debug\net8.0-windows\MaterialDesignThemes.Wpf.dll
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\bin\Debug\net8.0-windows\Microsoft.Xaml.Behaviors.dll
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\MotorTestSystem_Content.g.cs
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\LoginWindow.baml
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\LoginWindow.g.cs
