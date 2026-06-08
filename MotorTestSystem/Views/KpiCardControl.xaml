@@ -1,0 +1,14 @@
+<UserControl x:Class="MotorTestSystem.Views.KpiCardControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="80" d:DesignWidth="200">
+    <Border Background="{DynamicResource PanelBackground}" BorderBrush="#333645" BorderThickness="1" CornerRadius="8" Padding="15">
+        <StackPanel>
+            <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{DynamicResource TextSecondary}" FontSize="12" Margin="0,0,0,8"/>
+            <TextBlock Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}}" Foreground="{Binding ValueForeground, RelativeSource={RelativeSource AncestorType=UserControl}}" FontSize="26" FontWeight="Bold"/>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -56,3 +56,5 @@ C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\bin\Debug\net8.0-windows\Microsoft.X
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\MotorTestSystem_Content.g.cs
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\LoginWindow.baml
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\LoginWindow.g.cs
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\Views\KpiCardControl.baml
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\Views\KpiCardControl.g.cs
