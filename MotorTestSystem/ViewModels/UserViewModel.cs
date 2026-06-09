@@ -110,26 +110,61 @@ namespace MotorTestSystem.ViewModels
         [RelayCommand]
         private void AddUser()
         {
-            // Mock adding a user
-            var newUser = new UserItem
+            var dialogViewModel = new UserEditDialogViewModel
             {
-                Account = $"OP-{new Random().Next(10100, 19999)}",
-                Name = "新用户 (New User)",
-                Role = "操作员",
-                Status = "在线",
-                LastLoginTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                Title = "新增用户",
+                IsEnabled = true
             };
-            _allUsers.Insert(0, newUser);
-            FilterUsers();
+
+            var win = new UserEditWindow
+            {
+                DataContext = dialogViewModel,
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+
+            if (win.ShowDialog() == true)
+            {
+                var newUser = new UserItem
+                {
+                    Account = dialogViewModel.Account,
+                    Name = dialogViewModel.Name,
+                    Role = dialogViewModel.SelectedRole,
+                    Status = dialogViewModel.IsEnabled ? "在线" : "禁用",
+                    LastLoginTime = "-"
+                };
+                _allUsers.Insert(0, newUser);
+                FilterUsers();
+            }
         }
 
         [RelayCommand]
         private void EditUser(UserItem user)
         {
             if (user == null) return;
-            // Mock edit - change status just to show interactivity
-            user.Status = user.Status == "在线" ? "离线" : "在线";
-            FilterUsers();
+
+            var dialogViewModel = new UserEditDialogViewModel
+            {
+                Title = "编辑用户信息",
+                Account = user.Account,
+                Name = user.Name,
+                SelectedRole = user.Role,
+                IsEnabled = user.Status != "禁用"
+            };
+
+            var win = new UserEditWindow
+            {
+                DataContext = dialogViewModel,
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+
+            if (win.ShowDialog() == true)
+            {
+                user.Account = dialogViewModel.Account;
+                user.Name = dialogViewModel.Name;
+                user.Role = dialogViewModel.SelectedRole;
+                user.Status = dialogViewModel.IsEnabled ? "在线" : "禁用";
+                FilterUsers();
+            }
         }
 
         [RelayCommand]
