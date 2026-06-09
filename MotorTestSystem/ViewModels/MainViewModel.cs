@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
@@ -42,6 +43,8 @@ namespace MotorTestSystem.ViewModels
         public HistoryViewModel HistoryVM { get; }
         public ConfigViewModel ConfigVM { get; }
         public UserViewModel UserVM { get; }
+        public NotificationCenterViewModel NotificationVM { get; }
+        public ObservableCollection<StationState> HeaderStations { get; } = new();
 
         public MainViewModel()
             : this(BackendRuntime.Shared)
@@ -59,6 +62,16 @@ namespace MotorTestSystem.ViewModels
             HistoryVM = new HistoryViewModel(_runtime.Repository);
             ConfigVM = new ConfigViewModel(_runtime);
             UserVM = new UserViewModel();
+            NotificationVM = new NotificationCenterViewModel();
+
+            var allStations = MonitorVM.NoLoadStations
+                .Concat(MonitorVM.NoiseStations)
+                .Concat(MonitorVM.LoadStations)
+                .OrderBy(s => s.Id);
+            foreach (var station in allStations)
+            {
+                HeaderStations.Add(station);
+            }
 
             _currentView = MonitorVM;
 
@@ -72,9 +85,27 @@ namespace MotorTestSystem.ViewModels
             _clockTimer.Start();
         }
 
+        private ViewModelBase? _previousViewBeforeNotification;
+
         [RelayCommand]
         private void Navigate(string destination)
         {
+            if (destination == "Notification")
+            {
+                if (CurrentView == NotificationVM)
+                {
+                    CurrentView = _previousViewBeforeNotification ?? MonitorVM;
+                }
+                else
+                {
+                    _previousViewBeforeNotification = CurrentView;
+                    CurrentView = NotificationVM;
+                }
+                return;
+            }
+
+            _previousViewBeforeNotification = null;
+
             CurrentView = destination switch
             {
                 "Dashboard" => DashboardVM,

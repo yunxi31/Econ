@@ -42,49 +42,113 @@ namespace MotorTestSystem.Services
 
         private static async Task SeedRepositoryAsync(IMotorTestRepository repository)
         {
-            var now = DateTime.Now.AddMinutes(-30);
-            for (int i = 0; i < 12; i++)
+            var now = DateTime.Now;
+            // Define data for the last 8 hours: (hoursAgo, okCount, ngCount)
+            var hourData = new[]
             {
-                string barcode = $"DES-SR-150GEN{1992900399000 + i}";
-                string noiseResult = i % 5 == 0 ? "NG" : "OK";
-                string loadResult = i % 7 == 0 ? "NG" : "OK";
+                (7, 8, 1),
+                (6, 11, 1),
+                (5, 10, 0),
+                (4, 14, 1),
+                (3, 7, 0),
+                (2, 9, 1),
+                (1, 11, 1),
+                (0, 8, 2)
+            };
 
-                await repository.UpsertStageResultAsync(new StageTestData
+            int barcodeIndex = 0;
+            foreach (var item in hourData)
+            {
+                int hoursAgo = item.Item1;
+                int okCount = item.Item2;
+                int ngCount = item.Item3;
+                
+                DateTime hourTime = now.AddHours(-hoursAgo);
+                
+                // Seed OK records
+                for (int i = 0; i < okCount; i++)
                 {
-                    Barcode = barcode,
-                    StationId = "A1",
-                    Stage = TestStage.NoLoad,
-                    CollectedAt = now.AddMinutes(i),
-                    Result = "OK",
-                    NoLoadCurrent = 1.82 + i * 0.01,
-                    NoLoadSpeed = 2050 + i,
-                    ShaftLength = 32.4,
-                    KnurlDiameter = 4.42
-                });
+                    string barcode = $"DES-SR-150GEN{1992900399000 + barcodeIndex++}";
+                    DateTime collectedAt = new DateTime(hourTime.Year, hourTime.Month, hourTime.Day, hourTime.Hour, (i * 5) % 60, 0);
+                    
+                    await repository.UpsertStageResultAsync(new StageTestData
+                    {
+                        Barcode = barcode,
+                        StationId = "A1",
+                        Stage = TestStage.NoLoad,
+                        CollectedAt = collectedAt,
+                        Result = "OK",
+                        NoLoadCurrent = 1.82 + (i % 5) * 0.01,
+                        NoLoadSpeed = 2050 + i,
+                        ShaftLength = 32.4,
+                        KnurlDiameter = 4.42
+                    });
+                    
+                    await repository.UpsertStageResultAsync(new StageTestData
+                    {
+                        Barcode = barcode,
+                        StationId = "A3",
+                        Stage = TestStage.Noise,
+                        CollectedAt = collectedAt.AddMinutes(1),
+                        Result = "OK",
+                        FwdNoise = 62.5,
+                        RevNoise = 55.3,
+                        NoiseDiff = 7.2
+                    });
 
-                await repository.UpsertStageResultAsync(new StageTestData
-                {
-                    Barcode = barcode,
-                    StationId = "A3",
-                    Stage = TestStage.Noise,
-                    CollectedAt = now.AddMinutes(i + 1),
-                    Result = noiseResult,
-                    FwdNoise = noiseResult == "OK" ? 62.5 : 75.5,
-                    RevNoise = 55.3,
-                    NoiseDiff = noiseResult == "OK" ? 7.2 : 20.2
-                });
-
-                if (i % 4 != 0)
-                {
                     await repository.UpsertStageResultAsync(new StageTestData
                     {
                         Barcode = barcode,
                         StationId = "A5",
                         Stage = TestStage.Load,
-                        CollectedAt = now.AddMinutes(i + 2),
-                        Result = loadResult,
-                        LoadCurrent = loadResult == "OK" ? 2.35 : 3.42,
+                        CollectedAt = collectedAt.AddMinutes(2),
+                        Result = "OK",
+                        LoadCurrent = 2.35,
                         LoadSpeed = 1210 + i
+                    });
+                }
+                
+                // Seed NG records
+                for (int i = 0; i < ngCount; i++)
+                {
+                    string barcode = $"DES-SR-150GEN{1992900399000 + barcodeIndex++}";
+                    DateTime collectedAt = new DateTime(hourTime.Year, hourTime.Month, hourTime.Day, hourTime.Hour, (i * 15 + 2) % 60, 0);
+                    
+                    await repository.UpsertStageResultAsync(new StageTestData
+                    {
+                        Barcode = barcode,
+                        StationId = "A1",
+                        Stage = TestStage.NoLoad,
+                        CollectedAt = collectedAt,
+                        Result = "OK",
+                        NoLoadCurrent = 1.82,
+                        NoLoadSpeed = 2050,
+                        ShaftLength = 32.4,
+                        KnurlDiameter = 4.42
+                    });
+                    
+                    // Noise failed (leads to NG final result)
+                    await repository.UpsertStageResultAsync(new StageTestData
+                    {
+                        Barcode = barcode,
+                        StationId = "A3",
+                        Stage = TestStage.Noise,
+                        CollectedAt = collectedAt.AddMinutes(1),
+                        Result = "NG",
+                        FwdNoise = 78.5,
+                        RevNoise = 55.3,
+                        NoiseDiff = 23.2
+                    });
+
+                    await repository.UpsertStageResultAsync(new StageTestData
+                    {
+                        Barcode = barcode,
+                        StationId = "A5",
+                        Stage = TestStage.Load,
+                        CollectedAt = collectedAt.AddMinutes(2),
+                        Result = "OK",
+                        LoadCurrent = 2.35,
+                        LoadSpeed = 1210
                     });
                 }
             }

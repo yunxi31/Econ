@@ -12,6 +12,8 @@
         AllowsTransparency="True"
         Background="Transparent">
 
+    <Window.Resources/>
+
     <Border CornerRadius="12" Background="#1B1E26" BorderBrush="#2B303C" BorderThickness="1">
         <Border.Effect>
             <DropShadowEffect BlurRadius="15" Direction="-90" RenderingBias="Quality" ShadowDepth="2" Color="Black" Opacity="0.5"/>
@@ -73,19 +75,27 @@
                 </Grid.RowDefinitions>
 
                 <!-- Role Selection -->
-                <ComboBox x:Name="RoleComboBox" Grid.Row="0" Margin="0,10,0,15"
+                <ComboBox x:Name="RoleComboBox" Grid.Row="0" Margin="0,10,0,14"
                           materialDesign:HintAssist.Hint="选择身份角色"
                           Style="{StaticResource MaterialDesignFloatingHintComboBox}"
                           Foreground="White"
-                          BorderBrush="#2B303C"
+                          BorderBrush="#3A4250"
+                          FontSize="14"
                           SelectedIndex="0"
                           SelectionChanged="RoleComboBox_SelectionChanged">
+                    <ComboBox.Resources>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1B1E26"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#D0D8E0"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#1E3040"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#00DFFF"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#22262F"/>
+                    </ComboBox.Resources>
                     <ComboBoxItem Content="操作员 (Operator)"/>
                     <ComboBoxItem Content="技术员 (Technician)"/>
                     <ComboBoxItem Content="管理员 (Admin)"/>
                 </ComboBox>
 
-                <!-- Username (Readonly or typed based on selection) -->
+                <!-- Username -->
                 <TextBox x:Name="UsernameTextBox" Grid.Row="1" Margin="0,10,0,15"
                          materialDesign:HintAssist.Hint="用户账号"
                          Style="{StaticResource MaterialDesignFloatingHintTextBox}"

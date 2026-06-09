@@ -64,3 +64,5 @@ C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\Views\UserE
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\Views\UserEditDialogView.baml
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\UserEditWindow.g.cs
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\UserEditWindow.baml
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\Views\NotificationCenterView.g.cs
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\Views\NotificationCenterView.baml

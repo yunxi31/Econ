@@ -10,6 +10,9 @@ using CommunityToolkit.Mvvm.Input;
 using MotorTestSystem.Models;
 using MotorTestSystem.Services;
 
+// 快捷时间过滤枚举
+public enum QuickTimeFilter { LastHour, CurrentShift, Today }
+
 namespace MotorTestSystem.ViewModels
 {
     public class MotorTestRecordModel
@@ -80,6 +83,44 @@ namespace MotorTestSystem.ViewModels
 
         [ObservableProperty]
         private int _pageSize = 10;
+
+        // ---- 任务二：选中行联动 ----
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasSelectedMotor))]
+        [NotifyPropertyChangedFor(nameof(SelectedMotorResult))]
+        private MotorTestRecordModel? _selectedMotor;
+
+        public bool HasSelectedMotor => SelectedMotor != null;
+
+        /// <summary>返回选中电机的 FinalResult，用于右侧徽章联动</summary>
+        public string SelectedMotorResult => SelectedMotor?.FinalResult ?? string.Empty;
+
+        // ---- 任务一：快捷时间过滤 ----
+        [ObservableProperty]
+        private QuickTimeFilter _selectedQuickFilter = QuickTimeFilter.Today;
+
+        partial void OnSelectedQuickFilterChanged(QuickTimeFilter value)
+        {
+            switch (value)
+            {
+                case QuickTimeFilter.LastHour:
+                    StartDate = DateTime.Now.AddHours(-1);
+                    EndDate = DateTime.Now;
+                    break;
+                case QuickTimeFilter.CurrentShift:
+                    // 以8小时班制为准，向下取整到最近的 08:00 / 16:00 / 00:00
+                    var now = DateTime.Now;
+                    int hour = now.Hour;
+                    int shiftStart = hour < 8 ? 0 : (hour < 16 ? 8 : 16);
+                    StartDate = now.Date.AddHours(shiftStart);
+                    EndDate = now;
+                    break;
+                case QuickTimeFilter.Today:
+                    StartDate = DateTime.Today;
+                    EndDate = DateTime.Now;
+                    break;
+            }
+        }
 
         public List<string> StationStatuses { get; } = new() { "OK", "OK", "OK", "OK", "OK" };
 
@@ -192,6 +233,8 @@ namespace MotorTestSystem.ViewModels
             SelectedResultFilter = "全部";
             StartDate = DateTime.Now.AddDays(-7);
             EndDate = DateTime.Now;
+            SelectedQuickFilter = QuickTimeFilter.Today;
+            SelectedMotor = null;
             Search();
         }
 
@@ -224,6 +267,23 @@ namespace MotorTestSystem.ViewModels
             {
                 MessageBox.Show($"导出数据失败: {ex.Message}", "导出错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // ---- 任务三：操作面板命令 ----
+        [RelayCommand]
+        private void PrintTrace()
+        {
+            if (SelectedMotor == null) return;
+            MessageBox.Show($"正在打印电机 [{SelectedMotor.Barcode}] 的追溯单...", "打印追溯单",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        [RelayCommand]
+        private void ViewReport()
+        {
+            if (SelectedMotor == null) return;
+            MessageBox.Show($"正在打开电机 [{SelectedMotor.Barcode}] 的完整报告...", "查看报告",
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private static string Escape(object? value)

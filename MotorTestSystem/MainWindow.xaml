@@ -6,6 +6,7 @@
         xmlns:vm="clr-namespace:MotorTestSystem.ViewModels"
         xmlns:views="clr-namespace:MotorTestSystem.Views"
         xmlns:conv="clr-namespace:MotorTestSystem.Converters"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="电机电性能测试系统"
         Height="920"
@@ -41,8 +42,77 @@
         <DataTemplate DataType="{x:Type vm:UserViewModel}">
             <views:UserView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:NotificationCenterViewModel}">
+            <views:NotificationCenterView/>
+        </DataTemplate>
 
         <conv:ViewTypeToBoolConverter x:Key="ViewTypeToBoolConverter"/>
+
+        <Style x:Key="NotificationBellButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="64"/>
+            <Setter Property="Height" Value="64"/>
+            <Setter Property="Background" Value="#202936"/>
+            <Setter Property="BorderBrush" Value="#334052"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="BtnBorder" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18">
+                            <Grid>
+                                <!-- Bell Icon -->
+                                <materialDesign:PackIcon Kind="BellOutline" 
+                                                         Width="30" 
+                                                         Height="30" 
+                                                         Foreground="#B8C4CC" 
+                                                         HorizontalAlignment="Center" 
+                                                         VerticalAlignment="Center"
+                                                         x:Name="Icon"/>
+                                
+                                <!-- Red Badge for Unread Count -->
+                                <Border x:Name="BadgeBorder"
+                                        Background="#FF3B30"
+                                        CornerRadius="8"
+                                        MinWidth="16"
+                                        Height="16"
+                                        Padding="4,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Margin="0,6,6,0"
+                                        Visibility="Visible">
+                                    <TextBlock Text="{Binding DataContext.NotificationVM.UnreadCount, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               Foreground="White"
+                                               FontSize="10"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- Mouse Over -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2A3442"/>
+                                <Setter TargetName="Icon" Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                            <!-- Clicked -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#1C222B"/>
+                            </Trigger>
+                            <!-- Hide badge if unread count is 0 -->
+                            <DataTrigger Binding="{Binding DataContext.NotificationVM.UnreadCount, RelativeSource={RelativeSource AncestorType=Window}}" Value="0">
+                                <Setter TargetName="BadgeBorder" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <Style x:Key="SidebarTabStyle" TargetType="RadioButton">
             <Setter Property="Height" Value="106"/>
@@ -90,13 +160,29 @@
         <Style x:Key="StatusDotStyle" TargetType="Ellipse">
             <Setter Property="Width" Value="16"/>
             <Setter Property="Height" Value="16"/>
-            <Setter Property="Fill" Value="#00E68A"/>
             <Setter Property="Margin" Value="8,0"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect Color="#00E68A" BlurRadius="13" ShadowDepth="0" Opacity="0.75"/>
-                </Setter.Value>
-            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Status}" Value="0">
+                    <Setter Property="Fill" Value="#78838C"/>
+                    <Setter Property="Effect" Value="{x:Null}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="1">
+                    <Setter Property="Fill" Value="#00E68A"/>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#00E68A" BlurRadius="13" ShadowDepth="0" Opacity="0.75"/>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="2">
+                    <Setter Property="Fill" Value="#FF5A5F"/>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#FF5A5F" BlurRadius="13" ShadowDepth="0" Opacity="0.75"/>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <!-- Window Title Bar Buttons Style -->
@@ -300,13 +386,14 @@
             <Grid Margin="38,0,20,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="42"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="28"/>
-                    <ColumnDefinition Width="64"/>
-                    <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/> <!-- Node Status -->
+                    <ColumnDefinition Width="32"/>   <!-- Spacer -->
+                    <ColumnDefinition Width="Auto"/> <!-- CurrentTime -->
+                    <ColumnDefinition Width="32"/>   <!-- Spacer -->
+                    <ColumnDefinition Width="Auto"/> <!-- Notification -->
+                    <ColumnDefinition Width="24"/>   <!-- Spacer -->
+                    <ColumnDefinition Width="Auto"/> <!-- UserAvatar -->
+                    <ColumnDefinition Width="16"/>   <!-- Right Spacer -->
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Text="电机电性能测试系统"
@@ -319,8 +406,8 @@
                         Height="48"
                         Padding="26,0"
                         CornerRadius="19"
-                        Background="#222A35"
-                        BorderBrush="#334052"
+                        Background="#10161B"
+                        BorderBrush="#34414A"
                         BorderThickness="1.5"
                         VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -328,17 +415,19 @@
                                    Foreground="#B7C2CA"
                                    FontSize="15"
                                    VerticalAlignment="Center"
-                                   Margin="0,0,18,0"/>
-                        <Ellipse Style="{StaticResource StatusDotStyle}"/>
-                        <Ellipse Style="{StaticResource StatusDotStyle}"/>
-                        <Ellipse Style="{StaticResource StatusDotStyle}"/>
-                        <Ellipse Style="{StaticResource StatusDotStyle}"/>
-                        <Ellipse Style="{StaticResource StatusDotStyle}"/>
-                        <Ellipse Width="16" Height="16" Fill="#FF5A5F" Margin="8,0">
-                            <Ellipse.Effect>
-                                <DropShadowEffect Color="#FF5A5F" BlurRadius="13" ShadowDepth="0" Opacity="0.75"/>
-                            </Ellipse.Effect>
-                        </Ellipse>
+                                   Margin="0,0,10,0"/>
+                        <ItemsControl ItemsSource="{Binding HeaderStations}" Focusable="False" BorderThickness="0" Background="Transparent">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Ellipse Style="{StaticResource StatusDotStyle}" ToolTip="{Binding DisplayToolTip}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </Border>
 
@@ -350,7 +439,14 @@
                                VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <Border x:Name="UserAvatarBorder" Grid.Column="5"
+                <Button Grid.Column="5"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Notification"
+                        Style="{StaticResource NotificationBellButtonStyle}"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        VerticalAlignment="Center"/>
+
+                <Border x:Name="UserAvatarBorder" Grid.Column="7"
                         Width="64"
                         Height="64"
                         CornerRadius="18"

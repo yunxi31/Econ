@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MotorTestSystem.Views"
+             xmlns:converters="clr-namespace:MotorTestSystem.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="750" d:DesignWidth="1100">
 
@@ -257,6 +258,40 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- 任务一：胶囊 RadioButton 样式 -->
+        <Style x:Key="CapsuleRadioStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#8A8D99"/>
+            <Setter Property="Background" Value="#181924"/>
+            <Setter Property="BorderBrush" Value="#333645"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,0,14,0"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#252937"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#0D3540"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#00D2E6"/>
+                                <Setter Property="Foreground" Value="#00D2E6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid Background="{DynamicResource BackgroundDark}">
@@ -291,6 +326,10 @@
         <!-- ROW 2: FILTER BAR -->
         <Border Grid.Row="2" Background="{DynamicResource PanelBackground}" BorderBrush="#333645" BorderThickness="1" CornerRadius="8" Margin="20,0,20,15" Padding="15">
             <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2.5*"/>
                     <ColumnDefinition Width="1.5*"/>
@@ -299,42 +338,54 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Search Barcode -->
-                <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                <!-- 快捷时间胶囊按钮组 (Row 0, 跨全列) -->
+                <StackPanel Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal" Margin="0,0,0,12">
+                    <TextBlock Text="快捷筛选：" Foreground="#8A8D99" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="最近一小时" Style="{StaticResource CapsuleRadioStyle}" Margin="0,0,6,0"
+                                 IsChecked="{Binding SelectedQuickFilter, Converter={x:Static converters:EnumToBoolConverter.Instance}, ConverterParameter=LastHour}"/>
+                    <RadioButton Content="当班" Style="{StaticResource CapsuleRadioStyle}" Margin="0,0,6,0"
+                                 IsChecked="{Binding SelectedQuickFilter, Converter={x:Static converters:EnumToBoolConverter.Instance}, ConverterParameter=CurrentShift}"/>
+                    <RadioButton Content="今日" Style="{StaticResource CapsuleRadioStyle}"
+                                 IsChecked="{Binding SelectedQuickFilter, Converter={x:Static converters:EnumToBoolConverter.Instance}, ConverterParameter=Today}"/>
+                </StackPanel>
+
+                <!-- 以下控件移至 Row 1 -->
+
+                <!-- Search Barcode (Row 1) -->
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,0">
                     <TextBlock Text="电机条码" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
                     <Grid>
                         <TextBox Text="{Binding SearchBarcode, UpdateSourceTrigger=PropertyChanged}" 
                                  Style="{StaticResource DarkTextBoxStyle}" Padding="8,0,28,0"/>
-                        <!-- Search Icon decoration inside TextBox -->
                         <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.3,20.41L13.03,15.14C11.89,16.11 10.41,16.7 8.5,16.7A8.2,8.2 0 0,1 0.3,8.5A8.2,8.2 0 0,1 8.5,0.3M8.5,2.3A6.2,6.2 0 0,0 2.3,8.5A6.2,6.2 0 0,0 8.5,14.7A6.2,6.2 0 0,0 14.7,8.5A6.2,6.2 0 0,0 8.5,2.3Z" 
                               Fill="{DynamicResource TextSecondary}" Width="14" Height="14" Stretch="Fill" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" IsHitTestVisible="False"/>
                     </Grid>
                 </StackPanel>
 
-                <!-- Result Filter -->
-                <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                <!-- Result Filter (Row 1) -->
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,15,0">
                     <TextBlock Text="测试结果" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
                     <ComboBox ItemsSource="{Binding ResultFilters}" 
                               SelectedItem="{Binding SelectedResultFilter}" 
                               Style="{StaticResource DarkComboBoxStyle}"/>
                 </StackPanel>
 
-                <!-- Start Date -->
-                <StackPanel Grid.Column="2" Margin="0,0,15,0">
+                <!-- Start Date (Row 1) -->
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,15,0">
                     <TextBlock Text="开始日期" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
                     <DatePicker SelectedDate="{Binding StartDate}" 
                                 Style="{StaticResource DarkDatePickerStyle}"/>
                 </StackPanel>
 
-                <!-- End Date -->
-                <StackPanel Grid.Column="3" Margin="0,0,15,0">
+                <!-- End Date (Row 1) -->
+                <StackPanel Grid.Row="1" Grid.Column="3" Margin="0,0,15,0">
                     <TextBlock Text="结束日期" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
                     <DatePicker SelectedDate="{Binding EndDate}" 
                                 Style="{StaticResource DarkDatePickerStyle}"/>
                 </StackPanel>
 
-                <!-- Action Buttons -->
-                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Bottom">
+                <!-- Action Buttons (Row 1) -->
+                <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Bottom">
                     <Button Content="查询" 
                             Command="{Binding SearchCommand}" 
                             Width="80" Height="32" 
@@ -372,6 +423,8 @@
             <!-- Left: Core DataGrid Border -->
             <Border Grid.Column="0" Background="{DynamicResource PanelBackground}" BorderBrush="#333645" BorderThickness="1" CornerRadius="8" Padding="10">
                 <DataGrid ItemsSource="{Binding TestResults}" 
+                          SelectedItem="{Binding SelectedMotor}"
+                          CanUserSortColumns="True"
                           AutoGenerateColumns="False" 
                           CanUserAddRows="False" 
                           Background="Transparent" 
@@ -399,7 +452,7 @@
                             <Setter Property="BorderBrush" Value="#333645"/>
                         </Style>
                     </DataGrid.ColumnHeaderStyle>
-
+ 
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
                             <Setter Property="Height" Value="38" />
@@ -414,7 +467,7 @@
                             </Style.Triggers>
                         </Style>
                     </DataGrid.RowStyle>
-
+ 
                     <DataGrid.CellStyle>
                         <Style TargetType="DataGridCell">
                             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -422,19 +475,19 @@
                             <Setter Property="Background" Value="Transparent"/>
                         </Style>
                     </DataGrid.CellStyle>
-
+ 
                     <DataGrid.Columns>
                         <!-- Motor Barcode -->
-                        <DataGridTemplateColumn Header="电机条码" Width="160">
+                        <DataGridTemplateColumn Header="电机条码" SortMemberPath="Barcode" Width="160">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Barcode}" Foreground="{DynamicResource AccentCyan}" Cursor="Hand" VerticalAlignment="Center" Margin="10,0,10,0" FontWeight="SemiBold"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-
+ 
                         <!-- Test Time -->
-                        <DataGridTemplateColumn Header="检测时间" Width="140">
+                        <DataGridTemplateColumn Header="检测时间" SortMemberPath="TestTime" Width="140">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding TestTime, StringFormat=\{0:yyyy-MM-dd HH:mm:ss\}}" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,10,0"/>
@@ -621,14 +674,243 @@
                 </GridSplitter.Template>
             </GridSplitter>
 
-            <!-- Right: Reserved Functional Area -->
+            <!-- Right: Single Record Detail & Action Panel -->
             <Border Grid.Column="2" Background="{DynamicResource PanelBackground}" BorderBrush="#333645" BorderThickness="1" CornerRadius="8" Padding="15">
                 <Grid>
-                    <Rectangle Stroke="#333645" StrokeDashArray="4 4" StrokeThickness="1" RadiusX="6" RadiusY="6"/>
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="{DynamicResource TextSecondary}" Width="24" Height="24" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,10" Opacity="0.4"/>
-                        <TextBlock Text="功能预留区域" Foreground="{DynamicResource TextSecondary}" FontSize="13" HorizontalAlignment="Center" Opacity="0.5"/>
-                    </StackPanel>
+                    <!-- State 1: Placeholder when no item is selected -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSelectedMotor}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Rectangle Stroke="#333645" StrokeDashArray="4 4" StrokeThickness="1" RadiusX="6" RadiusY="6"/>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M11,16H13V10H11V16M11,8H13V6H11V8Z" 
+                                  Fill="{DynamicResource TextSecondary}" Width="32" Height="32" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,12" Opacity="0.4"/>
+                            <TextBlock Text="请在左侧选择测试记录" Foreground="{DynamicResource TextSecondary}" FontSize="13" HorizontalAlignment="Center" Opacity="0.6"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- State 2: Detailed view when an item is selected -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSelectedMotor}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header Area: Barcode & OK/NG Badge -->
+                        <Grid Grid.Row="0" Margin="0,0,0,10">
+                            <TextBlock Text="{Binding SelectedMotor.Barcode}" Foreground="{DynamicResource AccentCyan}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <ContentControl Content="{Binding SelectedMotorResult}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                <ContentControl.Resources>
+                                    <DataTemplate x:Key="OkBadge">
+                                        <Border CornerRadius="4" Width="52" Height="24" Background="#143228" BorderBrush="{DynamicResource AccentGreen}" BorderThickness="1">
+                                            <TextBlock Text="OK" Foreground="{DynamicResource AccentGreen}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                    <DataTemplate x:Key="NgBadge">
+                                        <Border CornerRadius="4" Width="52" Height="24" Background="#32141A" BorderBrush="{DynamicResource AccentRed}" BorderThickness="1">
+                                            <TextBlock Text="NG" Foreground="{DynamicResource AccentRed}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ContentControl.Resources>
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource NgBadge}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedMotorResult}" Value="OK">
+                                                <Setter Property="ContentTemplate" Value="{StaticResource OkBadge}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
+                        </Grid>
+
+                        <!-- Content Area: Parameters & Waveform -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel>
+                                <TextBlock Text="测试指标详细数据" Foreground="{DynamicResource TextSecondary}" FontSize="11" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                                
+                                <!-- Detailed Parameters Grid -->
+                                <Border Background="#252937" CornerRadius="6" Padding="12" Margin="0,5,0,0">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Row 0: No Load Current & Speed -->
+                                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12">
+                                            <TextBlock Text="空载电流" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.NoLoadCurrentText, StringFormat=\{0\} A}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsNoLoadCurrentAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+                                            <TextBlock Text="空载转速" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.NoLoadSpeedText, StringFormat=\{0\} r/min}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsNoLoadSpeedAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <!-- Row 1: Noise Fwd & Rev -->
+                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,12">
+                                            <TextBlock Text="正转综合噪音" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.FwdNoiseText, StringFormat=\{0\} dB}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsFwdNoiseAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,12">
+                                            <TextBlock Text="反转综合噪音" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.RevNoiseText, StringFormat=\{0\} dB}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsRevNoiseAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <!-- Row 2: Load Current & Speed -->
+                                        <StackPanel Grid.Row="2" Grid.Column="0">
+                                            <TextBlock Text="负载电流" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.LoadCurrentText, StringFormat=\{0\} A}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsLoadCurrentAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2" Grid.Column="1">
+                                            <TextBlock Text="负载转速" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.LoadSpeedText, StringFormat=\{0\} r/min}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsLoadSpeedAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Waveform Visualization Block -->
+                                <Grid Margin="0,15,0,15" Height="150">
+                                    <Border Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1">
+                                        <Grid>
+                                            <!-- Ambient decorative wave path -->
+                                            <Path Data="M 10,75 Q 40,20 70,75 T 130,75 T 190,75 T 250,75" Stroke="{DynamicResource AccentCyan}" StrokeThickness="1" Opacity="0.15" Stretch="Fill" Margin="20,10,20,10"/>
+                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                <Path Data="M21,6H3C1.89,6 1,6.89 1,8V16A2,2 0 0,0 3,18H21A2,2 0 0,0 23,16V8C23,6.89 22.1,6 21,6M21,16H3V8H21V16M7,15H9V10H7V15M11,15H13V12H11V15M15,15H17V11H15V15Z" 
+                                                      Fill="{DynamicResource TextSecondary}" Width="20" Height="20" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,8" Opacity="0.4"/>
+                                                <TextBlock Text="空载与噪音波形图加载区..." Foreground="{DynamicResource TextSecondary}" FontSize="11" HorizontalAlignment="Center" Opacity="0.5"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <!-- Action Buttons: Print Trace & View Full Report -->
+                        <Grid Grid.Row="2" Margin="0,5,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Print button -->
+                            <Button Grid.Column="0" Command="{Binding PrintTraceCommand}" Height="36" Background="#2B303C" Foreground="{DynamicResource TextPrimary}" BorderBrush="#3B4254" BorderThickness="1" Margin="0,0,5,0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="M18,3H6V7H18M19,12A1,1 0 0,1 18,11A1,1 0 0,1 17,12A1,1 0 0,1 18,13A1,1 0 0,1 19,12M16,19H8V14H16M19,8H5A3,3 0 0,0 2,11V17H6V21H18V17H22V11A3,3 0 0,0 19,8Z" Fill="{DynamicResource TextPrimary}" Width="14" Height="14" Stretch="Fill" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="打印追溯单" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- View Report button -->
+                            <Button Grid.Column="1" Command="{Binding ViewReportCommand}" Height="36" Background="{DynamicResource AccentCyan}" Foreground="Black" BorderThickness="0" Margin="5,0,0,0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M7,20H17V18H7V20M7,16H17V14H7V16M7,12H13V10H7V12Z" Fill="Black" Width="14" Height="14" Stretch="Fill" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="查看完整报告" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </Border>
         </Grid>

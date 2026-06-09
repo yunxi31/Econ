@@ -12,7 +12,9 @@ namespace MotorTestSystem.Services
 
         private readonly Random _random;
         private readonly TestStage _stage;
+        private readonly int _stableStatus;  // 每个工位的固定稳态
         private bool _isConnected;
+        private bool _connectionInitialized = false;
         private int _pollCount;
 
         public MockPlcClient(StationConfig config)
@@ -20,6 +22,9 @@ namespace MotorTestSystem.Services
             Config = config;
             _stage = ResolveStage(config.Id);
             _random = new Random(config.Id.GetHashCode() ^ Environment.TickCount);
+
+            // A2 待机(0)，其他在线工位运行中(1)
+            _stableStatus = config.Id == "A2" ? 0 : 1;
         }
 
         public StationConfig Config { get; }
@@ -27,7 +32,15 @@ namespace MotorTestSystem.Services
         public Task<bool> ConnectAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            _isConnected = Config.Id != "A6" || _random.NextDouble() > 0.25;
+
+            // 只在首次初始化连接状态，之后返回缓存值，避免每次 poll 随机抖动
+            if (!_connectionInitialized)
+            {
+                // A4 模拟永久故障离线；其余全部在线
+                _isConnected = Config.Id != "A4";
+                _connectionInitialized = true;
+            }
+
             return Task.FromResult(_isConnected);
         }
 
@@ -54,7 +67,8 @@ namespace MotorTestSystem.Services
             {
                 StationId = Config.Id,
                 IsOnline = true,
-                Status = completed ? 1 : _random.Next(0, 2),
+                // 用固定稳态，不再每次随机；仅完成瞬间短暂显示运行中(1)
+                Status = completed ? 1 : _stableStatus,
                 CompletionSignal = completed,
                 CompletedData = data
             });
