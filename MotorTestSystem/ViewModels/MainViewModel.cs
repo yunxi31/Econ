@@ -35,6 +35,7 @@ namespace MotorTestSystem.ViewModels
         public MonitorViewModel MonitorVM { get; }
         public HistoryViewModel HistoryVM { get; }
         public ConfigViewModel ConfigVM { get; }
+        public UserViewModel UserVM { get; }
 
         public MainViewModel()
             : this(BackendRuntime.Shared)
@@ -51,6 +52,7 @@ namespace MotorTestSystem.ViewModels
             MonitorVM = new MonitorViewModel(_runtime);
             HistoryVM = new HistoryViewModel(_runtime.Repository);
             ConfigVM = new ConfigViewModel(_runtime);
+            UserVM = new UserViewModel();
 
             _currentView = MonitorVM;
 
@@ -73,6 +75,7 @@ namespace MotorTestSystem.ViewModels
                 "Monitor" => MonitorVM,
                 "History" => HistoryVM,
                 "Config" => ConfigVM,
+                "User" => UserVM,
                 _ => DashboardVM
             };
         }

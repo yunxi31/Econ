@@ -38,6 +38,9 @@
         <DataTemplate DataType="{x:Type vm:ConfigViewModel}">
             <views:ConfigView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:UserViewModel}">
+            <views:UserView/>
+        </DataTemplate>
 
         <conv:ViewTypeToBoolConverter x:Key="ViewTypeToBoolConverter"/>
 
@@ -249,7 +252,10 @@
                         </StackPanel>
                     </RadioButton>
 
-                    <RadioButton Style="{StaticResource SidebarTabStyle}">
+                    <RadioButton Command="{Binding NavigateCommand}"
+                                 CommandParameter="User"
+                                 IsChecked="{Binding CurrentView, Mode=OneWay, Converter={StaticResource ViewTypeToBoolConverter}, ConverterParameter=User}"
+                                 Style="{StaticResource SidebarTabStyle}">
                         <StackPanel>
                             <Path Data="M27,12 A10,10 0 1 0 27,32 A10,10 0 1 0 27,12 M8,51 C13,40 41,40 46,51 M43,17 L54,17 M48.5,11.5 L48.5,22.5 M43,33 L54,33"
                                   Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"

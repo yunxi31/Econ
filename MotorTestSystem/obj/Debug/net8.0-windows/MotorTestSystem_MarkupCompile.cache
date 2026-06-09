@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\App.xaml
-71807179825
+8-1461957870
 22-825766878
-39882214737
+41158701341
 212-1152679897
-LoginWindow.xaml;MainWindow.xaml;Views\ConfigView.xaml;Views\DashboardView.xaml;Views\HistoryView.xaml;Views\KpiCardControl.xaml;Views\MonitorView.xaml;
+LoginWindow.xaml;MainWindow.xaml;Views\ConfigView.xaml;Views\DashboardView.xaml;Views\HistoryView.xaml;Views\KpiCardControl.xaml;Views\MonitorView.xaml;Views\UserView.xaml;
 
 False
 
