@@ -28,11 +28,16 @@ namespace MotorTestSystem.ViewModels
         private double _passRate;
 
         public ISeries[] OutputSeries { get; set; }
-        public ISeries[] PassRateSeries { get; set; }
         public ISeries[] DefectDistributionSeries { get; set; }
         public Axis[] XAxes { get; set; }
         public Axis[] YAxes { get; set; }
         public Axis[] PassRateYAxes { get; set; }
+
+        [ObservableProperty]
+        private ISeries[] _passRateSeries;
+
+        [ObservableProperty]
+        private Axis[] _passRateXAxes;
 
         public DashboardViewModel()
             : this(BackendRuntime.Shared.Repository)
@@ -67,23 +72,8 @@ namespace MotorTestSystem.ViewModels
             };
 
             // 良率趋势图（带区域渐变阴影的折线图）
-            PassRateSeries = new ISeries[]
-            {
-                new LineSeries<double>
-                {
-                    Name = "实际",
-                    Values = new[] { 93.5, 94.8, 92.5, 96.2, 95.5, 97.2, 92.0 },
-                    Stroke = new SolidColorPaint(SKColor.Parse("#00FFB2"), 4),
-                    Fill = new LinearGradientPaint(
-                        new[] { SKColor.Parse("#4000FFB2"), SKColor.Parse("#0000FFB2") },
-                        new SKPoint(0.5f, 0),
-                        new SKPoint(0.5f, 1)),
-                    GeometrySize = 10,
-                    GeometryStroke = new SolidColorPaint(SKColor.Parse("#00FFB2"), 2),
-                    GeometryFill = new SolidColorPaint(SKColor.Parse("#1A1D24")),
-                    LineSmoothness = 0.6
-                }
-            };
+            PassRateSeries = CreateLineSeries(new[] { 93.5, 94.8, 92.5, 96.2, 95.5, 97.2, 92.0 });
+            PassRateXAxes = CreateAxis(new[] { "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00" });
 
             // 各阶段不良分布（环形饼图）
             DefectDistributionSeries = new ISeries[]
@@ -216,6 +206,62 @@ namespace MotorTestSystem.ViewModels
         {
             SKTypeface = SKTypeface.FromFamilyName("Segoe UI")
         };
+
+        [RelayCommand]
+        private void SelectTimeDimension(string dimension)
+        {
+            if (string.IsNullOrEmpty(dimension)) return;
+
+            if (dimension == "今日")
+            {
+                PassRateXAxes = CreateAxis(new[] { "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00" });
+                PassRateSeries = CreateLineSeries(new[] { 93.5, 94.8, 92.5, 96.2, 95.5, 97.2, 92.0 });
+            }
+            else if (dimension == "本周")
+            {
+                PassRateXAxes = CreateAxis(new[] { "周一", "周二", "周三", "周四", "周五", "周六", "周日" });
+                PassRateSeries = CreateLineSeries(new[] { 95.2, 96.5, 95.8, 97.0, 96.2, 98.1, 97.5 });
+            }
+            else if (dimension == "本月")
+            {
+                PassRateXAxes = CreateAxis(new[] { "第一周", "第二周", "第三周", "第四周" });
+                PassRateSeries = CreateLineSeries(new[] { 94.6, 95.8, 96.5, 97.2 });
+            }
+        }
+
+        private Axis[] CreateAxis(string[] labels)
+        {
+            return new Axis[]
+            {
+                new Axis
+                {
+                    Labels = labels,
+                    LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+                    SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C"))
+                }
+            };
+        }
+
+        private ISeries[] CreateLineSeries(double[] values)
+        {
+            return new ISeries[]
+            {
+                new LineSeries<double>
+                {
+                    Name = "实际",
+                    Values = values,
+                    Stroke = new SolidColorPaint(SKColor.Parse("#00FFB2"), 4),
+                    Fill = new LinearGradientPaint(
+                        new[] { SKColor.Parse("#4000FFB2"), SKColor.Parse("#0000FFB2") },
+                        new SKPoint(0.5f, 0),
+                        new SKPoint(0.5f, 1)),
+                    GeometrySize = 10,
+                    GeometryStroke = new SolidColorPaint(SKColor.Parse("#00FFB2"), 2),
+                    GeometryFill = new SolidColorPaint(SKColor.Parse("#1A1D24")),
+                    LineSmoothness = 0.6
+                }
+            };
+        }
     }
 
     public class DefectItem

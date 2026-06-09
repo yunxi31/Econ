@@ -11,6 +11,13 @@
              d:DesignHeight="700" d:DesignWidth="1100">
     
     <UserControl.Resources>
+        <!-- Global Theme Color Palette -->
+        <SolidColorBrush x:Key="PanelBackground" Color="#212431"/>
+        <SolidColorBrush x:Key="AccentCyan" Color="#00D2E6"/>
+        <SolidColorBrush x:Key="AccentGreen" Color="#26DE81"/>
+        <SolidColorBrush x:Key="BorderDark" Color="#333645"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#8A8D99"/>
+
         <!-- Capsule ProgressBar Style -->
         <Style TargetType="ProgressBar" x:Key="CapsuleProgressBarStyle">
             <Setter Property="Height" Value="6"/>
@@ -23,6 +30,55 @@
                             <Border x:Name="PART_Track" Background="{TemplateBinding Background}" CornerRadius="3"/>
                             <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="3" HorizontalAlignment="Left"/>
                         </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Segmented Control RadioButton Style -->
+        <Style x:Key="SegmentedRadioButtonStyle" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="BackgroundBorder" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="4" 
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <ContentPresenter x:Name="ContentSite"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  Margin="{TemplateBinding Padding}"/>
+                                <!-- Underline Indicator -->
+                                <Border x:Name="UnderlineIndicator"
+                                        Height="2"
+                                        Background="{StaticResource AccentCyan}"
+                                        VerticalAlignment="Bottom"
+                                        HorizontalAlignment="Stretch"
+                                        Margin="8,0,8,0"
+                                        Visibility="Collapsed"
+                                        CornerRadius="1"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BackgroundBorder" Property="Background" Value="#1AFFFFFF"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="BackgroundBorder" Property="Background" Value="#1F00D2E6"/>
+                                <Setter Property="Foreground" Value="{StaticResource AccentCyan}"/>
+                                <Setter TargetName="UnderlineIndicator" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -51,16 +107,18 @@
         </Grid>
 
         <!-- STATS CARDS -->
-        <Grid Grid.Row="1" Margin="20,5,20,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-            </Grid.ColumnDefinitions>
+        <UniformGrid Grid.Row="1" Columns="5" Margin="15,5,15,10">
+            <!-- Card 0: 设备运行状态 -->
+            <local:KpiCardControl Title="设备运行状态" 
+                                  Value="6 / 6" 
+                                  Unit="台" 
+                                  TrendText="● 在线率 100%" 
+                                  ValueForeground="{StaticResource AccentGreen}" 
+                                  TrendForeground="{StaticResource AccentGreen}"
+                                  Margin="5,0"/>
 
             <!-- Card 1: 累计加工总数 -->
-            <Border Grid.Column="0" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="0,0,8,0">
+            <Border Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="5,0">
                 <Grid Margin="15,12,15,12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -82,7 +140,7 @@
             </Border>
 
             <!-- Card 2: 合格总数 -->
-            <Border Grid.Column="1" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="8,0,8,0">
+            <Border Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="5,0">
                 <Grid Margin="15,12,15,12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -102,7 +160,7 @@
             </Border>
 
             <!-- Card 3: 不良总数 (Highlight Warn Red) -->
-            <Border Grid.Column="2" Background="#1B1E26" BorderBrush="#FF3366" BorderThickness="1.5" CornerRadius="8" Margin="8,0,8,0">
+            <Border Background="#1B1E26" BorderBrush="#FF3366" BorderThickness="1.5" CornerRadius="8" Margin="5,0">
                 <Grid Margin="15,12,15,12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -125,7 +183,7 @@
             </Border>
 
             <!-- Card 4: 今日良率 -->
-            <Border Grid.Column="3" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="8,0,0,0">
+            <Border Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="5,0">
                 <Grid Margin="15,12,15,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -158,7 +216,7 @@
                     </Grid>
                 </Grid>
             </Border>
-        </Grid>
+        </UniformGrid>
 
         <!-- MIDDLE ROW: 2 CHARTS -->
         <Grid Grid.Row="2" Margin="20,10,20,10">
@@ -192,12 +250,31 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
-                        <Border Width="3" Height="14" Background="#00FFB2" CornerRadius="1.5" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="良率趋势及目标对比 (%)" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
-                    </StackPanel>
+                    <Grid Grid.Row="0" Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="3" Height="14" Background="#00FFB2" CornerRadius="1.5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="良率趋势及目标对比 (%)" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <!-- Segmented Switch for Time Dimension -->
+                        <Border Grid.Column="1" Background="#141722" BorderBrush="#333645" BorderThickness="1" CornerRadius="6" Padding="2" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Content="今日" Style="{StaticResource SegmentedRadioButtonStyle}" IsChecked="True" GroupName="TimeDimension"
+                                             Command="{Binding SelectTimeDimensionCommand}" CommandParameter="今日"/>
+                                <RadioButton Content="本周" Style="{StaticResource SegmentedRadioButtonStyle}" GroupName="TimeDimension"
+                                             Command="{Binding SelectTimeDimensionCommand}" CommandParameter="本周"/>
+                                <RadioButton Content="本月" Style="{StaticResource SegmentedRadioButtonStyle}" GroupName="TimeDimension"
+                                             Command="{Binding SelectTimeDimensionCommand}" CommandParameter="本月"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
 
-                    <lvc:CartesianChart Grid.Row="1" Background="Transparent" Series="{Binding PassRateSeries}" XAxes="{Binding XAxes}" YAxes="{Binding PassRateYAxes}" TooltipBackgroundPaint="{Binding TooltipBgPaint}" TooltipTextPaint="{Binding TooltipTextPaint}" TooltipTextSize="12"/>
+                    <lvc:CartesianChart Grid.Row="1" Background="Transparent" Series="{Binding PassRateSeries}" XAxes="{Binding PassRateXAxes}" YAxes="{Binding PassRateYAxes}" TooltipBackgroundPaint="{Binding TooltipBgPaint}" TooltipTextPaint="{Binding TooltipTextPaint}" TooltipTextSize="12"/>
                 </Grid>
             </Border>
         </Grid>
