@@ -26,6 +26,12 @@ namespace MotorTestSystem.ViewModels
         private string _currentUser = "管理员";
 
         [ObservableProperty]
+        private string _currentUserName = "admin";
+
+        [ObservableProperty]
+        private string _currentUserRole = "管理员";
+
+        [ObservableProperty]
         private int _onlineStationCount;
 
         [ObservableProperty]
@@ -96,6 +102,28 @@ namespace MotorTestSystem.ViewModels
         {
             _onlineStations[snapshot.StationId] = snapshot.IsOnline;
             OnlineStationCount = _onlineStations.Count(kvp => kvp.Value);
+        }
+
+        partial void OnCurrentUserChanged(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                CurrentUserRole = "未知角色";
+                CurrentUserName = "未知用户";
+                return;
+            }
+
+            int index = value.IndexOf('(');
+            if (index > 0)
+            {
+                CurrentUserRole = value.Substring(0, index).Trim();
+                CurrentUserName = value.Substring(index + 1).Replace(")", "").Trim();
+            }
+            else
+            {
+                CurrentUserRole = value;
+                CurrentUserName = value;
+            }
         }
     }
 }

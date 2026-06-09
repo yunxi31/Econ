@@ -356,7 +356,7 @@
                                VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <Border Grid.Column="5"
+                <Border x:Name="UserAvatarBorder" Grid.Column="5"
                         Width="64"
                         Height="64"
                         CornerRadius="18"
@@ -365,35 +365,101 @@
                         BorderThickness="1.5"
                         VerticalAlignment="Center"
                         WindowChrome.IsHitTestVisibleInChrome="True"
-                        ToolTip="用户主页">
-                    <Path Data="M24,22 A8,8 0 1 0 24,38 A8,8 0 1 0 24,22 M10,54 C14,43 34,43 38,54"
-                          Stroke="#B8C4CC"
-                          StrokeThickness="4"
-                          StrokeStartLineCap="Round"
-                          StrokeEndLineCap="Round"
-                          Stretch="Uniform"
-                          Width="30"
-                          Height="30"/>
+                        ToolTip="用户主页"
+                        Cursor="Hand"
+                        MouseLeftButtonDown="UserAvatarBorder_MouseLeftButtonDown">
+                    <Grid>
+                        <Path Data="M24,22 A8,8 0 1 0 24,38 A8,8 0 1 0 24,22 M10,54 C14,43 34,43 38,54"
+                              Stroke="#B8C4CC"
+                              StrokeThickness="4"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              Stretch="Uniform"
+                              Width="30"
+                              Height="30"/>
+
+                        <!-- 用户信息悬浮卡片 -->
+                        <Popup x:Name="UserCardPopup"
+                               PlacementTarget="{Binding ElementName=UserAvatarBorder}"
+                               Placement="Bottom"
+                               VerticalOffset="8"
+                               HorizontalOffset="-140"
+                               AllowsTransparency="True"
+                               StaysOpen="True"
+                               PopupAnimation="Fade">
+                            <Border Background="#151C22"
+                                    BorderBrush="#334052"
+                                    BorderThickness="1.5"
+                                    CornerRadius="12"
+                                    Width="220"
+                                    Padding="16">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="Black" BlurRadius="15" ShadowDepth="3" Opacity="0.5"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <!-- 用户名 -->
+                                    <TextBlock Text="用户名" Foreground="#5F7585" FontSize="12" Margin="0,0,0,4"/>
+                                    <Border Background="#202936"
+                                            BorderBrush="#334052"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="8,6"
+                                            Margin="0,0,0,12">
+                                        <TextBlock Text="{Binding CurrentUserName}"
+                                                   Foreground="White"
+                                                   FontSize="14"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- 角色 -->
+                                    <TextBlock Text="用户角色" Foreground="#5F7585" FontSize="12" Margin="0,0,0,4"/>
+                                    <Border Background="#202936"
+                                            BorderBrush="#334052"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="8,6"
+                                            Margin="0,0,0,16">
+                                        <TextBlock Text="{Binding CurrentUserRole}"
+                                                   Foreground="White"
+                                                   FontSize="14"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- 退出登录按钮 -->
+                                    <Button x:Name="LogoutButton"
+                                            Content="退出登录"
+                                            Click="LogoutButton_Click"
+                                            Height="34"
+                                            Foreground="White"
+                                            BorderThickness="0"
+                                            Cursor="Hand"
+                                            FontWeight="Bold">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="6"/>
+                                            </Style>
+                                        </Button.Resources>
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="#FF3B30"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FF453A"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter Property="Background" Value="#D0342C"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
+                    </Grid>
                 </Border>
 
-                <!-- Window Action Buttons -->
-                <StackPanel Grid.Column="7" 
-                            Orientation="Horizontal" 
-                            VerticalAlignment="Center"
-                            WindowChrome.IsHitTestVisibleInChrome="True">
-                    <Button x:Name="BtnMinimize" Click="BtnMinimize_Click" Style="{StaticResource WindowControlButtonStyle}" ToolTip="最小化">
-                        <Path Data="M0,8 L16,8" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" Width="12" Height="12" Stretch="Uniform"/>
-                    </Button>
-                    <Button x:Name="BtnMaximize" Click="BtnMaximize_Click" Style="{StaticResource WindowControlButtonStyle}" ToolTip="最大化">
-                        <Path x:Name="MaximizeIcon" Data="M1,1 L15,1 L15,15 L1,15 Z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" Width="12" Height="12" Stretch="Uniform"/>
-                    </Button>
-                    <Button x:Name="BtnFullscreen" Click="BtnFullscreen_Click" Style="{StaticResource WindowControlButtonStyle}" ToolTip="全屏 (F11)">
-                        <Path x:Name="FullscreenIcon" Data="M1,5 L1,1 L5,1 M11,1 L15,1 L15,5 M15,11 L15,15 L11,15 M5,15 L1,15 L1,11" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" Width="12" Height="12" Stretch="Uniform"/>
-                    </Button>
-                    <Button x:Name="BtnClose" Click="BtnClose_Click" Style="{StaticResource CloseControlButtonStyle}" ToolTip="关闭">
-                        <Path Data="M1,1 L15,15 M15,1 L1,15" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" Width="12" Height="12" Stretch="Uniform"/>
-                    </Button>
-                </StackPanel>
+                <!-- Removed Window Action Buttons as per user request -->
             </Grid>
         </Border>
 

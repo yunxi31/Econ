@@ -1,0 +1,15 @@
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\bin\Debug\net8.0-windows\scratch_baml.exe
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\bin\Debug\net8.0-windows\scratch_baml.deps.json
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\bin\Debug\net8.0-windows\scratch_baml.runtimeconfig.json
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\bin\Debug\net8.0-windows\scratch_baml.dll
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\bin\Debug\net8.0-windows\scratch_baml.pdb
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\obj\Debug\net8.0-windows\scratch_baml.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\obj\Debug\net8.0-windows\scratch_baml.AssemblyInfoInputs.cache
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\obj\Debug\net8.0-windows\scratch_baml.AssemblyInfo.cs
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\obj\Debug\net8.0-windows\scratch_baml.csproj.CoreCompileInputs.cache
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\obj\Debug\net8.0-windows\scratch_baml.sourcelink.json
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\obj\Debug\net8.0-windows\scratch_baml.dll
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\obj\Debug\net8.0-windows\refint\scratch_baml.dll
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\obj\Debug\net8.0-windows\scratch_baml.pdb
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\obj\Debug\net8.0-windows\scratch_baml.genruntimeconfig.cache
+C:\Users\Yunxi\Desktop\Econ\scratch_baml\obj\Debug\net8.0-windows\ref\scratch_baml.dll

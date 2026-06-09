@@ -27,12 +27,12 @@ namespace MotorTestSystem.Services
         {
             var configs = new ObservableCollection<StationConfig>
             {
-                new() { Id = "A1", Name = "空载测试机台 A1", PlcModel = "三菱 FX5U", IpAddress = "192.168.1.10", Port = 6000, Protocol = "MC Protocol (TCP)" },
-                new() { Id = "A2", Name = "空载测试机台 A2", PlcModel = "三菱 Q系列", IpAddress = "192.168.1.11", Port = 6000, Protocol = "MC Protocol (TCP)" },
-                new() { Id = "A3", Name = "噪音测试机台 A3", PlcModel = "西门子 S7-1200", IpAddress = "192.168.1.12", Port = 102, Protocol = "S7 Protocol (TCP)", StationId = 0 },
-                new() { Id = "A4", Name = "噪音测试机台 A4", PlcModel = "西门子 S7-1500", IpAddress = "192.168.1.13", Port = 102, Protocol = "S7 Protocol (TCP)", StationId = 0 },
-                new() { Id = "A5", Name = "负载测试机台 A5", PlcModel = "汇川 H5U", IpAddress = "192.168.1.14", Port = 502, Protocol = "ModbusTCP" },
-                new() { Id = "A6", Name = "负载测试机台 A6", PlcModel = "汇川 Easy521", IpAddress = "192.168.1.15", Port = 502, Protocol = "ModbusTCP" }
+                new() { Id = "A1", Name = "A1", PlcModel = "FX5U", IpAddress = "192.168.10.11", Port = 502, Protocol = "ModbusTCP", IsConnected = true, Status = "在线" },
+                new() { Id = "A2", Name = "A2", PlcModel = "S7-1200", IpAddress = "192.168.10.12", Port = 102, Protocol = "S7 Protocol (TCP)", IsConnected = true, Status = "在线" },
+                new() { Id = "A3", Name = "A3", PlcModel = "AM600", IpAddress = "192.168.10.13", Port = 502, Protocol = "ModbusTCP", IsConnected = false, Status = "故障" },
+                new() { Id = "A4", Name = "A4", PlcModel = "FX5U", IpAddress = "192.168.10.14", Port = 502, Protocol = "ModbusTCP", IsConnected = false, Status = "离线" },
+                new() { Id = "A5", Name = "A5", PlcModel = "S7-1500", IpAddress = "192.168.10.15", Port = 102, Protocol = "S7 Protocol (TCP)", IsConnected = true, Status = "在线" },
+                new() { Id = "A6", Name = "A6", PlcModel = "AM600", IpAddress = "192.168.10.16", Port = 502, Protocol = "ModbusTCP", IsConnected = true, Status = "在线" }
             };
 
             var repository = new InMemoryMotorTestRepository();

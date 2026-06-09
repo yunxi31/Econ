@@ -1,0 +1,59 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "scratch_baml/1.0.0": {
+        "dependencies": {
+          "ICSharpCode.BamlDecompiler": "10.1.0.8386"
+        },
+        "runtime": {
+          "scratch_baml.dll": {}
+        }
+      },
+      "ICSharpCode.BamlDecompiler/10.1.0.8386": {
+        "dependencies": {
+          "ICSharpCode.Decompiler": "10.1.0.8386"
+        },
+        "runtime": {
+          "lib/net10.0/ICSharpCode.BamlDecompiler.dll": {
+            "assemblyVersion": "10.1.0.8386",
+            "fileVersion": "10.1.0.8386"
+          }
+        }
+      },
+      "ICSharpCode.Decompiler/10.1.0.8386": {
+        "runtime": {
+          "lib/netstandard2.0/ICSharpCode.Decompiler.dll": {
+            "assemblyVersion": "10.1.0.8386",
+            "fileVersion": "10.1.0.8386"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "scratch_baml/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ICSharpCode.BamlDecompiler/10.1.0.8386": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-px0zDAnIZ0Bfa+D64CA/eZ5rgO2r//p7wIR+ITT5V0qH8t8VKCsfcw/2WyTw3Hy9/3LrfgQAJa0mTFgCNExoaw==",
+      "path": "icsharpcode.bamldecompiler/10.1.0.8386",
+      "hashPath": "icsharpcode.bamldecompiler.10.1.0.8386.nupkg.sha512"
+    },
+    "ICSharpCode.Decompiler/10.1.0.8386": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vq3sH7MW+GqT6N5V4kbhfdN4zotq7+QKOBzRjgNRgUX3D46QDNGpHgbO6lS4A/JEs203lZOrEVc/eiQMPONMsw==",
+      "path": "icsharpcode.decompiler/10.1.0.8386",
+      "hashPath": "icsharpcode.decompiler.10.1.0.8386.nupkg.sha512"
+    }
+  }
+}

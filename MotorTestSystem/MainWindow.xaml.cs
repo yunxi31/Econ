@@ -18,76 +18,79 @@ namespace MotorTestSystem;
 public partial class MainWindow : Window
 {
     private bool _isFullscreen = false;
-    private double _normalWidth;
-    private double _normalHeight;
-    private double _normalLeft;
-    private double _normalTop;
-    private WindowState _normalState;
-    private WindowStyle _normalStyle;
-    private ResizeMode _normalResizeMode;
+    private double _normalWidth = 1280;
+    private double _normalHeight = 920;
+    private double _normalLeft = 0;
+    private double _normalTop = 0;
+    private WindowState _normalState = WindowState.Normal;
+    private WindowStyle _normalStyle = WindowStyle.SingleBorderWindow;
+    private ResizeMode _normalResizeMode = ResizeMode.CanResize;
+
+    public bool IsLoggingOut { get; private set; } = false;
 
     public MainWindow()
     {
         InitializeComponent();
         DataContext = new ViewModels.MainViewModel();
-        this.StateChanged += MainWindow_StateChanged;
-    }
 
-    private void MainWindow_StateChanged(object? sender, EventArgs e)
-    {
-        if (MaximizeIcon == null || BtnMaximize == null) return;
-
-        if (this.WindowState == WindowState.Maximized)
+        // 默认登录后全屏
+        this.Loaded += (s, e) =>
         {
-            MaximizeIcon.Data = Geometry.Parse("M3,5 L3,3 L13,3 L13,13 L11,13 M1,5 L11,5 L11,15 L1,15 Z");
-            BtnMaximize.ToolTip = "向下还原";
-        }
-        else if (this.WindowState == WindowState.Normal)
+            _normalWidth = double.IsNaN(this.Width) ? 1280 : this.Width;
+            _normalHeight = double.IsNaN(this.Height) ? 920 : this.Height;
+            _normalStyle = this.WindowStyle;
+            _normalResizeMode = this.ResizeMode;
+            _normalState = this.WindowState;
+
+            ToggleFullscreen();
+        };
+
+        // 双击鼠标左键退出全屏
+        this.PreviewMouseDoubleClick += MainWindow_PreviewMouseDoubleClick;
+
+        // 监听全局点击以关闭用户悬浮卡片
+        this.PreviewMouseDown += MainWindow_PreviewMouseDown;
+
+        // 失去焦点、位置或大小改变时关闭悬浮卡片
+        this.Deactivated += (s, e) => { UserCardPopup.IsOpen = false; };
+        this.LocationChanged += (s, e) => { UserCardPopup.IsOpen = false; };
+        this.SizeChanged += (s, e) => { UserCardPopup.IsOpen = false; };
+    }
+
+    private void MainWindow_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton == MouseButton.Left && _isFullscreen)
         {
-            MaximizeIcon.Data = Geometry.Parse("M1,1 L15,1 L15,15 L1,15 Z");
-            BtnMaximize.ToolTip = "最大化";
+            DependencyObject? clickedElement = e.OriginalSource as DependencyObject;
+            if (clickedElement != null)
+            {
+                bool isAvatar = IsVisualDescendant(clickedElement, UserAvatarBorder);
+                bool isPopup = UserCardPopup.Child != null && IsVisualDescendant(clickedElement, UserCardPopup.Child);
+                if (isAvatar || isPopup)
+                {
+                    return; // 双击头像或用户信息卡片时，不退出全屏
+                }
+            }
+            ToggleFullscreen(); // 退出全屏
+            e.Handled = true;
         }
-    }
-
-    private void BtnMinimize_Click(object sender, RoutedEventArgs e)
-    {
-        this.WindowState = WindowState.Minimized;
-    }
-
-    private void BtnMaximize_Click(object sender, RoutedEventArgs e)
-    {
-        if (this.WindowState == WindowState.Maximized)
-        {
-            this.WindowState = WindowState.Normal;
-        }
-        else
-        {
-            this.WindowState = WindowState.Maximized;
-        }
-    }
-
-    private void BtnFullscreen_Click(object sender, RoutedEventArgs e)
-    {
-        ToggleFullscreen();
-    }
-
-    private void BtnClose_Click(object sender, RoutedEventArgs e)
-    {
-        this.Close();
     }
 
     private void ToggleFullscreen()
     {
         if (!_isFullscreen)
         {
-            // 进入全屏
-            _normalWidth = this.Width;
-            _normalHeight = this.Height;
-            _normalLeft = this.Left;
-            _normalTop = this.Top;
-            _normalState = this.WindowState;
-            _normalStyle = this.WindowStyle;
-            _normalResizeMode = this.ResizeMode;
+            // 进入全屏前，如果当前窗口处于非全屏模式，记录当前窗口的位置大小
+            if (this.WindowStyle != WindowStyle.None)
+            {
+                _normalWidth = this.ActualWidth > 0 ? this.ActualWidth : (double.IsNaN(this.Width) ? 1280 : this.Width);
+                _normalHeight = this.ActualHeight > 0 ? this.ActualHeight : (double.IsNaN(this.Height) ? 920 : this.Height);
+                _normalLeft = double.IsNaN(this.Left) ? 0 : this.Left;
+                _normalTop = double.IsNaN(this.Top) ? 0 : this.Top;
+                _normalState = this.WindowState;
+                _normalStyle = this.WindowStyle;
+                _normalResizeMode = this.ResizeMode;
+            }
 
             this.WindowStyle = WindowStyle.None;
             this.ResizeMode = ResizeMode.NoResize;
@@ -98,10 +101,6 @@ public partial class MainWindow : Window
             }
             this.WindowState = WindowState.Maximized;
             _isFullscreen = true;
-
-            // 改变全屏图标为“退出全屏”
-            FullscreenIcon.Data = Geometry.Parse("M5,1 L5,5 L1,5 M11,5 L11,1 L15,5 M15,11 L11,11 L11,15 M1,11 L5,11 L5,15");
-            BtnFullscreen.ToolTip = "退出全屏 (F11)";
         }
         else
         {
@@ -112,16 +111,22 @@ public partial class MainWindow : Window
 
             if (this.WindowState == WindowState.Normal)
             {
-                this.Width = _normalWidth;
-                this.Height = _normalHeight;
-                this.Left = _normalLeft;
-                this.Top = _normalTop;
+                this.Width = _normalWidth > 0 ? _normalWidth : 1280;
+                this.Height = _normalHeight > 0 ? _normalHeight : 920;
+                
+                // 居中恢复窗口位置
+                if (_normalLeft <= 0 || double.IsNaN(_normalLeft))
+                {
+                    this.Left = (SystemParameters.PrimaryScreenWidth - this.Width) / 2;
+                    this.Top = (SystemParameters.PrimaryScreenHeight - this.Height) / 2;
+                }
+                else
+                {
+                    this.Left = _normalLeft;
+                    this.Top = _normalTop;
+                }
             }
             _isFullscreen = false;
-
-            // 恢复全屏图标
-            FullscreenIcon.Data = Geometry.Parse("M1,5 L1,1 L5,1 M11,1 L15,1 L15,5 M15,11 L15,15 L11,15 M5,15 L1,15 L1,11");
-            BtnFullscreen.ToolTip = "全屏 (F11)";
         }
     }
 
@@ -138,5 +143,46 @@ public partial class MainWindow : Window
             ToggleFullscreen(); // 退出全屏
             e.Handled = true;
         }
+    }
+
+    private void UserAvatarBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        UserCardPopup.IsOpen = !UserCardPopup.IsOpen;
+        e.Handled = true;
+    }
+
+    private void LogoutButton_Click(object sender, RoutedEventArgs e)
+    {
+        UserCardPopup.IsOpen = false;
+        IsLoggingOut = true;
+        this.Close();
+    }
+
+    private void MainWindow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (UserCardPopup.IsOpen)
+        {
+            DependencyObject? clickedElement = e.OriginalSource as DependencyObject;
+            if (clickedElement != null)
+            {
+                bool isAvatar = IsVisualDescendant(clickedElement, UserAvatarBorder);
+                bool isPopup = UserCardPopup.Child != null && IsVisualDescendant(clickedElement, UserCardPopup.Child);
+                if (!isAvatar && !isPopup)
+                {
+                    UserCardPopup.IsOpen = false;
+                }
+            }
+        }
+    }
+
+    private bool IsVisualDescendant(DependencyObject child, DependencyObject parent)
+    {
+        while (child != null)
+        {
+            if (child == parent)
+                return true;
+            child = VisualTreeHelper.GetParent(child);
+        }
+        return false;
     }
 }

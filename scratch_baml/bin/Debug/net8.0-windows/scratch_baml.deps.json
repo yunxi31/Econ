@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "scratch_baml/1.0.0": {
+        "runtime": {
+          "scratch_baml.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "scratch_baml/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "t5muVolRKb0=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Yunxi\\Desktop\\Econ\\scratch_baml\\scratch_baml.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Yunxi\\.nuget\\packages\\icsharpcode.bamldecompiler\\10.1.0.8386\\icsharpcode.bamldecompiler.10.1.0.8386.nupkg.sha512",
+    "C:\\Users\\Yunxi\\.nuget\\packages\\icsharpcode.decompiler\\10.1.0.8386\\icsharpcode.decompiler.10.1.0.8386.nupkg.sha512"
+  ],
+  "logs": []
+}

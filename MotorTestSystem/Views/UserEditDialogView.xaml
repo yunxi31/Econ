@@ -223,8 +223,8 @@
             <Setter Property="BorderBrush" Value="#333645"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="Padding" Value="20,8"/>
-            <Setter Property="Height" Value="36"/>
+            <Setter Property="Width" Value="80"/>
+            <Setter Property="Height" Value="34"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -248,8 +248,8 @@
             <Setter Property="Background" Value="#00D2E6"/>
             <Setter Property="Foreground" Value="#090E12"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="24,8"/>
-            <Setter Property="Height" Value="36"/>
+            <Setter Property="Width" Value="80"/>
+            <Setter Property="Height" Value="34"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -382,11 +382,11 @@
             </Grid>
 
             <!-- 3. FOOTER BUTTON AREA -->
-            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
                 <Button Content="取消" 
                         Click="Cancel_Click"
                         Style="{StaticResource DialogCancelButtonStyle}" 
-                        Margin="0,0,12,0"/>
+                        Margin="0,0,16,0"/>
                 <Button Content="保存" 
                         Click="Save_Click"
                         Style="{StaticResource DialogSaveButtonStyle}"/>

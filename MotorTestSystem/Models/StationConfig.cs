@@ -27,5 +27,8 @@ namespace MotorTestSystem.Models
 
         [ObservableProperty]
         private bool _isConnected = false;
+
+        [ObservableProperty]
+        private string _status = "离线"; // 在线, 离线, 故障
     }
 }

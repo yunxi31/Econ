@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <AssemblyName>MotorTestSystem</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>True</UseWPF>
+    <TargetFramework>netcoreapp8.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="views\configview.baml" />
+    <None Remove="loginwindow.baml" />
+    <None Remove="images\mock_video.jpg" />
+    <None Remove="views\usereditdialogview.baml" />
+    <None Remove="views\userview.baml" />
+    <None Remove="views\dashboardview.baml" />
+    <None Remove="mainwindow.baml" />
+    <None Remove="usereditwindow.baml" />
+    <None Remove="views\monitorview.baml" />
+    <None Remove="views\historyview.baml" />
+    <None Remove="app.baml" />
+    <None Remove="views\kpicardcontrol.baml" />
+    <EmbeddedResource Include="views\configview.baml" LogicalName="views/configview.baml" />
+    <EmbeddedResource Include="loginwindow.baml" LogicalName="loginwindow.baml" />
+    <EmbeddedResource Include="images\mock_video.jpg" LogicalName="images/mock_video.jpg" />
+    <EmbeddedResource Include="views\usereditdialogview.baml" LogicalName="views/usereditdialogview.baml" />
+    <EmbeddedResource Include="views\userview.baml" LogicalName="views/userview.baml" />
+    <EmbeddedResource Include="views\dashboardview.baml" LogicalName="views/dashboardview.baml" />
+    <EmbeddedResource Include="mainwindow.baml" LogicalName="mainwindow.baml" />
+    <EmbeddedResource Include="usereditwindow.baml" LogicalName="usereditwindow.baml" />
+    <EmbeddedResource Include="views\monitorview.baml" LogicalName="views/monitorview.baml" />
+    <EmbeddedResource Include="views\historyview.baml" LogicalName="views/historyview.baml" />
+    <EmbeddedResource Include="app.baml" LogicalName="app.baml" />
+    <EmbeddedResource Include="views\kpicardcontrol.baml" LogicalName="views/kpicardcontrol.baml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="CommunityToolkit.Mvvm" />
+    <Reference Include="LiveChartsCore" />
+    <Reference Include="LiveChartsCore.SkiaSharpView" />
+    <Reference Include="SkiaSharp" />
+  </ItemGroup>
+</Project>

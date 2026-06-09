@@ -268,46 +268,9 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- ROW 0: TITLE & LINE STATUS -->
+        <!-- ROW 0: TITLE -->
         <Grid Grid.Row="0" Margin="20,15,20,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            
             <TextBlock Text="数据追溯与查询" Foreground="{DynamicResource TextPrimary}" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
-            
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <!-- Status LEDs using ItemsControl -->
-                <TextBlock Text="产线状态" Foreground="{DynamicResource TextSecondary}" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                <ItemsControl ItemsSource="{Binding StationStatuses}" VerticalAlignment="Center" Margin="0,0,20,0">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Width="8" Height="8" CornerRadius="4" Background="{DynamicResource AccentGreen}" Margin="3,0,3,0" ToolTip="工位正常"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <!-- Divider -->
-                <Border Width="1" Height="16" Background="#333645" Margin="0,0,20,0"/>
-
-                <!-- ID -->
-                <TextBlock Text="ID: 4892" Foreground="{DynamicResource AccentCyan}" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,20,0"/>
-
-                <!-- Divider -->
-                <Border Width="1" Height="16" Background="#333645" Margin="0,0,20,0"/>
-
-                <!-- User Profile -->
-                <Button Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32" Padding="0" Background="Transparent" BorderThickness="0">
-                    <Path Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4M12,18C8.58,18 5.66,16.03 4.2,13.1C5.9,11.23 8.32,10 11,10C11.35,10 11.68,10.03 12,10.08C12.32,10.03 12.65,10 13,10C15.68,10 18.1,11.23 19.8,13.1C18.34,16.03 15.42,18 12,18Z" 
-                          Fill="{DynamicResource TextSecondary}" Stretch="Uniform" Width="18" Height="18"/>
-                </Button>
-            </StackPanel>
         </Grid>
 
         <!-- ROW 1: KPI CARDS -->
@@ -398,246 +361,277 @@
             </Grid>
         </Border>
 
-        <!-- ROW 3: CORE DATAGRID PANEL -->
-        <Border Grid.Row="3" Background="{DynamicResource PanelBackground}" BorderBrush="#333645" BorderThickness="1" CornerRadius="8" Margin="20,0,20,15" Padding="10">
-            <DataGrid ItemsSource="{Binding TestResults}" 
-                      AutoGenerateColumns="False" 
-                      CanUserAddRows="False" 
-                      Background="Transparent" 
-                      BorderThickness="0" 
-                      RowBackground="{DynamicResource PanelBackground}" 
-                      AlternatingRowBackground="#252937" 
-                      Foreground="{DynamicResource TextPrimary}" 
-                      GridLinesVisibility="Horizontal" 
-                      HorizontalGridLinesBrush="#333645" 
-                      HeadersVisibility="Column" 
-                      RowHeaderWidth="0" 
-                      IsReadOnly="True"
-                      VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      ScrollViewer.CanContentScroll="True">
-                
-                <DataGrid.ColumnHeaderStyle>
-                    <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="#1F222F" />
-                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
-                        <Setter Property="FontWeight" Value="SemiBold" />
-                        <Setter Property="Height" Value="38" />
-                        <Setter Property="Padding" Value="10,0,10,0" />
-                        <Setter Property="BorderThickness" Value="0,0,0,1" />
-                        <Setter Property="BorderBrush" Value="#333645"/>
-                    </Style>
-                </DataGrid.ColumnHeaderStyle>
+        <!-- ROW 3: CORE CONTENT AREA -->
+        <Grid Grid.Row="3" Margin="20,0,20,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="7.5*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="2.5*"/>
+            </Grid.ColumnDefinitions>
 
-                <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
-                        <Setter Property="Height" Value="38" />
-                        <Setter Property="VerticalContentAlignment" Value="Center" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#2A2E3D" />
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#303546" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.RowStyle>
-
-                <DataGrid.CellStyle>
-                    <Style TargetType="DataGridCell">
-                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                        <Setter Property="BorderThickness" Value="0"/>
-                        <Setter Property="Background" Value="Transparent"/>
-                    </Style>
-                </DataGrid.CellStyle>
-
-                <DataGrid.Columns>
-                    <!-- Motor Barcode -->
-                    <DataGridTemplateColumn Header="电机条码" Width="160">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Barcode}" Foreground="{DynamicResource AccentCyan}" Cursor="Hand" VerticalAlignment="Center" Margin="10,0,10,0" FontWeight="SemiBold"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <!-- Test Time -->
-                    <DataGridTemplateColumn Header="检测时间" Width="140">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding TestTime, StringFormat=\{0:yyyy-MM-dd HH:mm:ss\}}" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,10,0"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+            <!-- Left: Core DataGrid Border -->
+            <Border Grid.Column="0" Background="{DynamicResource PanelBackground}" BorderBrush="#333645" BorderThickness="1" CornerRadius="8" Padding="10">
+                <DataGrid ItemsSource="{Binding TestResults}" 
+                          AutoGenerateColumns="False" 
+                          CanUserAddRows="False" 
+                          Background="Transparent" 
+                          BorderThickness="0" 
+                          RowBackground="{DynamicResource PanelBackground}" 
+                          AlternatingRowBackground="#252937" 
+                          Foreground="{DynamicResource TextPrimary}" 
+                          GridLinesVisibility="Horizontal" 
+                          HorizontalGridLinesBrush="#333645" 
+                          HeadersVisibility="Column" 
+                          RowHeaderWidth="0" 
+                          IsReadOnly="True"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.CanContentScroll="True">
                     
-                    <!-- Final Result styled Badge (OK / NG) -->
-                    <DataGridTemplateColumn Header="最终结果" Width="90">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <ContentControl Content="{Binding FinalResult}">
-                                    <ContentControl.Resources>
-                                        <DataTemplate x:Key="OkTemplate">
-                                            <Border CornerRadius="4" Width="46" Height="22" Background="#143228" BorderBrush="{DynamicResource AccentGreen}" BorderThickness="1" HorizontalAlignment="Left" Margin="10,0,10,0">
-                                                <TextBlock Text="OK" Foreground="{DynamicResource AccentGreen}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </DataTemplate>
-                                        <DataTemplate x:Key="NgTemplate">
-                                            <Border CornerRadius="4" Width="46" Height="22" Background="#32141A" BorderBrush="{DynamicResource AccentRed}" BorderThickness="1" HorizontalAlignment="Left" Margin="10,0,10,0">
-                                                <TextBlock Text="NG" Foreground="{DynamicResource AccentRed}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ContentControl.Resources>
-                                    <ContentControl.Style>
-                                        <Style TargetType="ContentControl">
-                                            <Setter Property="ContentTemplate" Value="{StaticResource NgTemplate}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding FinalResult}" Value="OK">
-                                                    <Setter Property="ContentTemplate" Value="{StaticResource OkTemplate}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ContentControl.Style>
-                                </ContentControl>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#1F222F" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                            <Setter Property="Height" Value="38" />
+                            <Setter Property="Padding" Value="10,0,10,0" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                            <Setter Property="BorderBrush" Value="#333645"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
 
-                    <!-- Measurement Columns with Condition-based highlighting -->
-                    <DataGridTemplateColumn Header="空载电流(A)" Width="100">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding NoLoadCurrentText}" VerticalAlignment="Center" Margin="10,0,10,0">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding NoLoadCurrent}" Value="{x:Null}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsNoLoadCurrentAbnormal}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Height" Value="38" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#2A2E3D" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#303546" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
 
-                    <DataGridTemplateColumn Header="空载转速(r/min)" Width="120">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding NoLoadSpeedText}" VerticalAlignment="Center" Margin="10,0,10,0">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding NoLoadSpeed}" Value="{x:Null}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsNoLoadSpeedAbnormal}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                        </Style>
+                    </DataGrid.CellStyle>
 
-                    <DataGridTemplateColumn Header="正转噪音(dB)" Width="110">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding FwdNoiseText}" VerticalAlignment="Center" Margin="10,0,10,0">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding FwdNoise}" Value="{x:Null}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsFwdNoiseAbnormal}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                    <DataGrid.Columns>
+                        <!-- Motor Barcode -->
+                        <DataGridTemplateColumn Header="电机条码" Width="160">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Barcode}" Foreground="{DynamicResource AccentCyan}" Cursor="Hand" VerticalAlignment="Center" Margin="10,0,10,0" FontWeight="SemiBold"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="反转噪音(dB)" Width="110">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding RevNoiseText}" VerticalAlignment="Center" Margin="10,0,10,0">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding RevNoise}" Value="{x:Null}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsRevNoiseAbnormal}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                        <!-- Test Time -->
+                        <DataGridTemplateColumn Header="检测时间" Width="140">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TestTime, StringFormat=\{0:yyyy-MM-dd HH:mm:ss\}}" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,10,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- Final Result styled Badge (OK / NG) -->
+                        <DataGridTemplateColumn Header="最终结果" Width="90">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ContentControl Content="{Binding FinalResult}">
+                                        <ContentControl.Resources>
+                                            <DataTemplate x:Key="OkTemplate">
+                                                <Border CornerRadius="4" Width="46" Height="22" Background="#143228" BorderBrush="{DynamicResource AccentGreen}" BorderThickness="1" HorizontalAlignment="Left" Margin="10,0,10,0">
+                                                    <TextBlock Text="OK" Foreground="{DynamicResource AccentGreen}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </DataTemplate>
+                                            <DataTemplate x:Key="NgTemplate">
+                                                <Border CornerRadius="4" Width="46" Height="22" Background="#32141A" BorderBrush="{DynamicResource AccentRed}" BorderThickness="1" HorizontalAlignment="Left" Margin="10,0,10,0">
+                                                    <TextBlock Text="NG" Foreground="{DynamicResource AccentRed}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ContentControl.Resources>
+                                        <ContentControl.Style>
+                                            <Style TargetType="ContentControl">
+                                                <Setter Property="ContentTemplate" Value="{StaticResource NgTemplate}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FinalResult}" Value="OK">
+                                                        <Setter Property="ContentTemplate" Value="{StaticResource OkTemplate}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ContentControl.Style>
+                                    </ContentControl>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="负载电流(A)" Width="100">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding LoadCurrentText}" VerticalAlignment="Center" Margin="10,0,10,0">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding LoadCurrent}" Value="{x:Null}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsLoadCurrentAbnormal}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                        <!-- Measurement Columns with Condition-based highlighting -->
+                        <DataGridTemplateColumn Header="空载电流(A)" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding NoLoadCurrentText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding NoLoadCurrent}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsNoLoadCurrentAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="负载转速(r/min)" Width="120">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding LoadSpeedText}" VerticalAlignment="Center" Margin="10,0,10,0">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding LoadSpeed}" Value="{x:Null}">
-                                                    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsLoadSpeedAbnormal}" Value="True">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
+                        <DataGridTemplateColumn Header="空载转速(r/min)" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding NoLoadSpeedText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding NoLoadSpeed}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsNoLoadSpeedAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="正转综合(dB)" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding FwdNoiseText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FwdNoise}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsFwdNoiseAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="反转综合(dB)" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding RevNoiseText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RevNoise}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsRevNoiseAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="负载电流(A)" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding LoadCurrentText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding LoadCurrent}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsLoadCurrentAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="负载转速(r/min)" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding LoadSpeedText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding LoadSpeed}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsLoadSpeedAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Column Splitter with Vertical Line -->
+            <GridSplitter Grid.Column="1" Width="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" ResizeBehavior="PreviousAndNext" ShowsPreview="False">
+                <GridSplitter.Template>
+                    <ControlTemplate TargetType="GridSplitter">
+                        <Border Background="Transparent" Margin="2,0,2,0">
+                            <Rectangle Width="2" VerticalAlignment="Stretch" Fill="#333645"/>
+                        </Border>
+                    </ControlTemplate>
+                </GridSplitter.Template>
+            </GridSplitter>
+
+            <!-- Right: Reserved Functional Area -->
+            <Border Grid.Column="2" Background="{DynamicResource PanelBackground}" BorderBrush="#333645" BorderThickness="1" CornerRadius="8" Padding="15">
+                <Grid>
+                    <Rectangle Stroke="#333645" StrokeDashArray="4 4" StrokeThickness="1" RadiusX="6" RadiusY="6"/>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" Fill="{DynamicResource TextSecondary}" Width="24" Height="24" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,10" Opacity="0.4"/>
+                        <TextBlock Text="功能预留区域" Foreground="{DynamicResource TextSecondary}" FontSize="13" HorizontalAlignment="Center" Opacity="0.5"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
 
         <!-- ROW 4: BOTTOM PAGINATION & ACTIONS -->
         <Grid Grid.Row="4" Margin="20,0,20,20">
