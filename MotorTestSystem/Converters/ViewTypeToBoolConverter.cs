@@ -12,7 +12,12 @@ namespace MotorTestSystem.Converters
                 return false;
 
             string currentViewName = value.GetType().Name; // e.g., "DashboardViewModel"
-            string targetView = parameter.ToString(); // e.g., "Dashboard"
+            string? targetView = parameter.ToString(); // e.g., "Dashboard"
+
+            if (string.IsNullOrWhiteSpace(targetView))
+            {
+                return false;
+            }
 
             return currentViewName.StartsWith(targetView, StringComparison.OrdinalIgnoreCase);
         }

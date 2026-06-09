@@ -20,10 +20,10 @@ namespace MotorTestSystem.ViewModels
         private ViewModelBase _currentView;
 
         [ObservableProperty]
-        private string _currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        private string _currentTime = DateTime.UtcNow.ToString("HH:mm:ss");
 
         [ObservableProperty]
-        private string _currentUser = "管理员 (Admin)";
+        private string _currentUser = "管理员";
 
         [ObservableProperty]
         private int _onlineStationCount;
@@ -52,7 +52,7 @@ namespace MotorTestSystem.ViewModels
             HistoryVM = new HistoryViewModel(_runtime.Repository);
             ConfigVM = new ConfigViewModel(_runtime);
 
-            _currentView = DashboardVM;
+            _currentView = MonitorVM;
 
             _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
 
@@ -60,7 +60,7 @@ namespace MotorTestSystem.ViewModels
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-            _clockTimer.Tick += (_, _) => CurrentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            _clockTimer.Tick += (_, _) => CurrentTime = DateTime.UtcNow.ToString("HH:mm:ss");
             _clockTimer.Start();
         }
 

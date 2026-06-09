@@ -13,11 +13,12 @@ namespace MotorTestSystem.Converters
                 return status switch
                 {
                     0 => "待机",
-                    1 => "运行",
+                    1 => "运行中",
                     2 => "故障",
                     _ => "未知"
                 };
             }
+
             return "未知";
         }
 

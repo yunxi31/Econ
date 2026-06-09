@@ -40,14 +40,16 @@ namespace MotorTestSystem.ViewModels
                 var state = new StationState
                 {
                     Id = config.Id,
-                    Name = config.Name,
-                    PlcModel = config.PlcModel,
+                    Name = config.Id,
+                    PlcModel = ResolveDisplayModel(config.Id),
                     Protocol = config.Protocol,
-                    Status = 0,
-                    IsOnline = false,
-                    Barcode = "...",
-                    Result = "WAIT"
+                    Status = ResolveInitialStatus(config.Id),
+                    IsOnline = true,
+                    Barcode = ResolveInitialBarcode(config.Id),
+                    Result = ResolveInitialResult(config.Id)
                 };
+
+                ApplyInitialMeasurements(state);
 
                 _stationsById[config.Id] = state;
 
@@ -63,6 +65,80 @@ namespace MotorTestSystem.ViewModels
                 {
                     LoadStations.Add(state);
                 }
+            }
+        }
+
+        private static string ResolveDisplayModel(string stationId)
+        {
+            return stationId switch
+            {
+                "A1" or "A2" => "FX5U",
+                "A3" or "A4" => "NV-X",
+                "A5" or "A6" => "LD-Max",
+                _ => "PLC"
+            };
+        }
+
+        private static int ResolveInitialStatus(string stationId)
+        {
+            return stationId switch
+            {
+                "A1" or "A3" or "A6" => 1,
+                "A4" => 2,
+                _ => 0
+            };
+        }
+
+        private static string ResolveInitialBarcode(string stationId)
+        {
+            return stationId switch
+            {
+                "A1" => "SN-99483-XA1",
+                "A2" => "等待中",
+                "A3" => "SN-99482-XA1",
+                "A4" => "SN-99480-XA1",
+                "A5" => "SN-99481-XA1",
+                "A6" => "SN-99482-XA1",
+                _ => "SN-00000-XA1"
+            };
+        }
+
+        private static string ResolveInitialResult(string stationId)
+        {
+            return stationId switch
+            {
+                "A4" => "NG",
+                "A5" => "OK",
+                "A2" => "WAIT",
+                _ => "RUN"
+            };
+        }
+
+        private static void ApplyInitialMeasurements(StationState state)
+        {
+            switch (state.Id)
+            {
+                case "A1":
+                    state.NoLoadCurrent = 1.2;
+                    state.NoLoadSpeed = 1450;
+                    break;
+                case "A3":
+                    state.FwdNoise = 62.4;
+                    state.RevNoise = 0.8;
+                    state.NoiseDiff = 28.5;
+                    break;
+                case "A4":
+                    state.FwdNoise = 78.9;
+                    state.NoiseDiff = 65.0;
+                    break;
+                case "A5":
+                    state.LoadCurrent = 15.2;
+                    state.LoadSpeed = 42;
+                    break;
+                case "A6":
+                    state.LoadCurrent = 10.1;
+                    state.LoadSpeed = 38;
+                    break;
             }
         }
 

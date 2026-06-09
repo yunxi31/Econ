@@ -1,0 +1,16 @@
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\MotorTestSystem.csproj.AssemblyReference.cache
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\LoginWindow.baml
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\Views\KpiCardControl.baml
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\Views\MonitorView.baml
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\LoginWindow.g.cs
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\MainWindow.g.cs
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\Views\ConfigView.g.cs
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\Views\DashboardView.g.cs
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\Views\HistoryView.g.cs
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\Views\KpiCardControl.g.cs
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\Views\MonitorView.g.cs
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\App.g.cs
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\MotorTestSystem_Content.g.cs
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\MotorTestSystem_MarkupCompile.cache
+C:\Users\Yunxi\Desktop\Econ\msbuild-obj-check\Debug\net8.0-windows\MotorTestSystem_MarkupCompile.lref
