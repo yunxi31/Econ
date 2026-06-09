@@ -20,7 +20,7 @@ namespace MotorTestSystem.ViewModels
         private ViewModelBase _currentView;
 
         [ObservableProperty]
-        private string _currentTime = DateTime.UtcNow.ToString("HH:mm:ss");
+        private string _currentTime = DateTime.Now.ToString("HH:mm:ss");
 
         [ObservableProperty]
         private string _currentUser = "管理员";
@@ -68,7 +68,7 @@ namespace MotorTestSystem.ViewModels
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-            _clockTimer.Tick += (_, _) => CurrentTime = DateTime.UtcNow.ToString("HH:mm:ss");
+            _clockTimer.Tick += (_, _) => CurrentTime = DateTime.Now.ToString("HH:mm:ss");
             _clockTimer.Start();
         }
 

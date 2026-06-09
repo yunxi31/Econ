@@ -348,12 +348,6 @@
                                FontSize="30"
                                FontFamily="Consolas"
                                VerticalAlignment="Center"/>
-                    <TextBlock Text="UTC"
-                               Foreground="#AEB8C2"
-                               FontSize="20"
-                               FontWeight="Bold"
-                               Margin="24,0,0,0"
-                               VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <Border x:Name="UserAvatarBorder" Grid.Column="5"
