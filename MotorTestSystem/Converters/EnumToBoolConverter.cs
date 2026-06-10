@@ -28,7 +28,8 @@ namespace MotorTestSystem.Converters
             {
                 try
                 {
-                    return Enum.Parse(targetType, parameter.ToString()!, true);
+                    Type actualType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+                    return Enum.Parse(actualType, parameter.ToString()!, true);
                 }
                 catch
                 {

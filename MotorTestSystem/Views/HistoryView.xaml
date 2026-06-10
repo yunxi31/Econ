@@ -356,9 +356,28 @@
                     <TextBlock Text="电机条码" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
                     <Grid>
                         <TextBox Text="{Binding SearchBarcode, UpdateSourceTrigger=PropertyChanged}" 
-                                 Style="{StaticResource DarkTextBoxStyle}" Padding="8,0,28,0"/>
-                        <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.3,20.41L13.03,15.14C11.89,16.11 10.41,16.7 8.5,16.7A8.2,8.2 0 0,1 0.3,8.5A8.2,8.2 0 0,1 8.5,0.3M8.5,2.3A6.2,6.2 0 0,0 2.3,8.5A6.2,6.2 0 0,0 8.5,14.7A6.2,6.2 0 0,0 14.7,8.5A6.2,6.2 0 0,0 8.5,2.3Z" 
-                              Fill="{DynamicResource TextSecondary}" Width="14" Height="14" Stretch="Fill" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" IsHitTestVisible="False"/>
+                                 Style="{StaticResource DarkTextBoxStyle}" Padding="8,0,28,0">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding SearchCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <Button HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" 
+                                Width="20" Height="20" Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                Command="{Binding SearchCommand}" ToolTip="搜索">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="Transparent">
+                                        <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.3,20.41L13.03,15.14C11.89,16.11 10.41,16.7 8.5,16.7A8.2,8.2 0 0,1 0.3,8.5A8.2,8.2 0 0,1 8.5,0.3M8.5,2.3A6.2,6.2 0 0,0 2.3,8.5A6.2,6.2 0 0,0 8.5,14.7A6.2,6.2 0 0,0 14.7,8.5A6.2,6.2 0 0,0 8.5,2.3Z" 
+                                              Fill="{DynamicResource TextSecondary}" Width="14" Height="14" Stretch="Fill" x:Name="searchIcon"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="searchIcon" Property="Fill" Value="{DynamicResource AccentCyan}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
                     </Grid>
                 </StackPanel>
 
@@ -478,10 +497,33 @@
  
                     <DataGrid.Columns>
                         <!-- Motor Barcode -->
-                        <DataGridTemplateColumn Header="电机条码" SortMemberPath="Barcode" Width="260">
+                        <DataGridTemplateColumn Header="电机条码" SortMemberPath="Barcode" Width="250">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Barcode}" Foreground="{DynamicResource AccentCyan}" Cursor="Hand" VerticalAlignment="Center" Margin="10,0,10,0" FontWeight="SemiBold"/>
+                                    <StackPanel x:Name="CellGrid" Orientation="Horizontal" Background="Transparent" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Barcode}" Foreground="{DynamicResource AccentCyan}" Cursor="Hand" VerticalAlignment="Center" Margin="10,0,5,0" FontWeight="SemiBold"/>
+                                        <Button x:Name="CopyButton" Background="Transparent" BorderThickness="0" Width="24" Height="24" Padding="0" VerticalAlignment="Center" Margin="0,0,10,0" Command="{Binding DataContext.CopyBarcodeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding Barcode}" ToolTip="复制条码" Visibility="Hidden">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="Transparent" CornerRadius="4" x:Name="btnBorder">
+                                                        <Path Data="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" 
+                                                              Fill="{DynamicResource AccentCyan}" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="iconPath"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="btnBorder" Property="Background" Value="#22FFFFFF"/>
+                                                            <Setter TargetName="iconPath" Property="Fill" Value="#FFFFFF"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </StackPanel>
+                                    <DataTemplate.Triggers>
+                                        <Trigger SourceName="CellGrid" Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="CopyButton" Property="Visibility" Value="Visible"/>
+                                        </Trigger>
+                                    </DataTemplate.Triggers>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

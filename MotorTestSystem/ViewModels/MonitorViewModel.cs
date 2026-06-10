@@ -30,7 +30,7 @@ namespace MotorTestSystem.ViewModels
 
             _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
             _runtime.PollingService.LogReceived += OnLogReceived;
-            _runtime.PollingService.Start();
+            // _runtime.PollingService.Start();
         }
 
         private void BuildStationStates()

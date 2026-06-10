@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MotorTestSystem.Models;
 using MotorTestSystem.Services;
+using MotorTestSystem.Views;
 
 // 快捷时间过滤枚举
 public enum QuickTimeFilter { LastHour, CurrentShift, Today }
@@ -57,11 +58,50 @@ namespace MotorTestSystem.ViewModels
 
         public List<string> ResultFilters { get; } = new() { "全部", "OK", "NG" };
 
-        [ObservableProperty]
-        private DateTime _startDate = DateTime.Now.AddDays(-7);
+        private bool _isApplyingQuickFilter;
+        private bool _isResetting;
 
-        [ObservableProperty]
-        private DateTime _endDate = DateTime.Now;
+        private DateTime _startDate = DateTime.Today.AddDays(-7);
+        public DateTime StartDate
+        {
+            get => _startDate;
+            set
+            {
+                // 如果是同一天，且新值的时间部分为 00:00:00，而旧值的时间部分不为 00:00:00，则忽略（防止 DatePicker 失去焦点时清除精确时分秒）
+                if (!_isResetting && !_isApplyingQuickFilter && value.Date == _startDate.Date && value.TimeOfDay == TimeSpan.Zero && _startDate.TimeOfDay != TimeSpan.Zero)
+                {
+                    return;
+                }
+                if (SetProperty(ref _startDate, value))
+                {
+                    if (!_isApplyingQuickFilter)
+                    {
+                        SelectedQuickFilter = null;
+                    }
+                }
+            }
+        }
+
+        private DateTime _endDate = DateTime.Today;
+        public DateTime EndDate
+        {
+            get => _endDate;
+            set
+            {
+                // 如果是同一天，且新值的时间部分为 00:00:00，而旧值的时间部分不为 00:00:00，则忽略（防止 DatePicker 失去焦点时清除精确时分秒）
+                if (!_isResetting && !_isApplyingQuickFilter && value.Date == _endDate.Date && value.TimeOfDay == TimeSpan.Zero && _endDate.TimeOfDay != TimeSpan.Zero)
+                {
+                    return;
+                }
+                if (SetProperty(ref _endDate, value))
+                {
+                    if (!_isApplyingQuickFilter)
+                    {
+                        SelectedQuickFilter = null;
+                    }
+                }
+            }
+        }
 
         [ObservableProperty]
         private int _totalTestsCount = 30;
@@ -97,28 +137,77 @@ namespace MotorTestSystem.ViewModels
 
         // ---- 任务一：快捷时间过滤 ----
         [ObservableProperty]
-        private QuickTimeFilter _selectedQuickFilter = QuickTimeFilter.Today;
+        private QuickTimeFilter? _selectedQuickFilter = null;
 
-        partial void OnSelectedQuickFilterChanged(QuickTimeFilter value)
+        partial void OnSelectedQuickFilterChanged(QuickTimeFilter? value)
         {
-            switch (value)
+            if (value == null) return;
+
+            _isApplyingQuickFilter = true;
+            try
             {
-                case QuickTimeFilter.LastHour:
-                    StartDate = DateTime.Now.AddHours(-1);
-                    EndDate = DateTime.Now;
-                    break;
-                case QuickTimeFilter.CurrentShift:
-                    // 以8小时班制为准，向下取整到最近的 08:00 / 16:00 / 00:00
-                    var now = DateTime.Now;
-                    int hour = now.Hour;
-                    int shiftStart = hour < 8 ? 0 : (hour < 16 ? 8 : 16);
-                    StartDate = now.Date.AddHours(shiftStart);
-                    EndDate = now;
-                    break;
-                case QuickTimeFilter.Today:
-                    StartDate = DateTime.Today;
-                    EndDate = DateTime.Now;
-                    break;
+                switch (value.Value)
+                {
+                    case QuickTimeFilter.LastHour:
+                        StartDate = DateTime.Now.AddHours(-1);
+                        EndDate = DateTime.Now;
+                        break;
+                    case QuickTimeFilter.CurrentShift:
+                        var now = DateTime.Now;
+                        DateTime shiftStart, shiftEnd;
+                        if (now.Hour >= 8 && now.Hour < 20)
+                        {
+                            // 白班 8:00 - 20:00
+                            shiftStart = now.Date.AddHours(8);
+                            shiftEnd = now.Date.AddHours(20);
+                        }
+                        else
+                        {
+                            // 夜班 20:00 - 次日 8:00
+                            if (now.Hour >= 20)
+                            {
+                                shiftStart = now.Date.AddHours(20);
+                                shiftEnd = now.Date.AddDays(1).AddHours(8);
+                            }
+                            else
+                            {
+                                shiftStart = now.Date.AddDays(-1).AddHours(20);
+                                shiftEnd = now.Date.AddHours(8);
+                            }
+                        }
+                        StartDate = shiftStart;
+                        EndDate = shiftEnd;
+                        break;
+                    case QuickTimeFilter.Today:
+                        StartDate = DateTime.Today;
+                        EndDate = DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59);
+                        break;
+                }
+            }
+            finally
+            {
+                _isApplyingQuickFilter = false;
+            }
+
+            if (!_isResetting)
+            {
+                _ = SearchAsync();
+            }
+        }
+
+        partial void OnSelectedResultFilterChanged(string value)
+        {
+            if (!_isResetting)
+            {
+                _ = SearchAsync();
+            }
+        }
+
+        partial void OnSearchBarcodeChanged(string value)
+        {
+            if (string.IsNullOrEmpty(value) && !_isResetting)
+            {
+                _ = SearchAsync();
             }
         }
 
@@ -179,7 +268,7 @@ namespace MotorTestSystem.ViewModels
                 Barcode = SearchBarcode,
                 ResultFilter = SelectedResultFilter,
                 StartTime = StartDate,
-                EndTime = EndDate
+                EndTime = EndDate.TimeOfDay == TimeSpan.Zero ? EndDate.Date.AddHours(23).AddMinutes(59).AddSeconds(59) : EndDate
             };
 
             var raw = await _repository.QueryAsync(query);
@@ -226,25 +315,52 @@ namespace MotorTestSystem.ViewModels
         [RelayCommand]
         private void Reset()
         {
-            SearchBarcode = string.Empty;
-            SelectedResultFilter = "全部";
-            StartDate = DateTime.Now.AddDays(-7);
-            EndDate = DateTime.Now;
-            SelectedQuickFilter = QuickTimeFilter.Today;
-            SelectedMotor = null;
+            _isResetting = true;
+            try
+            {
+                SearchBarcode = string.Empty;
+                SelectedResultFilter = "全部";
+                SelectedQuickFilter = null;
+                StartDate = DateTime.Today.AddDays(-7);
+                EndDate = DateTime.Today;
+                SelectedMotor = null;
+            }
+            finally
+            {
+                _isResetting = false;
+            }
             SearchCommand.Execute(null);
         }
 
         [RelayCommand]
         private void Export()
         {
+            if (_cachedResults == null || _cachedResults.Count == 0)
+            {
+                ModernMessageBox.Show("当前没有符合条件的测试数据可供导出！", "导出提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             string exportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "电机电性能测试数据导出.csv");
             try
             {
                 using var sw = new StreamWriter(exportPath, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
                 sw.WriteLine("Barcode,TestTime,FinalResult,NoLoadCurrent(A),NoLoadSpeed(r/min),FwdNoise(dB),RevNoise(dB),LoadCurrent(A),LoadSpeed(r/min)");
 
-                foreach (var r in TestResults)
+                var allModels = _cachedResults.Select(r => new MotorTestRecordModel
+                {
+                    Barcode = r.Barcode,
+                    TestTime = r.TestTime,
+                    FinalResult = r.FinalResult,
+                    NoLoadCurrent = r.NoLoadCurrent,
+                    NoLoadSpeed = r.NoLoadSpeed,
+                    FwdNoise = r.FwdNoise,
+                    RevNoise = r.RevNoise,
+                    LoadCurrent = r.LoadCurrent,
+                    LoadSpeed = r.LoadSpeed
+                }).ToList();
+
+                foreach (var r in allModels)
                 {
                     sw.WriteLine(string.Join(",",
                          Escape(r.Barcode),
@@ -258,11 +374,11 @@ namespace MotorTestSystem.ViewModels
                          r.LoadSpeedText));
                 }
 
-                MessageBox.Show($"成功导出 {TestResults.Count} 条记录至桌面:\n{exportPath}", "数据导出成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                ModernMessageBox.Show($"成功导出 {allModels.Count} 条记录至桌面:\n{exportPath}", "数据导出成功", MessageBoxButton.OK, (MessageBoxImage)99);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"导出数据失败: {ex.Message}", "导出错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                ModernMessageBox.Show($"导出数据失败: {ex.Message}", "导出错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -271,7 +387,7 @@ namespace MotorTestSystem.ViewModels
         private void PrintTrace()
         {
             if (SelectedMotor == null) return;
-            MessageBox.Show($"正在打印电机 [{SelectedMotor.Barcode}] 的追溯单...", "打印追溯单",
+            ModernMessageBox.Show($"正在打印电机 [{SelectedMotor.Barcode}] 的追溯单...", "打印追溯单",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -279,8 +395,24 @@ namespace MotorTestSystem.ViewModels
         private void ViewReport()
         {
             if (SelectedMotor == null) return;
-            MessageBox.Show($"正在打开电机 [{SelectedMotor.Barcode}] 的完整报告...", "查看报告",
+            ModernMessageBox.Show($"正在打开电机 [{SelectedMotor.Barcode}] 的完整报告...", "查看报告",
                 MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        [RelayCommand]
+        private void CopyBarcode(string barcode)
+        {
+            if (!string.IsNullOrEmpty(barcode))
+            {
+                try
+                {
+                    Clipboard.SetText(barcode);
+                }
+                catch (Exception ex)
+                {
+                    ModernMessageBox.Show($"复制条码失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private static string Escape(object? value)
