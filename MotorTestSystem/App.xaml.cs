@@ -1,12 +1,9 @@
-using System.Configuration;
-using System.Data;
 using System.Windows;
+using MotorTestSystem.Models;
+using MotorTestSystem.Services;
 
 namespace MotorTestSystem;
 
-/// <summary>
-/// Interaction logic for App.xaml
-/// </summary>
 public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
@@ -19,11 +16,12 @@ public partial class App : Application
         var loginWindow = new LoginWindow();
         if (loginWindow.ShowDialog() == true)
         {
-            var username = loginWindow.AuthenticatedUser;
+            var authenticatedUser = loginWindow.AuthenticatedUser;
             var mainWindow = new MainWindow();
             if (mainWindow.DataContext is ViewModels.MainViewModel mainVM)
             {
-                mainVM.CurrentUser = username;
+                // 将认证用户信息传递给 MainViewModel
+                mainVM.SetAuthenticatedUser(authenticatedUser);
             }
             
             // 绑定主窗口，并恢复默认的关机模式（主窗口关闭时退出程序）
@@ -38,4 +36,3 @@ public partial class App : Application
         }
     }
 }
-

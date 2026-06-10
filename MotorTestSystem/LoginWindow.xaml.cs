@@ -1,16 +1,22 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
+using MotorTestSystem.Models;
+using MotorTestSystem.Services;
 
 namespace MotorTestSystem
 {
     public partial class LoginWindow : Window
     {
-        public string AuthenticatedUser { get; private set; } = "操作员";
+        private readonly IAuthService _authService;
+
+        /// <summary>认证成功后的用户信息</summary>
+        public AppUser? AuthenticatedUser { get; private set; }
 
         public LoginWindow()
         {
             InitializeComponent();
+            _authService = BackendRuntime.Shared.AuthService;
             UpdateUsernameDefault();
         }
 
@@ -82,54 +88,30 @@ namespace MotorTestSystem
                 return;
             }
 
-            bool isSuccess = false;
-            string userDisplayName = "";
-
-            switch (RoleComboBox.SelectedIndex)
+            if (string.IsNullOrEmpty(password))
             {
-                case 0: // 操作员
-                    // 操作员允许空密码或者任意密码，或是 op123
-                    if (string.IsNullOrEmpty(password) || password == "op123" || password == "123")
-                    {
-                        isSuccess = true;
-                        userDisplayName = $"操作员 ({username})";
-                    }
-                    else
-                    {
-                        ShowError("操作员密码错误！(提示：可为空或输入 123)");
-                    }
-                    break;
-
-                case 1: // 维护员
-                    if (password == "maint123" || password == "456")
-                    {
-                        isSuccess = true;
-                        userDisplayName = $"维护员 ({username})";
-                    }
-                    else
-                    {
-                        ShowError("维护员密码错误！(提示：maint123 或 456)");
-                    }
-                    break;
-
-                case 2: // 管理员
-                    if (password == "admin123" || password == "789")
-                    {
-                        isSuccess = true;
-                        userDisplayName = $"管理员 ({username})";
-                    }
-                    else
-                    {
-                        ShowError("管理员密码错误！(提示：admin123 或 789)");
-                    }
-                    break;
+                // 操作员允许空密码（等同于 "123"）
+                if (RoleComboBox.SelectedIndex == 0)
+                {
+                    password = "123";
+                }
+                else
+                {
+                    ShowError("请输入密码！");
+                    return;
+                }
             }
 
-            if (isSuccess)
+            // 使用 AuthService 认证
+            if (_authService.Login(username, password, out string errorMessage))
             {
-                AuthenticatedUser = userDisplayName;
+                AuthenticatedUser = _authService.CurrentUser;
                 DialogResult = true;
                 Close();
+            }
+            else
+            {
+                ShowError(errorMessage);
             }
         }
 

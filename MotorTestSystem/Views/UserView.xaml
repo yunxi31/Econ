@@ -3,13 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:MotorTestSystem.Views"
-             xmlns:vm="clr-namespace:MotorTestSystem.ViewModels"
+             xmlns:conv="clr-namespace:MotorTestSystem.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="760" d:DesignWidth="1100"
              Background="{DynamicResource BgBrush}">
 
     <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
         <SolidColorBrush x:Key="BgBrush" Color="#090E12"/>
         <SolidColorBrush x:Key="PanelBrush" Color="#1B242E"/>
         <SolidColorBrush x:Key="PanelAltBrush" Color="#242E3A"/>
@@ -195,7 +195,8 @@
                 </StackPanel>
 
                 <!-- Add User Button -->
-                <Button Grid.Column="1" Command="{Binding AddUserCommand}" Height="36" Width="110" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Grid.Column="1" Command="{Binding AddUserCommand}" Height="36" Width="110" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Visibility="{Binding CanAddUser, Converter={StaticResource InverseBoolToVisConverter}}">
                     <Button.Style>
                         <Style TargetType="Button">
                             <Setter Property="Background" Value="{StaticResource CyanBrush}"/>
@@ -410,103 +411,74 @@
                     <TextBlock Text="角色权限配置" Foreground="White" FontSize="16" FontWeight="Bold" Margin="8,0,0,0" VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <!-- Roles List -->
+                <!-- Roles List — 动态绑定 -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <!-- Role 1: Administrator -->
-                        <Border Background="{StaticResource PanelAltBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="6" Margin="0,12,0,0" Padding="15">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                    <ItemsControl ItemsSource="{Binding RolePermissionDisplays}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource PanelAltBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="6" Margin="0,12,0,0" Padding="15">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                                <Grid Grid.Row="0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="管理员" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    <Button Grid.Column="1" Content="修改" Style="{StaticResource HyperlinkButtonStyle}" Foreground="{StaticResource CyanBrush}" FontSize="13"/>
-                                </Grid>
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding RoleName}" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        </Grid>
 
-                                <WrapPanel Grid.Row="1" Margin="0,10,0,0">
-                                    <!-- Highlighted Tag -->
-                                    <Border Background="#1A10DDF7" BorderBrush="{StaticResource CyanBrush}" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="系统权限" Foreground="{StaticResource CyanBrush}" FontSize="12" FontWeight="SemiBold"/>
-                                    </Border>
-                                    <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="参数修改" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                                    </Border>
-                                    <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="用户管理" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                                    </Border>
-                                </WrapPanel>
-                            </Grid>
-                        </Border>
-
-                        <!-- Role 2: Operator -->
-                        <Border Background="{StaticResource PanelAltBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="6" Margin="0,15,0,0" Padding="15">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <Grid Grid.Row="0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="操作员" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    <Button Grid.Column="1" Content="修改" Style="{StaticResource HyperlinkButtonStyle}" Foreground="{StaticResource CyanBrush}" FontSize="13"/>
-                                </Grid>
-
-                                <WrapPanel Grid.Row="1" Margin="0,10,0,0">
-                                    <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="设备控制" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                                    </Border>
-                                    <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="查看看板" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                                    </Border>
-                                </WrapPanel>
-                            </Grid>
-                        </Border>
-
-                        <!-- Role 3: Maintainer -->
-                        <Border Background="{StaticResource PanelAltBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="6" Margin="0,15,0,0" Padding="15">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <Grid Grid.Row="0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="维护员" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    <Button Grid.Column="1" Content="修改" Style="{StaticResource HyperlinkButtonStyle}" Foreground="{StaticResource CyanBrush}" FontSize="13"/>
-                                </Grid>
-
-                                <WrapPanel Grid.Row="1" Margin="0,10,0,0">
-                                    <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="诊断功能" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                                    </Border>
-                                    <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="设备校准" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                                    </Border>
-                                    <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="数据查看" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                                    </Border>
-                                    <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="报警管理" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
-                                    </Border>
-                                </WrapPanel>
-                            </Grid>
-                        </Border>
-                    </StackPanel>
+                                        <WrapPanel Grid.Row="1" Margin="0,10,0,0">
+                                            <ItemsControl ItemsSource="{Binding Permissions}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Margin="0,0,8,8" CornerRadius="4" Padding="8,4">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Background" Value="#181D26"/>
+                                                                    <Setter Property="BorderBrush" Value="#2A3542"/>
+                                                                    <Setter Property="BorderThickness" Value="1"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                                                            <Setter Property="Background" Value="#1A10DDF7"/>
+                                                                            <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <TextBlock FontSize="12">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                                                                <Setter Property="Foreground" Value="{StaticResource CyanBrush}"/>
+                                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                                <TextBlock.Text>
+                                                                    <Binding Path="Name"/>
+                                                                </TextBlock.Text>
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </WrapPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </ScrollViewer>
             </Grid>
         </Border>

@@ -1,15 +1,31 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MotorTestSystem.Models;
+using MotorTestSystem.Services;
 
 namespace MotorTestSystem.ViewModels
 {
     public partial class UserViewModel : ViewModelBase
     {
+        private readonly IUserService _userService;
+        private readonly IAuthService _authService;
+
+        /// <summary>
+        /// 用户列表项（UI 展示用，映射自 AppUser）
+        /// </summary>
         public class UserItem : ObservableObject
         {
+            private string _id = string.Empty;
+            public string Id
+            {
+                get => _id;
+                set => SetProperty(ref _id, value);
+            }
+
             private string _account = string.Empty;
             public string Account
             {
@@ -31,7 +47,14 @@ namespace MotorTestSystem.ViewModels
                 set => SetProperty(ref _role, value);
             }
 
-            private string _status = string.Empty; // "在线", "离线", "禁用"
+            private AppRole _roleEnum = AppRole.Operator;
+            public AppRole RoleEnum
+            {
+                get => _roleEnum;
+                set => SetProperty(ref _roleEnum, value);
+            }
+
+            private string _status = string.Empty;
             public string Status
             {
                 get => _status;
@@ -46,8 +69,8 @@ namespace MotorTestSystem.ViewModels
             }
         }
 
-        private ObservableCollection<UserItem> _allUsers = new();
-        
+        private List<UserItem> _allUsers = new();
+
         [ObservableProperty]
         private ObservableCollection<UserItem> _users = new();
 
@@ -65,25 +88,99 @@ namespace MotorTestSystem.ViewModels
             "维护员"
         };
 
-        public UserViewModel()
+        // ===== 右侧角色权限面板 =====
+
+        /// <summary>角色权限展示列表</summary>
+        public ObservableCollection<RolePermissionDisplay> RolePermissionDisplays { get; } = new();
+
+        // ===== 权限检查 =====
+
+        /// <summary>当前用户是否可以新增用户</summary>
+        [ObservableProperty]
+        private bool _canAddUser;
+
+        /// <summary>当前用户是否可以编辑用户</summary>
+        [ObservableProperty]
+        private bool _canEditUser;
+
+        /// <summary>当前用户是否可以重置密码</summary>
+        [ObservableProperty]
+        private bool _canResetPassword;
+
+        public UserViewModel() : this(BackendRuntime.Shared.UserService, BackendRuntime.Shared.AuthService)
         {
-            LoadMockUsers();
+        }
+
+        public UserViewModel(IUserService userService, IAuthService authService)
+        {
+            _userService = userService;
+            _authService = authService;
+
+            LoadUsers();
+            LoadRolePermissions();
+            RefreshPermissions();
+        }
+
+        // ===== 数据加载 =====
+
+        private void LoadUsers()
+        {
+            var users = _userService.GetAll();
+            _allUsers = users.Select(MapToItem).ToList();
             FilterUsers();
         }
 
-        private void LoadMockUsers()
+        private static UserItem MapToItem(AppUser user) => new()
         {
-            _allUsers = new ObservableCollection<UserItem>
+            Id = user.Id,
+            Account = user.Account,
+            Name = user.Name,
+            Role = user.RoleDisplayName,
+            RoleEnum = user.Role,
+            Status = user.Status == UserStatus.Disabled ? "禁用" : (user.LastLoginTime.HasValue ? "在线" : "离线"),
+            LastLoginTime = user.LastLoginTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-",
+        };
+
+        private void LoadRolePermissions()
+        {
+            RolePermissionDisplays.Clear();
+
+            foreach (AppRole role in Enum.GetValues<AppRole>())
             {
-                new UserItem { Account = "OP-10024", Name = "张伟 (Zhang Wei)", Role = "管理员", Status = "在线", LastLoginTime = "2023-10-27 08:15:32" },
-                new UserItem { Account = "OP-10088", Name = "李娜 (Li Na)", Role = "操作员", Status = "在线", LastLoginTime = "2023-10-27 14:22:10" },
-                new UserItem { Account = "MT-20011", Name = "王强 (Wang Qiang)", Role = "维护员", Status = "离线", LastLoginTime = "2023-10-26 18:45:00" },
-                new UserItem { Account = "OP-10092", Name = "赵雷 (Zhao Lei)", Role = "操作员", Status = "禁用", LastLoginTime = "2023-10-15 09:12:44" },
-                new UserItem { Account = "OP-10095", Name = "陈静 (Chen Jing)", Role = "操作员", Status = "在线", LastLoginTime = "2023-10-27 15:10:22" },
-                new UserItem { Account = "MT-20015", Name = "刘洋 (Liu Yang)", Role = "维护员", Status = "离线", LastLoginTime = "2023-10-26 09:30:15" },
-                new UserItem { Account = "OP-10102", Name = "周梅 (Zhou Mei)", Role = "操作员", Status = "在线", LastLoginTime = "2023-10-27 16:45:00" }
-            };
+                var permissions = Models.RolePermissions.GetPermissions(role);
+                var display = new RolePermissionDisplay
+                {
+                    RoleName = role switch
+                    {
+                        AppRole.Admin => "管理员",
+                        AppRole.Operator => "操作员",
+                        AppRole.Maintainer => "维护员",
+                        _ => role.ToString()
+                    },
+                    RoleEnum = role,
+                };
+
+                foreach (var perm in permissions)
+                {
+                    display.Permissions.Add(new PermissionTag
+                    {
+                        Name = Models.RolePermissions.GetPermissionDisplayName(perm),
+                        IsHighlighted = Models.RolePermissions.IsHighlightPermission(role, perm),
+                    });
+                }
+
+                RolePermissionDisplays.Add(display);
+            }
         }
+
+        private void RefreshPermissions()
+        {
+            CanAddUser = _authService.HasPermission(AppPermission.UserManagement);
+            CanEditUser = _authService.HasPermission(AppPermission.UserManagement);
+            CanResetPassword = _authService.HasPermission(AppPermission.UserManagement);
+        }
+
+        // ===== 搜索与过滤 =====
 
         partial void OnSearchTextChanged(string value) => FilterUsers();
         partial void OnSelectedRoleFilterChanged(string value) => FilterUsers();
@@ -94,8 +191,8 @@ namespace MotorTestSystem.ViewModels
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
-                filtered = filtered.Where(u => 
-                    u.Account.Contains(SearchText, StringComparison.OrdinalIgnoreCase) || 
+                filtered = filtered.Where(u =>
+                    u.Account.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
                     u.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
             }
 
@@ -107,7 +204,9 @@ namespace MotorTestSystem.ViewModels
             Users = new ObservableCollection<UserItem>(filtered);
         }
 
-        [RelayCommand]
+        // ===== 命令 =====
+
+        [RelayCommand(CanExecute = nameof(CanAddUser))]
         private void AddUser()
         {
             var dialogViewModel = new UserEditDialogViewModel
@@ -124,20 +223,27 @@ namespace MotorTestSystem.ViewModels
 
             if (win.ShowDialog() == true)
             {
-                var newUser = new UserItem
+                var role = ParseRole(dialogViewModel.SelectedRole);
+                var status = dialogViewModel.IsEnabled ? UserStatus.Active : UserStatus.Disabled;
+
+                var error = _userService.Create(
+                    dialogViewModel.Account,
+                    dialogViewModel.Name,
+                    dialogViewModel.Password,
+                    role,
+                    status);
+
+                if (error != null)
                 {
-                    Account = dialogViewModel.Account,
-                    Name = dialogViewModel.Name,
-                    Role = dialogViewModel.SelectedRole,
-                    Status = dialogViewModel.IsEnabled ? "在线" : "禁用",
-                    LastLoginTime = "-"
-                };
-                _allUsers.Insert(0, newUser);
-                FilterUsers();
+                    System.Windows.MessageBox.Show(error, "创建失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                LoadUsers(); // 重新加载
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanEditUser))]
         private void EditUser(UserItem user)
         {
             if (user == null) return;
@@ -159,19 +265,99 @@ namespace MotorTestSystem.ViewModels
 
             if (win.ShowDialog() == true)
             {
-                user.Account = dialogViewModel.Account;
-                user.Name = dialogViewModel.Name;
-                user.Role = dialogViewModel.SelectedRole;
-                user.Status = dialogViewModel.IsEnabled ? "在线" : "禁用";
-                FilterUsers();
+                var role = ParseRole(dialogViewModel.SelectedRole);
+                var status = dialogViewModel.IsEnabled ? UserStatus.Active : UserStatus.Disabled;
+
+                var error = _userService.Update(user.Id, dialogViewModel.Name, role, status);
+
+                if (error != null)
+                {
+                    System.Windows.MessageBox.Show(error, "更新失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                LoadUsers(); // 重新加载
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanResetPassword))]
         private void ResetPassword(UserItem user)
         {
             if (user == null) return;
-            System.Windows.MessageBox.Show($"已重置用户 {user.Name} ({user.Account}) 的密码为初始密码。", "密码重置", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+
+            var result = System.Windows.MessageBox.Show(
+                $"确定要重置用户 {user.Name} ({user.Account}) 的密码为初始密码吗？",
+                "密码重置确认",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question);
+
+            if (result != System.Windows.MessageBoxResult.Yes) return;
+
+            // 重置为默认密码 123456
+            var error = _userService.ResetPassword(user.Id, "123456");
+            if (error != null)
+            {
+                System.Windows.MessageBox.Show(error, "重置失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            System.Windows.MessageBox.Show(
+                $"用户 {user.Name} 的密码已重置为：123456",
+                "密码重置成功",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+
+        private static AppRole ParseRole(string roleName) => roleName switch
+        {
+            "管理员" => AppRole.Admin,
+            "操作员" => AppRole.Operator,
+            "维护员" => AppRole.Maintainer,
+            _ => AppRole.Operator
+        };
+    }
+
+    // ===== 右侧角色权限面板的数据模型 =====
+
+    /// <summary>
+    /// 角色权限展示项
+    /// </summary>
+    public class RolePermissionDisplay : ObservableObject
+    {
+        private string _roleName = string.Empty;
+        public string RoleName
+        {
+            get => _roleName;
+            set => SetProperty(ref _roleName, value);
+        }
+
+        private AppRole _roleEnum = AppRole.Operator;
+        public AppRole RoleEnum
+        {
+            get => _roleEnum;
+            set => SetProperty(ref _roleEnum, value);
+        }
+
+        public ObservableCollection<PermissionTag> Permissions { get; } = new();
+    }
+
+    /// <summary>
+    /// 权限标签项
+    /// </summary>
+    public class PermissionTag : ObservableObject
+    {
+        private string _name = string.Empty;
+        public string Name
+        {
+            get => _name;
+            set => SetProperty(ref _name, value);
+        }
+
+        private bool _isHighlighted;
+        public bool IsHighlighted
+        {
+            get => _isHighlighted;
+            set => SetProperty(ref _isHighlighted, value);
         }
     }
 }

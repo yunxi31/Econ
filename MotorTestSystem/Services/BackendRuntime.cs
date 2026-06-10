@@ -14,15 +14,21 @@ namespace MotorTestSystem.Services
         public BackendRuntime(
             ObservableCollection<StationConfig> stationConfigs,
             IMotorTestRepository repository,
-            IPlcClientFactory plcClientFactory)
+            IPlcClientFactory plcClientFactory,
+            IUserService userService,
+            IAuthService authService)
         {
             StationConfigs = stationConfigs;
             Repository = repository;
+            UserService = userService;
+            AuthService = authService;
             PollingService = new PlcPollingService(StationConfigs, Repository, plcClientFactory);
         }
 
         public ObservableCollection<StationConfig> StationConfigs { get; }
         public IMotorTestRepository Repository { get; }
+        public IUserService UserService { get; }
+        public IAuthService AuthService { get; }
         public PlcPollingService PollingService { get; }
 
         private static BackendRuntime CreateDefault()
@@ -39,7 +45,11 @@ namespace MotorTestSystem.Services
 
             var repository = new InMemoryMotorTestRepository();
             SeedRepositoryAsync(repository).GetAwaiter().GetResult();
-            return new BackendRuntime(configs, repository, new PlcClientFactory(useSimulation: false));
+
+            var userService = new InMemoryUserService();
+            var authService = new AuthService(userService);
+
+            return new BackendRuntime(configs, repository, new PlcClientFactory(useSimulation: false), userService, authService);
         }
 
         private static async Task SeedRepositoryAsync(IMotorTestRepository repository)

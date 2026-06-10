@@ -24,19 +24,41 @@ namespace MotorTestSystem.ViewModels
         private string _currentTime = DateTime.Now.ToString("HH:mm:ss");
 
         [ObservableProperty]
-        private string _currentUser = "管理员";
+        private string _currentUser = "未登录";
 
         [ObservableProperty]
-        private string _currentUserName = "admin";
+        private string _currentUserName = "未知";
 
         [ObservableProperty]
-        private string _currentUserRole = "管理员";
+        private string _currentUserRole = "未知";
 
         [ObservableProperty]
         private int _onlineStationCount;
 
         [ObservableProperty]
         private int _totalStationCount;
+
+        // ===== 导航可见性（基于 RBAC 权限） =====
+
+        /// <summary>是否显示"生产监控"导航</summary>
+        [ObservableProperty]
+        private bool _isMonitorVisible = true;
+
+        /// <summary>是否显示"数据追溯"导航</summary>
+        [ObservableProperty]
+        private bool _isHistoryVisible = true;
+
+        /// <summary>是否显示"生产看板"导航</summary>
+        [ObservableProperty]
+        private bool _isDashboardVisible = true;
+
+        /// <summary>是否显示"用户管理"导航</summary>
+        [ObservableProperty]
+        private bool _isUserVisible = true;
+
+        /// <summary>是否显示"系统配置"导航</summary>
+        [ObservableProperty]
+        private bool _isConfigVisible = true;
 
         public DashboardViewModel DashboardVM { get; }
         public MonitorViewModel MonitorVM { get; }
@@ -61,7 +83,7 @@ namespace MotorTestSystem.ViewModels
             MonitorVM = new MonitorViewModel(_runtime);
             HistoryVM = new HistoryViewModel(_runtime.Repository);
             ConfigVM = new ConfigViewModel(_runtime);
-            UserVM = new UserViewModel();
+            UserVM = new UserViewModel(_runtime.UserService, _runtime.AuthService);
             NotificationVM = new NotificationCenterViewModel();
 
             var allStations = MonitorVM.NoLoadStations
@@ -85,6 +107,56 @@ namespace MotorTestSystem.ViewModels
             _clockTimer.Start();
         }
 
+        /// <summary>
+        /// 由 App.xaml.cs 在登录成功后调用，设置当前认证用户并刷新权限
+        /// </summary>
+        public void SetAuthenticatedUser(AppUser? user)
+        {
+            if (user == null)
+            {
+                CurrentUser = "未登录";
+                CurrentUserName = "未知";
+                CurrentUserRole = "未知角色";
+                return;
+            }
+
+            CurrentUser = $"{user.RoleDisplayName} ({user.Account})";
+            CurrentUserName = user.Name;
+            CurrentUserRole = user.RoleDisplayName;
+
+            // 根据 RBAC 权限刷新导航可见性
+            RefreshNavigationVisibility();
+        }
+
+        /// <summary>
+        /// 根据当前用户的角色权限，刷新各导航项的可见性
+        /// </summary>
+        private void RefreshNavigationVisibility()
+        {
+            var auth = _runtime.AuthService;
+
+            IsMonitorVisible = auth.HasPermission(AppPermission.Monitor);
+            IsHistoryVisible = auth.HasPermission(AppPermission.History);
+            IsDashboardVisible = auth.HasPermission(AppPermission.Dashboard);
+            IsUserVisible = auth.HasPermission(AppPermission.UserManagement);
+            IsConfigVisible = auth.HasPermission(AppPermission.SystemConfig);
+
+            // 如果当前页面不可见了，自动切换到第一个可见页面
+            if (CurrentView == MonitorVM && !IsMonitorVisible) NavigateToFirstVisible();
+            else if (CurrentView == HistoryVM && !IsHistoryVisible) NavigateToFirstVisible();
+            else if (CurrentView == DashboardVM && !IsDashboardVisible) NavigateToFirstVisible();
+            else if (CurrentView == UserVM && !IsUserVisible) NavigateToFirstVisible();
+            else if (CurrentView == ConfigVM && !IsConfigVisible) NavigateToFirstVisible();
+        }
+
+        private void NavigateToFirstVisible()
+        {
+            if (IsMonitorVisible) CurrentView = MonitorVM;
+            else if (IsDashboardVisible) CurrentView = DashboardVM;
+            else if (IsHistoryVisible) CurrentView = HistoryVM;
+            else CurrentView = MonitorVM; // 兜底
+        }
+
         private ViewModelBase? _previousViewBeforeNotification;
 
         [RelayCommand]
@@ -104,6 +176,13 @@ namespace MotorTestSystem.ViewModels
                 return;
             }
 
+            // RBAC 权限检查
+            if (!IsNavigationAllowed(destination))
+            {
+                // 无权限时不切换，保持当前页面
+                return;
+            }
+
             _previousViewBeforeNotification = null;
 
             CurrentView = destination switch
@@ -116,6 +195,19 @@ namespace MotorTestSystem.ViewModels
                 _ => DashboardVM
             };
         }
+
+        /// <summary>
+        /// 判断当前用户是否有权访问指定导航目标
+        /// </summary>
+        private bool IsNavigationAllowed(string destination) => destination switch
+        {
+            "Monitor" => IsMonitorVisible,
+            "History" => IsHistoryVisible,
+            "Dashboard" => IsDashboardVisible,
+            "User" => IsUserVisible,
+            "Config" => IsConfigVisible,
+            _ => true
+        };
 
         private void OnSnapshotReceived(object? sender, StationSnapshot snapshot)
         {
@@ -137,7 +229,9 @@ namespace MotorTestSystem.ViewModels
 
         partial void OnCurrentUserChanged(string value)
         {
-            if (string.IsNullOrEmpty(value))
+            // 保留兼容：如果外部直接设置 CurrentUser（非通过 SetAuthenticatedUser），
+            // 仍然能解析角色名和用户名
+            if (string.IsNullOrEmpty(value) || value == "未登录")
             {
                 CurrentUserRole = "未知角色";
                 CurrentUserName = "未知用户";
