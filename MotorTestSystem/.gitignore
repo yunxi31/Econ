@@ -38,3 +38,5 @@ PlayCtrl.dll
 *.pyc
 __pycache__/
 
+##workbuddy
+.workbuddy\memory/

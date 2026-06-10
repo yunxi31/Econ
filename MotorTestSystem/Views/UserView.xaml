@@ -495,10 +495,13 @@
                                         <TextBlock Text="诊断功能" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
                                     </Border>
                                     <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="权限覆盖" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                                        <TextBlock Text="设备校准" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
                                     </Border>
                                     <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
-                                        <TextBlock Text="仅限查看" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                                        <TextBlock Text="数据查看" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                                    </Border>
+                                    <Border Background="#181D26" BorderBrush="#2A3542" BorderThickness="1" CornerRadius="4" Padding="8,4" Margin="0,0,8,8">
+                                        <TextBlock Text="报警管理" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
                                     </Border>
                                 </WrapPanel>
                             </Grid>

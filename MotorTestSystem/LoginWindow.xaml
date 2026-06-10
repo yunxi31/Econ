@@ -91,7 +91,7 @@
                         <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#22262F"/>
                     </ComboBox.Resources>
                     <ComboBoxItem Content="操作员 (Operator)"/>
-                    <ComboBoxItem Content="技术员 (Technician)"/>
+                    <ComboBoxItem Content="维护员 (Maintainer)"/>
                     <ComboBoxItem Content="管理员 (Admin)"/>
                 </ComboBox>
 
@@ -131,7 +131,7 @@
                 </Button>
                 <!-- Help Tips -->
                 <TextBlock Margin="0,15,0,0" Foreground="#6C7A87" FontSize="10" TextAlignment="Center" 
-                           Text="默认密码：操作员(无需密码) | 技术员(tech123) | 管理员(admin123)"/>
+                           Text="默认密码：操作员(无需密码) | 维护员(maint123) | 管理员(admin123)"/>
             </StackPanel>
         </Grid>
     </Border>

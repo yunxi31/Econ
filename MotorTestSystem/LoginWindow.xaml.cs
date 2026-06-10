@@ -47,7 +47,7 @@ namespace MotorTestSystem
                     PasswordInput.Password = "";
                     break;
                 case 1:
-                    UsernameTextBox.Text = "technician";
+                    UsernameTextBox.Text = "maintainer";
                     PasswordInput.Password = "";
                     break;
                 case 2:
@@ -100,15 +100,15 @@ namespace MotorTestSystem
                     }
                     break;
 
-                case 1: // 技术员
-                    if (password == "tech123" || password == "456")
+                case 1: // 维护员
+                    if (password == "maint123" || password == "456")
                     {
                         isSuccess = true;
-                        userDisplayName = $"技术员 ({username})";
+                        userDisplayName = $"维护员 ({username})";
                     }
                     else
                     {
-                        ShowError("技术员密码错误！(提示：tech123 或 456)");
+                        ShowError("维护员密码错误！(提示：maint123 或 456)");
                     }
                     break;
 
