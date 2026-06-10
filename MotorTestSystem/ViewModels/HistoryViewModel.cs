@@ -126,6 +126,8 @@ namespace MotorTestSystem.ViewModels
 
         public ObservableCollection<MotorTestRecordModel> TestResults { get; } = new();
 
+        private List<MotorTestResult> _cachedResults = new();
+
         public HistoryViewModel()
             : this(BackendRuntime.Shared.Repository)
         {
@@ -134,78 +136,73 @@ namespace MotorTestSystem.ViewModels
         public HistoryViewModel(IMotorTestRepository repository)
         {
             _repository = repository;
-            LoadMockData();
+            // Initialize with an initial search to populate UI
+            SearchCommand.Execute(null);
         }
 
-        private void LoadMockData()
+        partial void OnCurrentPageChanged(int value)
+        {
+            RenderCurrentPage();
+        }
+
+        private void RenderCurrentPage()
         {
             TestResults.Clear();
-            
-            // Add Row 1: Normal OK test
-            TestResults.Add(new MotorTestRecordModel
-            {
-                Barcode = "M260608001",
-                TestTime = DateTime.Now.AddMinutes(-5),
-                FinalResult = "OK",
-                NoLoadCurrent = 1.24,
-                NoLoadSpeed = 3025,
-                FwdNoise = 55.4,
-                RevNoise = 56.1,
-                LoadCurrent = 4.12,
-                LoadSpeed = 2980
-            });
+            if (_cachedResults == null || _cachedResults.Count == 0) return;
 
-            // Add Row 2: NG test with abnormal values
-            TestResults.Add(new MotorTestRecordModel
-            {
-                Barcode = "M260608002",
-                TestTime = DateTime.Now.AddMinutes(-12),
-                FinalResult = "NG",
-                NoLoadCurrent = 1.85, // Abnormal (> 1.5)
-                NoLoadSpeed = 3050,
-                FwdNoise = 68.5, // Abnormal (> 60.0)
-                RevNoise = 69.2, // Abnormal (> 60.0)
-                LoadCurrent = 4.85, // Abnormal (> 4.5)
-                LoadSpeed = 2950
-            });
+            var pageItems = _cachedResults
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize);
 
-            // Add Row 3: NG test with NULL/Missing values
-            TestResults.Add(new MotorTestRecordModel
-            {
-                Barcode = "M260608003",
-                TestTime = DateTime.Now.AddMinutes(-20),
-                FinalResult = "NG",
-                NoLoadCurrent = null,
-                NoLoadSpeed = null,
-                FwdNoise = null,
-                RevNoise = null,
-                LoadCurrent = null,
-                LoadSpeed = null
-            });
-
-            // Let's add some more to represent 10 items for Page 1 of 3
-            for (int i = 4; i <= 10; i++)
+            foreach (var r in pageItems)
             {
                 TestResults.Add(new MotorTestRecordModel
                 {
-                    Barcode = $"M26060800{i}",
-                    TestTime = DateTime.Now.AddHours(-i),
-                    FinalResult = i % 3 == 0 ? "OK" : "NG",
-                    NoLoadCurrent = i % 3 == 0 ? 1.22 : 1.76,
-                    NoLoadSpeed = 3010,
-                    FwdNoise = i % 3 == 0 ? 54.2 : 62.4,
-                    RevNoise = 55.0,
-                    LoadCurrent = i % 3 == 0 ? 4.05 : null,
-                    LoadSpeed = i % 3 == 0 ? 2990 : null
+                    Barcode = r.Barcode,
+                    TestTime = r.TestTime,
+                    FinalResult = r.FinalResult,
+                    NoLoadCurrent = r.NoLoadCurrent,
+                    NoLoadSpeed = r.NoLoadSpeed,
+                    FwdNoise = r.FwdNoise,
+                    RevNoise = r.RevNoise,
+                    LoadCurrent = r.LoadCurrent,
+                    LoadSpeed = r.LoadSpeed
                 });
             }
         }
 
         [RelayCommand]
-        private void Search()
+        private async Task SearchAsync()
         {
-            // Query mock logic
-            LoadMockData();
+            var query = new MotorTestQuery
+            {
+                Barcode = SearchBarcode,
+                ResultFilter = SelectedResultFilter,
+                StartTime = StartDate,
+                EndTime = EndDate
+            };
+
+            var raw = await _repository.QueryAsync(query);
+            _cachedResults = raw.ToList();
+
+            // Calculate statistic aggregates
+            TotalTestsCount = _cachedResults.Count;
+            PassedCount = _cachedResults.Count(r => r.FinalResult == "OK");
+            FailedCount = _cachedResults.Count(r => r.FinalResult == "NG");
+            PassRateString = TotalTestsCount == 0 ? "0.00%" : $"{(PassedCount * 100.0 / TotalTestsCount):F2}%";
+
+            // Recalculate pagination metadata
+            TotalPages = (int)Math.Ceiling((double)TotalTestsCount / PageSize);
+            if (TotalPages < 1) TotalPages = 1;
+
+            if (CurrentPage != 1)
+            {
+                CurrentPage = 1; // Property trigger will call RenderCurrentPage()
+            }
+            else
+            {
+                RenderCurrentPage();
+            }
         }
 
         [RelayCommand]
@@ -235,7 +232,7 @@ namespace MotorTestSystem.ViewModels
             EndDate = DateTime.Now;
             SelectedQuickFilter = QuickTimeFilter.Today;
             SelectedMotor = null;
-            Search();
+            SearchCommand.Execute(null);
         }
 
         [RelayCommand]
