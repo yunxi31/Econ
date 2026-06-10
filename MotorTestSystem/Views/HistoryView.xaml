@@ -293,6 +293,9 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- BoolToVisibility Converter -->
+        <converters:BoolToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
 
     <Grid Background="{DynamicResource BackgroundDark}">
@@ -1204,6 +1207,46 @@
                     <TextBlock Text="导出数据" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
+        </Grid>
+
+        <!-- 打印进度浮层 -->
+        <Grid Panel.ZIndex="1000"
+              Visibility="{Binding IsPrinting, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+            <Grid.Background>
+                <SolidColorBrush Color="#13141E" Opacity="0.75"/>
+            </Grid.Background>
+            <Border Background="#212431" CornerRadius="12" BorderBrush="#333645" BorderThickness="1"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Padding="40,30">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <!-- 旋转动画圆环 -->
+                    <Grid Width="32" Height="32" Margin="0,0,16,0">
+                        <Ellipse Stroke="#333645" StrokeThickness="3" Width="32" Height="32"/>
+                        <Ellipse Stroke="{DynamicResource AccentCyan}" StrokeThickness="3"
+                                 StrokeDashArray="40,100" Width="32" Height="32"
+                                 RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform x:Name="PrintSpinnerRotate" Angle="0"/>
+                            </Ellipse.RenderTransform>
+                            <Ellipse.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="PrintSpinnerRotate"
+                                                             Storyboard.TargetProperty="Angle"
+                                                             From="0" To="360" Duration="0:0:1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Ellipse.Triggers>
+                        </Ellipse>
+                    </Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="正在打印追溯单" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding PrintStatus}" Foreground="#8A8D99" FontSize="12"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

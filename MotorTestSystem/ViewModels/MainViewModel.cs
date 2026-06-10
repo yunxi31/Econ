@@ -84,7 +84,7 @@ namespace MotorTestSystem.ViewModels
             HistoryVM = new HistoryViewModel(_runtime.Repository);
             ConfigVM = new ConfigViewModel(_runtime);
             UserVM = new UserViewModel(_runtime.UserService, _runtime.AuthService);
-            NotificationVM = new NotificationCenterViewModel();
+            NotificationVM = new NotificationCenterViewModel(_runtime.NotificationService);
 
             var allStations = MonitorVM.NoLoadStations
                 .Concat(MonitorVM.NoiseStations)

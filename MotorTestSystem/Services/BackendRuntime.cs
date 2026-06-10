@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using MotorTestSystem.Models;
 
@@ -8,6 +9,7 @@ namespace MotorTestSystem.Services
     public sealed class BackendRuntime
     {
         private static readonly Random _rng = new(42); // 固定种子保证可复现 — 必须在 Shared 之前
+        private readonly INotificationService _notificationService;
 
         public static BackendRuntime Shared { get; } = CreateDefault();
 
@@ -17,14 +19,20 @@ namespace MotorTestSystem.Services
             IPlcClientFactory plcClientFactory,
             IUserService userService,
             IAuthService authService,
+            INotificationService notificationService,
             HikvisionSdkService? hikvisionService = null)
         {
             StationConfigs = stationConfigs;
             Repository = repository;
             UserService = userService;
             AuthService = authService;
+            _notificationService = notificationService;
             PollingService = new PlcPollingService(StationConfigs, Repository, plcClientFactory);
             HikvisionService = hikvisionService ?? new HikvisionSdkService();
+
+            // 订阅 PLC 轮询事件，自动生成实时通知
+            PollingService.SnapshotReceived += OnSnapshotReceivedForNotification;
+            PollingService.LogReceived += OnLogReceivedForNotification;
         }
 
         public ObservableCollection<StationConfig> StationConfigs { get; }
@@ -33,6 +41,102 @@ namespace MotorTestSystem.Services
         public IAuthService AuthService { get; }
         public PlcPollingService PollingService { get; }
         public HikvisionSdkService HikvisionService { get; }
+        public INotificationService NotificationService => _notificationService;
+
+        // ---- 工位在线状态跟踪（用于检测离线事件） ----
+        private readonly System.Collections.Generic.Dictionary<string, bool> _stationOnlineState = new();
+        private readonly System.Collections.Generic.Dictionary<string, DateTime> _lastNgAlertTime = new();
+        private static readonly TimeSpan NgAlertCooldown = TimeSpan.FromMinutes(5);
+
+        /// <summary>
+        /// PLC 快照事件 → 实时通知生成
+        /// </summary>
+        private void OnSnapshotReceivedForNotification(object? sender, StationSnapshot snapshot)
+        {
+            // 1. 检测工位离线 → 报警通知
+            bool wasOnline = _stationOnlineState.TryGetValue(snapshot.StationId, out var prev) && prev;
+            bool isNowOnline = snapshot.IsOnline;
+
+            if (wasOnline && !isNowOnline)
+            {
+                // 工位从在线变为离线
+                var config = StationConfigs.FirstOrDefault(c => c.Id == snapshot.StationId);
+                string plcModel = config?.PlcModel ?? "未知型号";
+                _notificationService.Add(new NotificationItem
+                {
+                    Title = $"{snapshot.StationId}工位通信中断",
+                    Content = $"工位 {snapshot.StationId}(PLC型号:{plcModel})与上位机失去连接，当前状态：离线。请检查网络连接及PLC电源状态。",
+                    Type = NotificationType.Alarm,
+                    Severity = NotificationSeverity.Critical,
+                    Source = snapshot.StationId
+                });
+            }
+
+            _stationOnlineState[snapshot.StationId] = isNowOnline;
+
+            // 2. 检测测试结果为 NG → 报警通知（带冷却，避免刷屏）
+            if (snapshot.CompletionSignal && snapshot.CompletedData != null
+                && snapshot.CompletedData.Result == "NG")
+            {
+                string barcode = snapshot.CompletedData.Barcode;
+                string stage = snapshot.CompletedData.Stage.ToString();
+
+                if (!_lastNgAlertTime.TryGetValue(barcode, out var lastTime)
+                    || DateTime.Now - lastTime > NgAlertCooldown)
+                {
+                    _lastNgAlertTime[barcode] = DateTime.Now;
+
+                    string reason = GetNgReason(snapshot.CompletedData);
+                    _notificationService.Add(new NotificationItem
+                    {
+                        Title = $"{snapshot.StationId}工位测试不合格",
+                        Content = $"电机 [{barcode}] 在{stage}阶段测试未通过。{reason}请及时处理。",
+                        Type = NotificationType.Alarm,
+                        Severity = NotificationSeverity.Warning,
+                        Source = snapshot.StationId
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// 根据阶段测试数据推断不合格原因
+        /// </summary>
+        private static string GetNgReason(StageTestData data)
+        {
+            var reasons = new System.Collections.Generic.List<string>();
+
+            if (data.NoLoadCurrent > 2.5) reasons.Add($"空载电流超限({data.NoLoadCurrent:F2}A)");
+            if (data.NoLoadSpeed > 2200 || data.NoLoadSpeed < 1800) reasons.Add($"空载转速异常({data.NoLoadSpeed}r/min)");
+            if (data.FwdNoise > 70) reasons.Add($"正转噪音超限({data.FwdNoise:F1}dB)");
+            if (data.NoiseDiff > 15) reasons.Add($"噪音差值过大({data.NoiseDiff:F1}dB)");
+            if (data.LoadCurrent > 3.0) reasons.Add($"负载电流超限({data.LoadCurrent:F2}A)");
+            if (data.LoadSpeed < 1000) reasons.Add($"负载转速偏低({data.LoadSpeed}r/min)");
+
+            return reasons.Count > 0
+                ? string.Join("；", reasons) + "。"
+                : "具体原因待诊断。";
+        }
+
+        /// <summary>
+        /// PLC 日志事件 → 系统级通知
+        /// </summary>
+        private void OnLogReceivedForNotification(object? sender, string log)
+        {
+            // 只对错误日志生成通知（正常日志忽略）
+            if (log.Contains("error", StringComparison.OrdinalIgnoreCase)
+                || log.Contains("异常", StringComparison.OrdinalIgnoreCase)
+                || log.Contains("故障", StringComparison.OrdinalIgnoreCase))
+            {
+                _notificationService.Add(new NotificationItem
+                {
+                    Title = "PLC通信异常",
+                    Content = $"PLC轮询服务报告异常：{log}",
+                    Type = NotificationType.Alarm,
+                    Severity = NotificationSeverity.Warning
+                });
+            }
+        }
 
         private static BackendRuntime CreateDefault()
         {
@@ -51,9 +155,11 @@ namespace MotorTestSystem.Services
 
             var userService = new InMemoryUserService();
             var authService = new AuthService(userService);
+            var notificationService = new InMemoryNotificationService();
             var hikvisionService = new HikvisionSdkService();
 
-            return new BackendRuntime(configs, repository, new PlcClientFactory(useSimulation: false), userService, authService, hikvisionService);
+            return new BackendRuntime(configs, repository, new PlcClientFactory(useSimulation: false),
+                userService, authService, notificationService, hikvisionService);
         }
 
         private static async Task SeedRepositoryAsync(IMotorTestRepository repository)

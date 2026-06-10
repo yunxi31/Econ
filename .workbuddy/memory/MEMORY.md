@@ -23,3 +23,22 @@
 - 环形进度条通过 DashboardView.xaml.cs code-behind + PropertyChanged 监听更新（因 WPF DoubleCollection 类型限制无法直接绑定）
 - 故障分类规则：空载电流>2.5→电流超限，噪音差>15→噪声过大，负载电流>3.0→电流超限 等
 - 日产量目标常量：DailyTarget = 2000，良率目标：TargetPassRate = 98%
+
+## 数据追溯 - 报告与打印
+- 打印追溯单：异步打印（XpsDocumentWriter.WriteAsync），TraceDocumentBuilder 构建白底打印友好格式
+- 打印超时30秒自动取消，进度浮层（IsPrinting/PrintStatus 属性驱动）
+- `PrintQueue.CreateXpsDocumentWriter(printQueue)` 是静态方法，不是实例方法
+- 查看完整报告：MotorReportWindow 暗色主题窗口，8章节（基本信息/空载/噪音/负载/阈值判定/波形图/结论/签章）
+- 阈值标准：空载电流≤1.5A，空载转速2900~3100r/min，噪音≤60dB，负载电流≤4.5A，负载转速2900~3100r/min
+- MotorTestRecordModel 已扩展：含 ShaftLength/KnurlDiameter/NoiseDiff 及各阶段判定结果
+- LiveCharts 波形图数据在 HistoryViewModel 中生成，通过 SetWaveformData() 传递给报告窗口
+
+## 通知中心
+- INotificationService 接口 + InMemoryNotificationService 内存实现
+- NotificationItem 模型（NotificationType枚举：Alarm/Maintenance/System，NotificationSeverity枚举：Info/Warning/Critical）
+- NotificationItemViewModel UI包装类（XAML绑定用）
+- BackendRuntime 订阅 PlcPollingService 事件自动生成通知：工位离线→报警，NG结果→报警（5min冷却），PLC错误日志→报警
+- XAML DataTrigger 绑定 TypeDisplay（中文），非 Type（枚举）
+- 种子数据12条（3报警+4维护+5系统）
+- DashEffect 用法：`new DashEffect(new float[] { 6, 4 }, 0)`，需 using `LiveChartsCore.SkiaSharpView.Painting.Effects`
+- 不要用 `SKPathEffect.CreateDash()`——那是 SkiaSharp 原生类型，与 LiveCharts 的 PathEffect 不兼容

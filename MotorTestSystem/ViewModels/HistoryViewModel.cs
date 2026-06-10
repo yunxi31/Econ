@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
+using System.Windows.Xps;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
@@ -29,10 +34,16 @@ namespace MotorTestSystem.ViewModels
         
         public double? NoLoadCurrent { get; set; }
         public double? NoLoadSpeed { get; set; }
+        public double? ShaftLength { get; set; }
+        public double? KnurlDiameter { get; set; }
+        public string? NoLoadResult { get; set; }
         public double? FwdNoise { get; set; }
         public double? RevNoise { get; set; }
+        public double? NoiseDiff { get; set; }
+        public string? NoiseResult { get; set; }
         public double? LoadCurrent { get; set; }
         public double? LoadSpeed { get; set; }
+        public string? LoadResult { get; set; }
 
         // Helper properties for XAML Binding:
         public string NoLoadCurrentText => NoLoadCurrent?.ToString("F2") ?? "NULL";
@@ -139,6 +150,16 @@ namespace MotorTestSystem.ViewModels
 
         /// <summary>返回选中电机的 FinalResult，用于右侧徽章联动</summary>
         public string SelectedMotorResult => SelectedMotor?.FinalResult ?? string.Empty;
+
+        // ---- 打印状态 ----
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsNotPrinting))]
+        private bool _isPrinting;
+
+        [ObservableProperty]
+        private string _printStatus = string.Empty;
+
+        public bool IsNotPrinting => !IsPrinting;
 
         #region 波形图属性
 
@@ -458,10 +479,16 @@ namespace MotorTestSystem.ViewModels
                     FinalResult = r.FinalResult,
                     NoLoadCurrent = r.NoLoadCurrent,
                     NoLoadSpeed = r.NoLoadSpeed,
+                    ShaftLength = r.ShaftLength,
+                    KnurlDiameter = r.KnurlDiameter,
+                    NoLoadResult = r.NoLoadResult,
                     FwdNoise = r.FwdNoise,
                     RevNoise = r.RevNoise,
+                    NoiseDiff = r.NoiseDiff,
+                    NoiseResult = r.NoiseResult,
                     LoadCurrent = r.LoadCurrent,
-                    LoadSpeed = r.LoadSpeed
+                    LoadSpeed = r.LoadSpeed,
+                    LoadResult = r.LoadResult
                 });
             }
         }
@@ -560,10 +587,16 @@ namespace MotorTestSystem.ViewModels
                     FinalResult = r.FinalResult,
                     NoLoadCurrent = r.NoLoadCurrent,
                     NoLoadSpeed = r.NoLoadSpeed,
+                    ShaftLength = r.ShaftLength,
+                    KnurlDiameter = r.KnurlDiameter,
+                    NoLoadResult = r.NoLoadResult,
                     FwdNoise = r.FwdNoise,
                     RevNoise = r.RevNoise,
+                    NoiseDiff = r.NoiseDiff,
+                    NoiseResult = r.NoiseResult,
                     LoadCurrent = r.LoadCurrent,
-                    LoadSpeed = r.LoadSpeed
+                    LoadSpeed = r.LoadSpeed,
+                    LoadResult = r.LoadResult
                 }).ToList();
 
                 foreach (var r in allModels)
@@ -590,19 +623,108 @@ namespace MotorTestSystem.ViewModels
 
         // ---- 任务三：操作面板命令 ----
         [RelayCommand]
-        private void PrintTrace()
+        private async Task PrintTraceAsync(CancellationToken cancellationToken)
         {
             if (SelectedMotor == null) return;
-            ModernMessageBox.Show($"正在打印电机 [{SelectedMotor.Barcode}] 的追溯单...", "打印追溯单",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+
+            var printDialog = new System.Windows.Controls.PrintDialog();
+            if (printDialog.ShowDialog() != true) return;
+
+            IsPrinting = true;
+            PrintStatus = "正在准备追溯单...";
+
+            try
+            {
+                // 1. 在 UI 线程构建 FlowDocument（WPF 要求）
+                var doc = TraceDocumentBuilder.Build(SelectedMotor);
+                var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
+
+                // 2. 在 UI 线程预分页（避免后台分页跨线程问题）
+                PrintStatus = "正在分页...";
+                paginator.ComputePageCount();
+
+                // 3. 获取异步打印写入器（静态方法）
+                var writer = System.Printing.PrintQueue.CreateXpsDocumentWriter(printDialog.PrintQueue);
+                PrintStatus = "正在发送至打印机...";
+
+                // 4. 异步写入 + 超时控制
+                var tcs = new TaskCompletionSource<bool>();
+
+                void OnWritingCompleted(object? s, AsyncCompletedEventArgs e)
+                {
+                    writer.WritingCompleted -= OnWritingCompleted;
+                    if (e.Error != null)
+                        tcs.TrySetException(e.Error);
+                    else if (e.Cancelled)
+                        tcs.TrySetCanceled();
+                    else
+                        tcs.TrySetResult(true);
+                }
+
+                writer.WritingCompleted += OnWritingCompleted;
+                writer.WriteAsync(paginator, $"电机追溯单 - {SelectedMotor.Barcode}");
+
+                // 30 秒超时自动取消
+                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                using var timeoutReg = timeoutCts.Token.Register(() =>
+                {
+                    writer.CancelAsync();
+                    tcs.TrySetCanceled();
+                });
+
+                // 同时响应外部取消（如用户关闭页面）
+                using var externalReg = cancellationToken.Register(() =>
+                {
+                    writer.CancelAsync();
+                    tcs.TrySetCanceled();
+                });
+
+                await tcs.Task;
+
+                ModernMessageBox.Show(
+                    $"电机 [{SelectedMotor.Barcode}] 的追溯单已发送至打印机。",
+                    "打印成功", MessageBoxButton.OK, (MessageBoxImage)99);
+            }
+            catch (OperationCanceledException)
+            {
+                ModernMessageBox.Show("打印超时已取消，请检查打印机连接状态后重试。",
+                    "打印取消", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                ModernMessageBox.Show($"打印失败: {ex.Message}", "打印错误",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsPrinting = false;
+                PrintStatus = string.Empty;
+            }
         }
 
         [RelayCommand]
         private void ViewReport()
         {
             if (SelectedMotor == null) return;
-            ModernMessageBox.Show($"正在打开电机 [{SelectedMotor.Barcode}] 的完整报告...", "查看报告",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+
+            try
+            {
+                var reportWindow = new MotorReportWindow(SelectedMotor);
+                reportWindow.Owner = Application.Current.MainWindow;
+
+                // 传入当前波形图数据到报告窗口
+                reportWindow.SetWaveformData(
+                    NoLoadWaveformSeries, NoiseWaveformSeries,
+                    WaveformXAxes, NoLoadWaveformYAxes, NoiseWaveformYAxes,
+                    WaveformTooltipBgPaint, WaveformTooltipTextPaint);
+
+                reportWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                ModernMessageBox.Show($"打开报告失败: {ex.Message}", "报告错误",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         [RelayCommand]

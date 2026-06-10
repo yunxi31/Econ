@@ -360,7 +360,7 @@
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  ItemContainerStyle="{StaticResource NotificationListBoxItemStyle}">
             <ListBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type vm:NotificationCenterViewModel+NotificationItem}">
+                <DataTemplate DataType="{x:Type vm:NotificationItemViewModel}">
                     <Border Background="#212431"
                             BorderBrush="#333645"
                             BorderThickness="1"
@@ -389,13 +389,13 @@
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Type}" Value="报警">
+                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
                                                 <Setter Property="Background" Value="#F74C5B"/>
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding Type}" Value="维护">
+                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
                                                 <Setter Property="Background" Value="#F39C12"/>
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding Type}" Value="系统">
+                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
                                                 <Setter Property="Background" Value="#5C6070"/>
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -413,13 +413,13 @@
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Type}" Value="报警">
+                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
                                                 <Setter Property="Background" Value="#2C1E21"/>
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding Type}" Value="维护">
+                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
                                                 <Setter Property="Background" Value="#2C261E"/>
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding Type}" Value="系统">
+                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
                                                 <Setter Property="Background" Value="#1E222D"/>
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -429,15 +429,15 @@
                                     <materialDesign:PackIcon.Style>
                                         <Style TargetType="materialDesign:PackIcon">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Type}" Value="报警">
+                                                <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
                                                     <Setter Property="Kind" Value="AlertCircleOutline"/>
                                                     <Setter Property="Foreground" Value="#F74C5B"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding Type}" Value="维护">
+                                                <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
                                                     <Setter Property="Kind" Value="WrenchOutline"/>
                                                     <Setter Property="Foreground" Value="#F39C12"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding Type}" Value="系统">
+                                                <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
                                                     <Setter Property="Kind" Value="InformationOutline"/>
                                                     <Setter Property="Foreground" Value="#8A8D99"/>
                                                 </DataTrigger>
