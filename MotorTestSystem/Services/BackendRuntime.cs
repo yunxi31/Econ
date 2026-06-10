@@ -37,7 +37,7 @@ namespace MotorTestSystem.Services
 
             var repository = new InMemoryMotorTestRepository();
             SeedRepositoryAsync(repository).GetAwaiter().GetResult();
-            return new BackendRuntime(configs, repository, new MockPlcClientFactory());
+            return new BackendRuntime(configs, repository, new PlcClientFactory(useSimulation: false));
         }
 
         private static async Task SeedRepositoryAsync(IMotorTestRepository repository)

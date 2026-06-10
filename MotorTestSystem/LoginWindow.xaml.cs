@@ -44,15 +44,15 @@ namespace MotorTestSystem
             {
                 case 0:
                     UsernameTextBox.Text = "operator";
-                    PasswordBox.Password = "";
+                    PasswordInput.Password = "";
                     break;
                 case 1:
                     UsernameTextBox.Text = "technician";
-                    PasswordBox.Password = "";
+                    PasswordInput.Password = "";
                     break;
                 case 2:
                     UsernameTextBox.Text = "admin";
-                    PasswordBox.Password = "";
+                    PasswordInput.Password = "";
                     break;
             }
             ErrorTextBlock.Visibility = Visibility.Collapsed;
@@ -74,7 +74,7 @@ namespace MotorTestSystem
         private void PerformLogin()
         {
             string username = UsernameTextBox.Text.Trim();
-            string password = PasswordBox.Password;
+            string password = PasswordInput.Password;
 
             if (string.IsNullOrEmpty(username))
             {

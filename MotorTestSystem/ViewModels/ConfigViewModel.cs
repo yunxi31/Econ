@@ -66,7 +66,7 @@ namespace MotorTestSystem.ViewModels
                     Message = $"‖ {config.Name} ({config.IpAddress}:{config.Port}) 连接测试成功 ‖‖‖‖", 
                     LevelBrush = "#12DDF7" 
                 });
-                MessageBox.Show($"{config.Name} ({config.IpAddress}:{config.Port}) 连接正常。", "连接测试成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowMessage($"{config.Name} ({config.IpAddress}:{config.Port}) 连接正常。", "连接测试成功", MessageBoxImage.Information);
             }
             else
             {
@@ -77,8 +77,20 @@ namespace MotorTestSystem.ViewModels
                     Message = $"‖ {config.Name} ({config.IpAddress}:{config.Port}) 连接测试失败 ‖‖‖‖", 
                     LevelBrush = "#FF5A5F" 
                 });
-                MessageBox.Show($"{config.Name} ({config.IpAddress}:{config.Port}) 无法建立连接，请检查 IP、端口、协议与网线连接。", "连接测试失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowMessage($"{config.Name} ({config.IpAddress}:{config.Port}) 无法建立连接，请检查 IP、端口、协议与网线连接。", "连接测试失败", MessageBoxImage.Warning);
             }
+        }
+
+        public static System.Action<string, string, MessageBoxImage>? MessageBoxShowMock { get; set; }
+
+        private void ShowMessage(string message, string caption, MessageBoxImage image)
+        {
+            if (MessageBoxShowMock != null)
+            {
+                MessageBoxShowMock(message, caption, image);
+                return;
+            }
+            MessageBox.Show(message, caption, MessageBoxButton.OK, image);
         }
 
         [RelayCommand]
