@@ -19,4 +19,134 @@
     <Resource Include="Images\**\*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- 海康SDK核心DLL -->
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDK.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDK.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCCore.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCCore.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\PlayCtrl.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>PlayCtrl.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\AudioRender.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>AudioRender.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\hlog.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>hlog.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\hpr.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>hpr.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HmMerge.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HmMerge.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\SuperRender.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>SuperRender.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\YUVProcess.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>YUVProcess.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\MP_Render.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>MP_Render.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\NPQos.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>NPQos.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HXVA.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HXVA.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\OpenAL32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>OpenAL32.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\libcrypto-1_1-x64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>libcrypto-1_1-x64.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\libssl-1_1-x64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>libssl-1_1-x64.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\zlib1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>zlib1.dll</TargetPath>
+    </ContentWithTargetPath>
+    
+    <!-- 海康SDK子目录DLL -->
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\HCAlarm.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\HCAlarm.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\HCGeneralCfgMgr.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\HCGeneralCfgMgr.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\HCPreview.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\HCPreview.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\AudioIntercom.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\AudioIntercom.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\HCCoreDevCfg.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\HCCoreDevCfg.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\HCDisplay.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\HCDisplay.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\HCIndustry.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\HCIndustry.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\HCPlayBack.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\HCPlayBack.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\HCVoiceTalk.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\HCVoiceTalk.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\StreamTransClient.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\StreamTransClient.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\SystemTransform.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\SystemTransform.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\AudioRender.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\AudioRender.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\AnalyzeData.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\AnalyzeData.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\OpenAL32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\OpenAL32.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\海康库文件\HCNetSDKCom\libiconv2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>HCNetSDKCom\libiconv2.dll</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+
 </Project>

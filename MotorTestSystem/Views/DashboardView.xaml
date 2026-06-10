@@ -8,7 +8,7 @@
              xmlns:conv="clr-namespace:MotorTestSystem.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1100">
+             d:DesignHeight="700" d:DesignWidth="1400">
     
     <UserControl.Resources>
         <!-- Global Theme Color Palette -->
@@ -286,7 +286,7 @@
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Panel 1: 各阶段不良分布 -->
+            <!-- Panel 0: 各阶段不良分布 -->
             <Border Grid.Column="0" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="0,0,8,0" Padding="15">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -340,7 +340,7 @@
                 </Grid>
             </Border>
 
-            <!-- Panel 2: 前五项故障原因 -->
+            <!-- Panel 1: 前五项故障原因 -->
             <Border Grid.Column="1" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="8,0,0,0" Padding="15">
                 <Grid>
                     <Grid.RowDefinitions>

@@ -86,6 +86,36 @@ namespace MotorTestSystem.ViewModels
 
         #endregion
 
+        #region 海康视频监控属性
+
+        [ObservableProperty]
+        private string _cameraStatus = "未连接";
+
+        [ObservableProperty]
+        private bool _isCameraConnected;
+
+        [ObservableProperty]
+        private string _cameraIp = "192.168.1.64";
+
+        [ObservableProperty]
+        private int _cameraPort = 8000;
+
+        [ObservableProperty]
+        private string _cameraUsername = "admin";
+
+        [ObservableProperty]
+        private string _cameraPassword = "admin123";
+
+        [ObservableProperty]
+        private string _captureImagePath = "";
+
+        [ObservableProperty]
+        private bool _isCameraLoading;
+
+        public System.Collections.ObjectModel.ObservableCollection<CameraInfo> CameraList { get; } = new();
+
+        #endregion
+
         #region Tooltip Paints
 
         public SolidColorPaint TooltipBgPaint { get; } = new SolidColorPaint(new SKColor(24, 25, 36, 230));
@@ -487,6 +517,100 @@ namespace MotorTestSystem.ViewModels
             await RefreshHourlyChartsAsync();
         }
 
+        [RelayCommand]
+        private async Task ConnectCameraAsync()
+        {
+            if (IsCameraLoading) return;
+
+            IsCameraLoading = true;
+            CameraStatus = "正在连接...";
+
+            try
+            {
+                var result = await _runtime.HikvisionService.LoginAsync(CameraIp, CameraPort, CameraUsername, CameraPassword);
+
+                if (result.Success)
+                {
+                    IsCameraConnected = true;
+                    CameraStatus = $"已连接 ({result.DeviceInfo?.ChannelCount ?? 0} 通道)";
+
+                    // 添加到摄像头列表
+                    if (!CameraList.Any(c => c.Ip == CameraIp))
+                    {
+                        CameraList.Add(new CameraInfo
+                        {
+                            Ip = CameraIp,
+                            Port = CameraPort,
+                            Username = CameraUsername,
+                            Password = CameraPassword,
+                            ChannelCount = result.DeviceInfo?.ChannelCount ?? 0,
+                            SerialNumber = result.DeviceInfo?.SerialNumber ?? ""
+                        });
+                    }
+
+                    MessageBox.Show($"摄像头连接成功！\n设备序列号: {result.DeviceInfo?.SerialNumber}\n通道数: {result.DeviceInfo?.ChannelCount}", "连接成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    IsCameraConnected = false;
+                    CameraStatus = $"连接失败: {result.ErrorMessage}";
+                    MessageBox.Show($"连接失败: {result.ErrorMessage}", "连接失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                IsCameraConnected = false;
+                CameraStatus = $"连接异常: {ex.Message}";
+                MessageBox.Show($"连接异常: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsCameraLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        private void DisconnectCamera()
+        {
+            if (_runtime.HikvisionService.Logout(CameraIp))
+            {
+                IsCameraConnected = false;
+                CameraStatus = "已断开";
+
+                var camera = CameraList.FirstOrDefault(c => c.Ip == CameraIp);
+                if (camera != null)
+                {
+                    CameraList.Remove(camera);
+                }
+            }
+        }
+
+        [RelayCommand]
+        private async Task CaptureImageAsync()
+        {
+            if (!IsCameraConnected)
+            {
+                MessageBox.Show("请先连接摄像头", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                string fileName = $"capture_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
+                string filePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), fileName);
+
+                // 这里简化处理，实际需要先启动预览才能抓图
+                // 在实际项目中应该配合视频预览窗口使用
+                CaptureImagePath = filePath;
+
+                MessageBox.Show($"抓图路径: {filePath}\n\n注意: 实际抓图需要先启动预览窗口", "抓图", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"抓图失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         #endregion
 
         #region Chart Helpers
@@ -566,5 +690,18 @@ namespace MotorTestSystem.ViewModels
         public string Name { get; set; } = string.Empty;
         public int Count { get; set; }
         public string Color { get; set; } = "#8E9AA7";
+    }
+
+    /// <summary>
+    /// 摄像头信息
+    /// </summary>
+    public class CameraInfo
+    {
+        public string Ip { get; set; } = string.Empty;
+        public int Port { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public int ChannelCount { get; set; }
+        public string SerialNumber { get; set; } = string.Empty;
     }
 }

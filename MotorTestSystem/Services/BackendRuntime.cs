@@ -16,13 +16,15 @@ namespace MotorTestSystem.Services
             IMotorTestRepository repository,
             IPlcClientFactory plcClientFactory,
             IUserService userService,
-            IAuthService authService)
+            IAuthService authService,
+            HikvisionSdkService? hikvisionService = null)
         {
             StationConfigs = stationConfigs;
             Repository = repository;
             UserService = userService;
             AuthService = authService;
             PollingService = new PlcPollingService(StationConfigs, Repository, plcClientFactory);
+            HikvisionService = hikvisionService ?? new HikvisionSdkService();
         }
 
         public ObservableCollection<StationConfig> StationConfigs { get; }
@@ -30,6 +32,7 @@ namespace MotorTestSystem.Services
         public IUserService UserService { get; }
         public IAuthService AuthService { get; }
         public PlcPollingService PollingService { get; }
+        public HikvisionSdkService HikvisionService { get; }
 
         private static BackendRuntime CreateDefault()
         {
@@ -48,8 +51,9 @@ namespace MotorTestSystem.Services
 
             var userService = new InMemoryUserService();
             var authService = new AuthService(userService);
+            var hikvisionService = new HikvisionSdkService();
 
-            return new BackendRuntime(configs, repository, new PlcClientFactory(useSimulation: false), userService, authService);
+            return new BackendRuntime(configs, repository, new PlcClientFactory(useSimulation: false), userService, authService, hikvisionService);
         }
 
         private static async Task SeedRepositoryAsync(IMotorTestRepository repository)

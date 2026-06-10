@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MotorTestSystem.Views"
              xmlns:converters="clr-namespace:MotorTestSystem.Converters"
-             mc:Ignorable="d" 
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             mc:Ignorable="d"
              d:DesignHeight="750" d:DesignWidth="1100">
 
     <UserControl.Resources>
@@ -800,17 +801,49 @@
                                 </Border>
 
                                 <!-- Waveform Visualization Block -->
-                                <Grid Margin="0,15,0,15" Height="150">
-                                    <Border Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1">
-                                        <Grid>
-                                            <!-- Ambient decorative wave path -->
-                                            <Path Data="M 10,75 Q 40,20 70,75 T 130,75 T 190,75 T 250,75" Stroke="{DynamicResource AccentCyan}" StrokeThickness="1" Opacity="0.15" Stretch="Fill" Margin="20,10,20,10"/>
-                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                <Path Data="M21,6H3C1.89,6 1,6.89 1,8V16A2,2 0 0,0 3,18H21A2,2 0 0,0 23,16V8C23,6.89 22.1,6 21,6M21,16H3V8H21V16M7,15H9V10H7V15M11,15H13V12H11V15M15,15H17V11H15V15Z" 
-                                                      Fill="{DynamicResource TextSecondary}" Width="20" Height="20" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,8" Opacity="0.4"/>
-                                                <TextBlock Text="空载与噪音波形图加载区..." Foreground="{DynamicResource TextSecondary}" FontSize="11" HorizontalAlignment="Center" Opacity="0.5"/>
-                                            </StackPanel>
-                                        </Grid>
+                                <Grid Margin="0,15,0,15">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="140"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="140"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 空载电流波形 -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,6">
+                                        <Border Width="3" Height="12" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="空载电流波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="（启动冲击 → 稳态波动）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                    </StackPanel>
+                                    <Border Grid.Row="1" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
+                                        <lvc:CartesianChart Background="Transparent"
+                                                            Series="{Binding NoLoadWaveformSeries}"
+                                                            XAxes="{Binding WaveformXAxes}"
+                                                            YAxes="{Binding NoLoadWaveformYAxes}"
+                                                            TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
+                                                            TooltipTextPaint="{Binding WaveformTooltipTextPaint}"
+                                                            TooltipTextSize="11"
+                                                            ZoomMode="X"
+                                                            LegendPosition="Hidden"/>
+                                    </Border>
+
+                                    <!-- 噪音波形 -->
+                                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6">
+                                        <Border Width="3" Height="12" Background="#FFA500" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="噪音波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="（正转 / 反转）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                    </StackPanel>
+                                    <Border Grid.Row="4" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
+                                        <lvc:CartesianChart Background="Transparent"
+                                                            Series="{Binding NoiseWaveformSeries}"
+                                                            XAxes="{Binding WaveformXAxes}"
+                                                            YAxes="{Binding NoiseWaveformYAxes}"
+                                                            TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
+                                                            TooltipTextPaint="{Binding WaveformTooltipTextPaint}"
+                                                            TooltipTextSize="11"
+                                                            ZoomMode="X"
+                                                            LegendPosition="Hidden"/>
                                     </Border>
                                 </Grid>
                             </StackPanel>
@@ -1019,17 +1052,49 @@
                                 </Border>
 
                                 <!-- Waveform Visualization Block -->
-                                <Grid Margin="0,15,0,15" Height="150">
-                                    <Border Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1">
-                                        <Grid>
-                                            <!-- Ambient decorative wave path -->
-                                            <Path Data="M 10,75 Q 40,20 70,75 T 130,75 T 190,75 T 250,75" Stroke="{DynamicResource AccentCyan}" StrokeThickness="1" Opacity="0.15" Stretch="Fill" Margin="20,10,20,10"/>
-                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                <Path Data="M21,6H3C1.89,6 1,6.89 1,8V16A2,2 0 0,0 3,18H21A2,2 0 0,0 23,16V8C23,6.89 22.1,6 21,6M21,16H3V8H21V16M7,15H9V10H7V15M11,15H13V12H11V15M15,15H17V11H15V15Z" 
-                                                      Fill="{DynamicResource TextSecondary}" Width="20" Height="20" Stretch="Fill" HorizontalAlignment="Center" Margin="0,0,0,8" Opacity="0.4"/>
-                                                <TextBlock Text="空载与噪音波形图加载区..." Foreground="{DynamicResource TextSecondary}" FontSize="11" HorizontalAlignment="Center" Opacity="0.5"/>
-                                            </StackPanel>
-                                        </Grid>
+                                <Grid Margin="0,15,0,15">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="140"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="140"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 空载电流波形 -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,6">
+                                        <Border Width="3" Height="12" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="空载电流波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="（启动冲击 → 稳态波动）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                    </StackPanel>
+                                    <Border Grid.Row="1" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
+                                        <lvc:CartesianChart Background="Transparent"
+                                                            Series="{Binding NoLoadWaveformSeries}"
+                                                            XAxes="{Binding WaveformXAxes}"
+                                                            YAxes="{Binding NoLoadWaveformYAxes}"
+                                                            TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
+                                                            TooltipTextPaint="{Binding WaveformTooltipTextPaint}"
+                                                            TooltipTextSize="11"
+                                                            ZoomMode="X"
+                                                            LegendPosition="Hidden"/>
+                                    </Border>
+
+                                    <!-- 噪音波形 -->
+                                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6">
+                                        <Border Width="3" Height="12" Background="#FFA500" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="噪音波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="（正转 / 反转）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                    </StackPanel>
+                                    <Border Grid.Row="4" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
+                                        <lvc:CartesianChart Background="Transparent"
+                                                            Series="{Binding NoiseWaveformSeries}"
+                                                            XAxes="{Binding WaveformXAxes}"
+                                                            YAxes="{Binding NoiseWaveformYAxes}"
+                                                            TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
+                                                            TooltipTextPaint="{Binding WaveformTooltipTextPaint}"
+                                                            TooltipTextSize="11"
+                                                            ZoomMode="X"
+                                                            LegendPosition="Hidden"/>
                                     </Border>
                                 </Grid>
                             </StackPanel>

@@ -7,9 +7,14 @@ using System.Text;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using LiveChartsCore.SkiaSharpView.Painting.Effects;
 using MotorTestSystem.Models;
 using MotorTestSystem.Services;
 using MotorTestSystem.Views;
+using SkiaSharp;
 
 // 快捷时间过滤枚举
 public enum QuickTimeFilter { LastHour, CurrentShift, Today }
@@ -134,6 +139,207 @@ namespace MotorTestSystem.ViewModels
 
         /// <summary>返回选中电机的 FinalResult，用于右侧徽章联动</summary>
         public string SelectedMotorResult => SelectedMotor?.FinalResult ?? string.Empty;
+
+        #region 波形图属性
+
+        [ObservableProperty]
+        private ISeries[] _noLoadWaveformSeries = Array.Empty<ISeries>();
+
+        [ObservableProperty]
+        private ISeries[] _noiseWaveformSeries = Array.Empty<ISeries>();
+
+        [ObservableProperty]
+        private Axis[] _waveformXAxes = Array.Empty<Axis>();
+
+        [ObservableProperty]
+        private Axis[] _noLoadWaveformYAxes = Array.Empty<Axis>();
+
+        [ObservableProperty]
+        private Axis[] _noiseWaveformYAxes = Array.Empty<Axis>();
+
+        public SolidColorPaint WaveformTooltipBgPaint { get; } = new SolidColorPaint(new SKColor(24, 25, 36, 230));
+        public SolidColorPaint WaveformTooltipTextPaint { get; } = new SolidColorPaint(SKColors.White)
+        {
+            SKTypeface = SKTypeface.FromFamilyName("Segoe UI")
+        };
+
+        #endregion
+
+        partial void OnSelectedMotorChanged(MotorTestRecordModel? value)
+        {
+            if (value != null)
+            {
+                GenerateWaveformData(value);
+            }
+            else
+            {
+                NoLoadWaveformSeries = Array.Empty<ISeries>();
+                NoiseWaveformSeries = Array.Empty<ISeries>();
+            }
+        }
+
+        /// <summary>
+        /// 根据选中电机的测试数据，生成模拟波形数据
+        /// </summary>
+        private void GenerateWaveformData(MotorTestRecordModel motor)
+        {
+            var rng = new Random(motor.Barcode.GetHashCode());
+
+            // ---- 空载电流波形 ----
+            // 模拟一个启动冲击 → 稳态波动的电流曲线（采样500点）
+            double baseCurrent = motor.NoLoadCurrent ?? 1.2;
+            double peakCurrent = baseCurrent * 2.8; // 启动冲击峰值
+            int sampleCount = 500;
+            var currentData = new double[sampleCount];
+
+            for (int i = 0; i < sampleCount; i++)
+            {
+                double t = i / (double)sampleCount;
+                if (t < 0.05)
+                {
+                    // 启动冲击阶段：指数衰减
+                    double decay = Math.Exp(-t / 0.012);
+                    currentData[i] = baseCurrent + (peakCurrent - baseCurrent) * decay + rng.NextDouble() * 0.05;
+                }
+                else
+                {
+                    // 稳态波动阶段：小幅正弦 + 随机噪声
+                    double ripple = Math.Sin(i * 0.3) * 0.06 * baseCurrent;
+                    double noise = (rng.NextDouble() - 0.5) * 0.04 * baseCurrent;
+                    currentData[i] = baseCurrent + ripple + noise;
+                }
+            }
+
+            // 阈值线
+            double currentLimit = 1.5; // 空载电流上限
+
+            NoLoadWaveformSeries = new ISeries[]
+            {
+                new LineSeries<double>
+                {
+                    Name = "空载电流",
+                    Values = currentData,
+                    Stroke = new SolidColorPaint(SKColor.Parse("#00DFFF"), 2),
+                    Fill = null,
+                    GeometrySize = 0,
+                    LineSmoothness = 0.3,
+                    IsVisibleAtLegend = true
+                },
+                new LineSeries<double>
+                {
+                    Name = $"上限 ({currentLimit} A)",
+                    Values = Enumerable.Repeat(currentLimit, sampleCount).ToArray(),
+                    Stroke = new SolidColorPaint(SKColor.Parse("#F74C5B"), 1.5f)
+                    {
+                        PathEffect = new DashEffect(new float[] { 6, 4 }, 0)
+                    },
+                    Fill = null,
+                    GeometrySize = 0,
+                    LineSmoothness = 0
+                }
+            };
+
+            NoLoadWaveformYAxes = new Axis[]
+            {
+                new Axis
+                {
+                    Name = "电流 (A)",
+                    NamePaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+                    LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+                    SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C")),
+                    MinLimit = 0,
+                    MaxLimit = Math.Max(peakCurrent + 0.5, currentLimit + 1),
+                    Labeler = val => $"{val:F1}"
+                }
+            };
+
+            // ---- 噪音波形 ----
+            // 模拟正转/反转噪音频谱时间序列
+            double fwdBase = motor.FwdNoise ?? 55.0;
+            double revBase = motor.RevNoise ?? 55.0;
+            var fwdNoiseData = new double[sampleCount];
+            var revNoiseData = new double[sampleCount];
+
+            for (int i = 0; i < sampleCount; i++)
+            {
+                double t = i / (double)sampleCount;
+
+                // 正转噪音：基础值 + 低频波动 + 随机噪声
+                double fwdRipple = Math.Sin(i * 0.08) * 2.5 + Math.Sin(i * 0.22) * 1.2;
+                double fwdNoise = (rng.NextDouble() - 0.5) * 3.0;
+                fwdNoiseData[i] = fwdBase + fwdRipple + fwdNoise;
+
+                // 反转噪音：类似但稍有差异
+                double revRipple = Math.Sin(i * 0.09 + 1.0) * 2.8 + Math.Sin(i * 0.19) * 1.0;
+                double revNoise = (rng.NextDouble() - 0.5) * 2.8;
+                revNoiseData[i] = revBase + revRipple + revNoise;
+            }
+
+            double noiseLimit = 60.0; // 噪音上限
+            double noiseMax = Math.Max(fwdBase, revBase) + 15;
+
+            NoiseWaveformSeries = new ISeries[]
+            {
+                new LineSeries<double>
+                {
+                    Name = "正转噪音",
+                    Values = fwdNoiseData,
+                    Stroke = new SolidColorPaint(SKColor.Parse("#FFA500"), 2),
+                    Fill = null,
+                    GeometrySize = 0,
+                    LineSmoothness = 0.3
+                },
+                new LineSeries<double>
+                {
+                    Name = "反转噪音",
+                    Values = revNoiseData,
+                    Stroke = new SolidColorPaint(SKColor.Parse("#A855F7"), 2),
+                    Fill = null,
+                    GeometrySize = 0,
+                    LineSmoothness = 0.3
+                },
+                new LineSeries<double>
+                {
+                    Name = $"上限 ({noiseLimit} dB)",
+                    Values = Enumerable.Repeat(noiseLimit, sampleCount).ToArray(),
+                    Stroke = new SolidColorPaint(SKColor.Parse("#F74C5B"), 1.5f)
+                    {
+                        PathEffect = new DashEffect(new float[] { 6, 4 }, 0)
+                    },
+                    Fill = null,
+                    GeometrySize = 0,
+                    LineSmoothness = 0
+                }
+            };
+
+            NoiseWaveformYAxes = new Axis[]
+            {
+                new Axis
+                {
+                    Name = "噪音 (dB)",
+                    NamePaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+                    LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+                    SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C")),
+                    MinLimit = Math.Min(fwdBase, revBase) - 15,
+                    MaxLimit = Math.Max(noiseMax, noiseLimit + 5),
+                    Labeler = val => $"{val:F0}"
+                }
+            };
+
+            WaveformXAxes = new Axis[]
+            {
+                new Axis
+                {
+                    Name = "采样点",
+                    NamePaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+                    LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+                    SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C")),
+                    MinLimit = 0,
+                    MaxLimit = sampleCount,
+                    Labeler = val => $"{(int)val}"
+                }
+            };
+        }
 
         // ---- 任务一：快捷时间过滤 ----
         [ObservableProperty]
