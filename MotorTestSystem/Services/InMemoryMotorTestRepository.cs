@@ -104,6 +104,101 @@ namespace MotorTestSystem.Services
             return Task.FromResult(summary);
         }
 
+        public Task<DefectSummary> GetDefectSummaryAsync(DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            DefectSummary summary;
+            lock (_gate)
+            {
+                var scoped = _records.Values
+                    .Where(r => r.TestTime >= startTime && r.TestTime <= endTime)
+                    .ToList();
+
+                summary = new DefectSummary
+                {
+                    NoLoadNgCount = scoped.Count(r => r.NoLoadResult == "NG"),
+                    NoiseNgCount = scoped.Count(r => r.NoiseResult == "NG"),
+                    LoadNgCount = scoped.Count(r => r.LoadResult == "NG")
+                };
+            }
+
+            return Task.FromResult(summary);
+        }
+
+        public Task<IReadOnlyList<FaultRankItem>> GetFaultRankingAsync(DateTime startTime, DateTime endTime, int topN = 5, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            IReadOnlyList<FaultRankItem> results;
+            lock (_gate)
+            {
+                var scoped = _records.Values
+                    .Where(r => r.TestTime >= startTime && r.TestTime <= endTime)
+                    .ToList();
+
+                // 根据各阶段测量值越限情况分类统计故障原因
+                var faultCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var r in scoped)
+                {
+                    // 空载阶段故障分类
+                    if (r.NoLoadResult == "NG")
+                    {
+                        if (r.NoLoadCurrent.HasValue && r.NoLoadCurrent > 2.5)
+                            IncrementFault(faultCounts, "电机起动电流超限");
+                        else if (r.NoLoadSpeed.HasValue && r.NoLoadSpeed > 2200)
+                            IncrementFault(faultCounts, "空载转速异常");
+                        else
+                            IncrementFault(faultCounts, "空载综合不合格");
+                    }
+
+                    // 噪音阶段故障分类
+                    if (r.NoiseResult == "NG")
+                    {
+                        if (r.NoiseDiff.HasValue && r.NoiseDiff > 15)
+                            IncrementFault(faultCounts, "空载噪声过大");
+                        else if (r.FwdNoise.HasValue && r.FwdNoise > 70)
+                            IncrementFault(faultCounts, "正转噪声超限");
+                        else
+                            IncrementFault(faultCounts, "噪音综合不合格");
+                    }
+
+                    // 负载阶段故障分类
+                    if (r.LoadResult == "NG")
+                    {
+                        if (r.LoadCurrent.HasValue && r.LoadCurrent > 3.0)
+                            IncrementFault(faultCounts, "负载电流超限");
+                        else if (r.LoadSpeed.HasValue && r.LoadSpeed < 1000)
+                            IncrementFault(faultCounts, "负载转速偏低");
+                        else
+                            IncrementFault(faultCounts, "负载综合不合格");
+                    }
+                }
+
+                results = faultCounts
+                    .OrderByDescending(kv => kv.Value)
+                    .Take(Math.Max(1, topN))
+                    .Select((kv, i) => new FaultRankItem
+                    {
+                        Rank = i + 1,
+                        Name = kv.Key,
+                        Count = kv.Value
+                    })
+                    .ToList();
+            }
+
+            return Task.FromResult(results);
+        }
+
+        private static void IncrementFault(Dictionary<string, int> dict, string key)
+        {
+            if (dict.ContainsKey(key))
+                dict[key]++;
+            else
+                dict[key] = 1;
+        }
+
         private static void ApplyStage(MotorTestResult record, StageTestData data)
         {
             string stageResult = NormalizeResult(data.Result);
@@ -151,7 +246,6 @@ namespace MotorTestSystem.Services
         {
             return string.IsNullOrWhiteSpace(filter) ||
                    filter == "全部" ||
-                   filter == "鍏ㄩ儴" ||
                    string.Equals(filter, "All", StringComparison.OrdinalIgnoreCase);
         }
 

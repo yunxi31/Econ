@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,7 +17,16 @@ namespace MotorTestSystem.ViewModels
     public partial class DashboardViewModel : ViewModelBase
     {
         private readonly IMotorTestRepository _repository;
+        private readonly BackendRuntime _runtime;
         private readonly DispatcherTimer _refreshTimer;
+
+        #region KPI Card Properties
+
+        [ObservableProperty]
+        private string _onlineStationDisplay = "0 / 0";
+
+        [ObservableProperty]
+        private string _onlineRateText = "● 在线率 0%";
 
         [ObservableProperty]
         private int _totalChecked;
@@ -30,9 +41,26 @@ namespace MotorTestSystem.ViewModels
         private double _passRate;
 
         [ObservableProperty]
+        private double _completionProgress;
+
+        [ObservableProperty]
+        private string _completionProgressText = "0%";
+
+        [ObservableProperty]
+        private string _passRateRingText = "0%";
+
+        [ObservableProperty]
+        private double _passRateRingDash;
+
+        #endregion
+
+        #region Chart Properties
+
+        [ObservableProperty]
         private ISeries[] _outputSeries = Array.Empty<ISeries>();
 
-        public ISeries[] DefectDistributionSeries { get; set; } = Array.Empty<ISeries>();
+        [ObservableProperty]
+        private ISeries[] _defectDistributionSeries = Array.Empty<ISeries>();
 
         [ObservableProperty]
         private Axis[] _xAxes = Array.Empty<Axis>();
@@ -40,52 +68,49 @@ namespace MotorTestSystem.ViewModels
         [ObservableProperty]
         private Axis[] _yAxes = Array.Empty<Axis>();
 
-        public Axis[] PassRateYAxes { get; set; } = Array.Empty<Axis>();
+        [ObservableProperty]
+        private Axis[] _passRateXAxes = Array.Empty<Axis>();
+
+        [ObservableProperty]
+        private Axis[] _passRateYAxes = Array.Empty<Axis>();
 
         [ObservableProperty]
         private ISeries[] _passRateSeries = Array.Empty<ISeries>();
 
-        [ObservableProperty]
-        private Axis[] _passRateXAxes = Array.Empty<Axis>();
+        #endregion
+
+        #region List Properties
+
+        public System.Collections.ObjectModel.ObservableCollection<DefectItem> DefectList { get; } = new();
+        public System.Collections.ObjectModel.ObservableCollection<FaultReason> TopFaultList { get; } = new();
+
+        #endregion
+
+        #region Tooltip Paints
+
+        public SolidColorPaint TooltipBgPaint { get; } = new SolidColorPaint(new SKColor(24, 25, 36, 230));
+        public SolidColorPaint TooltipTextPaint { get; } = new SolidColorPaint(SKColors.White)
+        {
+            SKTypeface = SKTypeface.FromFamilyName("Segoe UI")
+        };
+
+        #endregion
+
+        private string _currentDimension = "今日";
+        private const double TargetPassRate = 98.0;
+        private const int DailyTarget = 2000;
 
         public DashboardViewModel()
-            : this(BackendRuntime.Shared.Repository)
+            : this(BackendRuntime.Shared.Repository, BackendRuntime.Shared)
         {
         }
 
-        public DashboardViewModel(IMotorTestRepository repository)
+        public DashboardViewModel(IMotorTestRepository repository, BackendRuntime runtime)
         {
             _repository = repository;
+            _runtime = runtime;
 
-            // 各阶段不良分布（环形饼图）
-            DefectDistributionSeries = new ISeries[]
-            {
-                new PieSeries<double>
-                {
-                    Name = "空载不合格",
-                    Values = new double[] { 45 },
-                    InnerRadius = 35,
-                    Fill = new SolidColorPaint(SKColor.Parse("#FFA500")),
-                    Stroke = null
-                },
-                new PieSeries<double>
-                {
-                    Name = "噪音不合格",
-                    Values = new double[] { 35 },
-                    InnerRadius = 35,
-                    Fill = new SolidColorPaint(SKColor.Parse("#FF3366")),
-                    Stroke = null
-                },
-                new PieSeries<double>
-                {
-                    Name = "负载不合格",
-                    Values = new double[] { 20 },
-                    InnerRadius = 35,
-                    Fill = new SolidColorPaint(SKColor.Parse("#8E9AA7")),
-                    Stroke = null
-                }
-            };
-
+            // 初始化良率 Y 轴
             PassRateYAxes = new Axis[]
             {
                 new Axis
@@ -100,102 +125,106 @@ namespace MotorTestSystem.ViewModels
                 }
             };
 
-            RefreshSummary();
+            // 订阅 PLC 轮询事件，实时刷新
+            _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
+
+            // 首次加载
+            RefreshAllData();
 
             _refreshTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(5)
             };
-            _refreshTimer.Tick += (_, _) => RefreshSummary();
+            _refreshTimer.Tick += async (_, _) => await RefreshAllDataAsync();
             _refreshTimer.Start();
         }
 
-        private void RefreshSummary()
+        private void OnSnapshotReceived(object? sender, StationSnapshot snapshot)
         {
-            DateTime start = DateTime.Now.Date;
-            DateTime end = start.AddDays(1).AddTicks(-1);
+            // 收到 PLC 数据时触发刷新（节流：避免高频刷新）
+            Application.Current?.Dispatcher?.InvokeAsync(async () =>
+            {
+                await RefreshAllDataAsync();
+                UpdateOnlineStationCount();
+            });
+        }
+
+        #region Refresh Methods
+
+        private void RefreshAllData()
+        {
             try
             {
-                var summary = _repository.GetSummaryAsync(start, end).GetAwaiter().GetResult();
-
-                if (summary.TotalChecked > 0)
-                {
-                    TotalChecked = summary.TotalChecked;
-                    OkCount = summary.OkCount;
-                    NgCount = summary.NgCount;
-                    PassRate = summary.PassRate;
-                }
-                else
-                {
-                    // 默认高保真测试数据（匹配设计图）
-                    TotalChecked = 12458;
-                    OkCount = 11895;
-                    NgCount = 563;
-                    PassRate = 95.5;
-                }
+                RefreshAllDataAsync().GetAwaiter().GetResult();
             }
             catch
             {
-                // 回退到设计图的高保真数据
-                TotalChecked = 12458;
-                OkCount = 11895;
-                NgCount = 563;
-                PassRate = 95.5;
+                // 静默处理，下次定时器会重试
+            }
+        }
+
+        private async System.Threading.Tasks.Task RefreshAllDataAsync()
+        {
+            try
+            {
+                await Task.WhenAll(
+                    RefreshKpiCardsAsync(),
+                    RefreshHourlyChartsAsync(),
+                    RefreshDefectDataAsync(),
+                    RefreshFaultRankingAsync()
+                );
+            }
+            catch
+            {
+                // 静默处理
+            }
+        }
+
+        private async System.Threading.Tasks.Task RefreshKpiCardsAsync()
+        {
+            DateTime start = DateTime.Now.Date;
+            DateTime end = start.AddDays(1).AddTicks(-1);
+
+            var summary = await _repository.GetSummaryAsync(start, end);
+
+            if (summary.TotalChecked > 0)
+            {
+                TotalChecked = summary.TotalChecked;
+                OkCount = summary.OkCount;
+                NgCount = summary.NgCount;
+                PassRate = Math.Round(summary.PassRate, 1);
+            }
+            else
+            {
+                TotalChecked = 0;
+                OkCount = 0;
+                NgCount = 0;
+                PassRate = 0;
             }
 
-            UpdateHourlyCharts();
+            // 更新完成进度
+            CompletionProgress = Math.Min(100.0, Math.Round(TotalChecked * 100.0 / DailyTarget, 1));
+            CompletionProgressText = $"{CompletionProgress:F0}%";
+
+            // 更新良率环形进度
+            PassRateRingText = $"{PassRate:F1}%";
+            // Ellipse StrokeDashArray 模拟进度: 周长约 3.14 * 44 ≈ 138.2, 这里简化
+            PassRateRingDash = PassRate / 100.0;
+
+            // 更新设备在线数
+            UpdateOnlineStationCount();
         }
 
-        public System.Collections.ObjectModel.ObservableCollection<DefectItem> DefectList { get; } = new()
+        private void UpdateOnlineStationCount()
         {
-            new DefectItem { Name = "空载不合格", Percentage = 45, Color = "#FFA500" },
-            new DefectItem { Name = "噪音不合格", Percentage = 35, Color = "#FF3366" },
-            new DefectItem { Name = "负载不合格", Percentage = 20, Color = "#8E9AA7" }
-        };
-
-        public System.Collections.ObjectModel.ObservableCollection<FaultReason> TopFaultList { get; } = new()
-        {
-            new FaultReason { Rank = "01", Name = "电机起动电流超限", Count = 186, Color = "#FF3366" },
-            new FaultReason { Rank = "02", Name = "空载噪声过大", Count = 142, Color = "#FFA500" },
-            new FaultReason { Rank = "03", Name = "反电动势异常", Count = 95, Color = "#8E9AA7" },
-            new FaultReason { Rank = "04", Name = "温升过高", Count = 82, Color = "#8E9AA7" },
-            new FaultReason { Rank = "05", Name = "转子动平衡超差", Count = 58, Color = "#8E9AA7" }
-        };
-
-        public SolidColorPaint TooltipBgPaint { get; set; } = new SolidColorPaint(new SKColor(24, 25, 36, 230)); // #E6181924
-        public SolidColorPaint TooltipTextPaint { get; set; } = new SolidColorPaint(SKColors.White)
-        {
-            SKTypeface = SKTypeface.FromFamilyName("Segoe UI")
-        };
-
-        private static readonly (int Ok, int Ng, double PassRate)[] MockHourlyData = new[]
-        {
-            (1450, 150, 93.5), // 08:00
-            (1600, 100, 94.8), // 09:00
-            (1600, 250, 92.5), // 10:00
-            (1400, 100, 96.2), // 11:00
-            (1680, 50,  95.5), // 12:00
-            (880,  50,  97.2), // 13:00
-            (920,  80,  92.0), // 14:00
-            (1100, 60,  94.5), // 15:00
-            (1300, 70,  95.0), // 16:00
-            (1450, 90,  94.1), // 17:00
-            (1200, 80,  93.8), // 18:00
-            (1000, 50,  95.2), // 19:00
-            (800,  40,  95.2)  // 20:00
-        };
-
-        private string _currentDimension = "今日";
-
-        [RelayCommand]
-        private void SelectTimeDimension(string dimension)
-        {
-            if (string.IsNullOrEmpty(dimension)) return;
-            _currentDimension = dimension;
-            UpdateHourlyCharts();
+            int total = _runtime.StationConfigs.Count;
+            int online = _runtime.StationConfigs.Count(c => c.IsConnected);
+            OnlineStationDisplay = $"{online} / {total}";
+            double rate = total > 0 ? Math.Round(online * 100.0 / total, 0) : 0;
+            OnlineRateText = $"● 在线率 {rate:F0}%";
         }
 
-        private void UpdateHourlyCharts()
+        private async System.Threading.Tasks.Task RefreshHourlyChartsAsync()
         {
             DateTime now = DateTime.Now;
             int count = 8;
@@ -204,12 +233,11 @@ namespace MotorTestSystem.ViewModels
             int[] ngValues = new int[count];
             double[] passRateValues = new double[count];
 
-            // Start time: 7 hours ago, at the start of that hour
+            // 查询过去 8 小时的数据
             DateTime firstHourStart = now.AddHours(-7);
             DateTime queryStartTime = new DateTime(firstHourStart.Year, firstHourStart.Month, firstHourStart.Day, firstHourStart.Hour, 0, 0);
             DateTime queryEndTime = now;
 
-            // Check if there is actual data for the last 8 hours
             var query = new MotorTestQuery
             {
                 Barcode = "",
@@ -218,10 +246,10 @@ namespace MotorTestSystem.ViewModels
                 EndTime = queryEndTime
             };
 
-            System.Collections.Generic.IReadOnlyList<MotorTestResult>? records = null;
+            IReadOnlyList<MotorTestResult>? records = null;
             try
             {
-                records = _repository.QueryAsync(query).GetAwaiter().GetResult();
+                records = await _repository.QueryAsync(query);
             }
             catch
             {
@@ -246,14 +274,13 @@ namespace MotorTestSystem.ViewModels
                 }
                 else
                 {
-                    var mock = MockHourlyData[hour % MockHourlyData.Length];
-                    okValues[i] = mock.Ok;
-                    ngValues[i] = mock.Ng;
-                    passRateValues[i] = mock.PassRate;
+                    okValues[i] = 0;
+                    ngValues[i] = 0;
+                    passRateValues[i] = 0;
                 }
             }
 
-            // Update Hourly Production Count (bar chart)
+            // 更新小时生产统计柱状图
             XAxes = CreateAxis(labels, -0.5, 7.5);
             OutputSeries = new ISeries[]
             {
@@ -277,51 +304,192 @@ namespace MotorTestSystem.ViewModels
                 }
             };
 
-            if (useRealData)
+            YAxes = new Axis[]
             {
-                YAxes = new Axis[]
+                new Axis
                 {
-                    new Axis
-                    {
-                        MinLimit = 0,
-                        LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
-                        SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C"))
-                    }
-                };
-            }
-            else
-            {
-                YAxes = new Axis[]
-                {
-                    new Axis
-                    {
-                        MinLimit = 0,
-                        MaxLimit = 2000,
-                        ForceStepToMin = true,
-                        MinStep = 500,
-                        LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
-                        SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C"))
-                    }
-                };
-            }
+                    MinLimit = 0,
+                    LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+                    SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C"))
+                }
+            };
 
-            // Update Pass Rate Trend (line chart)
+            // 更新良率趋势折线图
+            UpdatePassRateChart(labels, passRateValues, useRealData);
+        }
+
+        private void UpdatePassRateChart(string[] todayLabels, double[] todayValues, bool hasRealData)
+        {
             if (_currentDimension == "今日")
             {
-                PassRateXAxes = CreateAxis(labels, -0.5, 7.5);
-                PassRateSeries = CreateLineSeries(passRateValues, true);
+                PassRateXAxes = CreateAxis(todayLabels, -0.5, 7.5);
+                PassRateSeries = hasRealData
+                    ? CreateLineSeries(todayValues, true)
+                    : CreateLineSeries(Enumerable.Repeat(0.0, todayLabels.Length).ToArray(), true);
             }
             else if (_currentDimension == "本周")
             {
-                PassRateXAxes = CreateAxis(new[] { "周一", "周二", "周三", "周四", "周五", "周六", "周日" }, -0.5, 6.5);
-                PassRateSeries = CreateLineSeries(new[] { 95.2, 96.5, 95.8, 97.0, 96.2, 98.1, 97.5 }, true);
+                var weekLabels = new[] { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
+                var weekValues = CalculateWeeklyPassRates();
+                PassRateXAxes = CreateAxis(weekLabels, -0.5, 6.5);
+                PassRateSeries = CreateLineSeries(weekValues, true);
             }
             else if (_currentDimension == "本月")
             {
-                PassRateXAxes = CreateAxis(new[] { "第一周", "第二周", "第三周", "第四周" }, -0.5, 3.5);
-                PassRateSeries = CreateLineSeries(new[] { 94.6, 95.8, 96.5, 97.2 }, true);
+                var monthLabels = new[] { "第一周", "第二周", "第三周", "第四周" };
+                var monthValues = CalculateMonthlyPassRates();
+                PassRateXAxes = CreateAxis(monthLabels, -0.5, 3.5);
+                PassRateSeries = CreateLineSeries(monthValues, true);
             }
         }
+
+        private double[] CalculateWeeklyPassRates()
+        {
+            var result = new double[7];
+            DateTime today = DateTime.Now.Date;
+
+            for (int i = 0; i < 7; i++)
+            {
+                // 从本周一开始
+                DateTime day = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday + i);
+                if (day > today) break;
+
+                var summary = _repository.GetSummaryAsync(day, day.AddDays(1).AddTicks(-1)).GetAwaiter().GetResult();
+                result[i] = summary.TotalChecked > 0 ? Math.Round(summary.PassRate, 1) : 0;
+            }
+
+            return result;
+        }
+
+        private double[] CalculateMonthlyPassRates()
+        {
+            var result = new double[4];
+            DateTime today = DateTime.Now.Date;
+            DateTime monthStart = new DateTime(today.Year, today.Month, 1);
+
+            for (int i = 0; i < 4; i++)
+            {
+                DateTime weekStart = monthStart.AddDays(i * 7);
+                DateTime weekEnd = weekStart.AddDays(7).AddTicks(-1);
+                if (weekStart > today) break;
+                if (weekEnd > today) weekEnd = today.AddDays(1).AddTicks(-1);
+
+                var summary = _repository.GetSummaryAsync(weekStart, weekEnd).GetAwaiter().GetResult();
+                result[i] = summary.TotalChecked > 0 ? Math.Round(summary.PassRate, 1) : 0;
+            }
+
+            return result;
+        }
+
+        private async System.Threading.Tasks.Task RefreshDefectDataAsync()
+        {
+            DateTime start = DateTime.Now.Date;
+            DateTime end = start.AddDays(1).AddTicks(-1);
+
+            var defectSummary = await _repository.GetDefectSummaryAsync(start, end);
+
+            // 更新不良分布列表
+            DefectList.Clear();
+            if (defectSummary.TotalNgCount > 0)
+            {
+                DefectList.Add(new DefectItem { Name = "空载不合格", Percentage = defectSummary.NoLoadPercentage, Color = "#FFA500" });
+                DefectList.Add(new DefectItem { Name = "噪音不合格", Percentage = defectSummary.NoisePercentage, Color = "#FF3366" });
+                DefectList.Add(new DefectItem { Name = "负载不合格", Percentage = defectSummary.LoadPercentage, Color = "#8E9AA7" });
+            }
+            else
+            {
+                // 无数据时显示默认比例
+                DefectList.Add(new DefectItem { Name = "空载不合格", Percentage = 0, Color = "#FFA500" });
+                DefectList.Add(new DefectItem { Name = "噪音不合格", Percentage = 0, Color = "#FF3366" });
+                DefectList.Add(new DefectItem { Name = "负载不合格", Percentage = 0, Color = "#8E9AA7" });
+            }
+
+            // 更新环形饼图
+            double noLoad = defectSummary.TotalNgCount > 0 ? defectSummary.NoLoadPercentage : 33.3;
+            double noise = defectSummary.TotalNgCount > 0 ? defectSummary.NoisePercentage : 33.3;
+            double load = defectSummary.TotalNgCount > 0 ? defectSummary.LoadPercentage : 33.4;
+
+            DefectDistributionSeries = new ISeries[]
+            {
+                new PieSeries<double>
+                {
+                    Name = "空载不合格",
+                    Values = new double[] { noLoad },
+                    InnerRadius = 35,
+                    Fill = new SolidColorPaint(SKColor.Parse("#FFA500")),
+                    Stroke = null
+                },
+                new PieSeries<double>
+                {
+                    Name = "噪音不合格",
+                    Values = new double[] { noise },
+                    InnerRadius = 35,
+                    Fill = new SolidColorPaint(SKColor.Parse("#FF3366")),
+                    Stroke = null
+                },
+                new PieSeries<double>
+                {
+                    Name = "负载不合格",
+                    Values = new double[] { load },
+                    InnerRadius = 35,
+                    Fill = new SolidColorPaint(SKColor.Parse("#8E9AA7")),
+                    Stroke = null
+                }
+            };
+        }
+
+        private async System.Threading.Tasks.Task RefreshFaultRankingAsync()
+        {
+            DateTime start = DateTime.Now.Date;
+            DateTime end = start.AddDays(1).AddTicks(-1);
+
+            var ranking = await _repository.GetFaultRankingAsync(start, end, 5);
+
+            TopFaultList.Clear();
+            if (ranking.Count > 0)
+            {
+                foreach (var item in ranking)
+                {
+                    TopFaultList.Add(new FaultReason
+                    {
+                        Rank = item.Rank.ToString("D2"),
+                        Name = item.Name,
+                        Count = item.Count,
+                        Color = item.Rank == 1 ? "#FF3366" : item.Rank == 2 ? "#FFA500" : "#8E9AA7"
+                    });
+                }
+            }
+            else
+            {
+                // 无数据时显示空占位
+                for (int i = 1; i <= 5; i++)
+                {
+                    TopFaultList.Add(new FaultReason
+                    {
+                        Rank = i.ToString("D2"),
+                        Name = "暂无数据",
+                        Count = 0,
+                        Color = "#8E9AA7"
+                    });
+                }
+            }
+        }
+
+        #endregion
+
+        #region Commands
+
+        [RelayCommand]
+        private async Task SelectTimeDimension(string dimension)
+        {
+            if (string.IsNullOrEmpty(dimension)) return;
+            _currentDimension = dimension;
+            await RefreshHourlyChartsAsync();
+        }
+
+        #endregion
+
+        #region Chart Helpers
 
         private Axis[] CreateAxis(string[] labels, double? minLimit = null, double? maxLimit = null)
         {
@@ -340,7 +508,7 @@ namespace MotorTestSystem.ViewModels
 
         private ISeries[] CreateLineSeries(double[] values, bool includeTarget = false)
         {
-            var seriesList = new System.Collections.Generic.List<ISeries>
+            var seriesList = new List<ISeries>
             {
                 new LineSeries<double>
                 {
@@ -363,12 +531,12 @@ namespace MotorTestSystem.ViewModels
                 var targetValues = new double[values.Length];
                 for (int i = 0; i < values.Length; i++)
                 {
-                    targetValues[i] = 98.0;
+                    targetValues[i] = TargetPassRate;
                 }
 
                 seriesList.Add(new LineSeries<double>
                 {
-                    Name = "目标 (98%)",
+                    Name = $"目标 ({TargetPassRate}%)",
                     Values = targetValues,
                     Stroke = new SolidColorPaint(SKColor.Parse("#FFC107"), 2),
                     Fill = null,
@@ -379,6 +547,8 @@ namespace MotorTestSystem.ViewModels
 
             return seriesList.ToArray();
         }
+
+        #endregion
     }
 
     public class DefectItem

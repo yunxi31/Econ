@@ -110,9 +110,9 @@
         <UniformGrid Grid.Row="1" Columns="5" Margin="15,5,15,10">
             <!-- Card 0: 设备运行状态 -->
             <local:KpiCardControl Title="设备运行状态" 
-                                  Value="6 / 6" 
+                                  Value="{Binding OnlineStationDisplay}" 
                                   Unit="台" 
-                                  TrendText="● 在线率 100%" 
+                                  TrendText="{Binding OnlineRateText}" 
                                   ValueForeground="{StaticResource AccentGreen}" 
                                   TrendForeground="{StaticResource AccentGreen}"
                                   Margin="5,0"/>
@@ -130,10 +130,10 @@
                     
                     <!-- Progress Bar (approx 70% filled) -->
                     <StackPanel Grid.Row="2" Margin="0,4,0,0">
-                        <ProgressBar Value="70" Foreground="#00DFFF" Style="{StaticResource CapsuleProgressBarStyle}"/>
+                        <ProgressBar Value="{Binding CompletionProgress}" Foreground="#00DFFF" Style="{StaticResource CapsuleProgressBarStyle}"/>
                         <Grid Margin="0,4,0,0">
                             <TextBlock Text="完成进度" Foreground="#6E7C8A" FontSize="10"/>
-                            <TextBlock Text="70%" Foreground="#00DFFF" FontSize="10" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding CompletionProgressText}" Foreground="#00DFFF" FontSize="10" HorizontalAlignment="Right" FontWeight="SemiBold"/>
                         </Grid>
                     </StackPanel>
                 </Grid>
@@ -210,9 +210,9 @@
                     <!-- Circular Progress Ring -->
                     <Grid Grid.Column="1" Width="52" Height="52" VerticalAlignment="Center" Margin="5,0,0,0">
                         <Ellipse Stroke="#252934" StrokeThickness="3.5" Width="44" Height="44"/>
-                        <Ellipse Stroke="#00FFB2" StrokeThickness="3.5" Width="44" Height="44"
-                                 StrokeDashArray="3.14 0.8" StrokeDashOffset="0.6" StrokeEndLineCap="Round"/>
-                        <TextBlock Text="95.5%" Foreground="#00FFB2" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Ellipse x:Name="PassRateRingEllipse" Stroke="#00FFB2" StrokeThickness="3.5" Width="44" Height="44"
+                                 StrokeDashArray="0 138.23" StrokeDashOffset="0" StrokeEndLineCap="Round"/>
+                        <TextBlock x:Name="PassRateRingText" Text="0%" Foreground="#00FFB2" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Grid>
                 </Grid>
             </Border>

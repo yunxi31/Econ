@@ -57,7 +57,7 @@ namespace MotorTestSystem.ViewModels
             TotalStationCount = _runtime.StationConfigs.Count;
             OnlineStationCount = 0;
 
-            DashboardVM = new DashboardViewModel(_runtime.Repository);
+            DashboardVM = new DashboardViewModel(_runtime.Repository, _runtime);
             MonitorVM = new MonitorViewModel(_runtime);
             HistoryVM = new HistoryViewModel(_runtime.Repository);
             ConfigVM = new ConfigViewModel(_runtime);
