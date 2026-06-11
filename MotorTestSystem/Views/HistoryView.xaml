@@ -814,11 +814,19 @@
                                     </Grid.RowDefinitions>
 
                                     <!-- 空载电流波形 -->
-                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,6">
-                                        <Border Width="3" Height="12" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="空载电流波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                        <TextBlock Text="（启动冲击 → 稳态波动）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
-                                    </StackPanel>
+                                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Border Width="3" Height="12" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="空载电流波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="（启动冲击 → 稳态波动）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Ellipse Width="6" Height="6" Fill="#00DFFF" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="当前电流" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="上限 (2.5A)" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
                                     <Border Grid.Row="1" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
                                         <lvc:CartesianChart Background="Transparent"
                                                             Series="{Binding NoLoadWaveformSeries}"
@@ -832,11 +840,21 @@
                                     </Border>
 
                                     <!-- 噪音波形 -->
-                                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6">
-                                        <Border Width="3" Height="12" Background="#FFA500" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="噪音波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                        <TextBlock Text="（正转 / 反转）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
-                                    </StackPanel>
+                                    <Grid Grid.Row="3" Margin="0,0,0,6">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Border Width="3" Height="12" Background="#FFA500" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="噪音波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="（正转 / 反转）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Ellipse Width="6" Height="6" Fill="#FFA500" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="正转噪音" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#A855F7" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="反转噪音" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="上限 (70dB)" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
                                     <Border Grid.Row="4" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
                                         <lvc:CartesianChart Background="Transparent"
                                                             Series="{Binding NoiseWaveformSeries}"
@@ -1065,11 +1083,19 @@
                                     </Grid.RowDefinitions>
 
                                     <!-- 空载电流波形 -->
-                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,6">
-                                        <Border Width="3" Height="12" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="空载电流波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                        <TextBlock Text="（启动冲击 → 稳态波动）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
-                                    </StackPanel>
+                                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Border Width="3" Height="12" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="空载电流波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="（启动冲击 → 稳态波动）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Ellipse Width="6" Height="6" Fill="#00DFFF" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="当前电流" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="上限 (2.5A)" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
                                     <Border Grid.Row="1" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
                                         <lvc:CartesianChart Background="Transparent"
                                                             Series="{Binding NoLoadWaveformSeries}"
@@ -1083,11 +1109,21 @@
                                     </Border>
 
                                     <!-- 噪音波形 -->
-                                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6">
-                                        <Border Width="3" Height="12" Background="#FFA500" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="噪音波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                        <TextBlock Text="（正转 / 反转）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
-                                    </StackPanel>
+                                    <Grid Grid.Row="3" Margin="0,0,0,6">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Border Width="3" Height="12" Background="#FFA500" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="噪音波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="（正转 / 反转）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Ellipse Width="6" Height="6" Fill="#FFA500" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="正转噪音" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#A855F7" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="反转噪音" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="上限 (70dB)" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
                                     <Border Grid.Row="4" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
                                         <lvc:CartesianChart Background="Transparent"
                                                             Series="{Binding NoiseWaveformSeries}"

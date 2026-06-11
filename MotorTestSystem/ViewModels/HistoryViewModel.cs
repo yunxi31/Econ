@@ -54,12 +54,12 @@ namespace MotorTestSystem.ViewModels
         public string LoadSpeedText => LoadSpeed?.ToString("F0") ?? "NULL";
 
         // Highlighting/Color properties:
-        public bool IsNoLoadCurrentAbnormal => NoLoadCurrent > 1.5;
-        public bool IsNoLoadSpeedAbnormal => NoLoadSpeed < 2900 || NoLoadSpeed > 3100;
-        public bool IsFwdNoiseAbnormal => FwdNoise > 60.0;
-        public bool IsRevNoiseAbnormal => RevNoise > 60.0;
-        public bool IsLoadCurrentAbnormal => LoadCurrent > 4.5;
-        public bool IsLoadSpeedAbnormal => LoadSpeed < 2900 || LoadSpeed > 3100;
+        public bool IsNoLoadCurrentAbnormal => NoLoadCurrent > 2.5;
+        public bool IsNoLoadSpeedAbnormal => NoLoadSpeed < 1800 || NoLoadSpeed > 2200;
+        public bool IsFwdNoiseAbnormal => FwdNoise > 70.0;
+        public bool IsRevNoiseAbnormal => RevNoise > 70.0;
+        public bool IsLoadCurrentAbnormal => LoadCurrent > 3.0;
+        public bool IsLoadSpeedAbnormal => LoadSpeed < 1000;
     }
 
     public partial class HistoryViewModel : ViewModelBase
@@ -207,7 +207,7 @@ namespace MotorTestSystem.ViewModels
             var rng = new Random(motor.Barcode.GetHashCode());
 
             // ---- 空载电流波形 ----
-            // 模拟一个启动冲击 → 稳态波动的电流曲线（采样500点）
+            // 模拟一个更真实的启动冲击 → 稳态波动的电流曲线（采样500点）
             double baseCurrent = motor.NoLoadCurrent ?? 1.2;
             double peakCurrent = baseCurrent * 2.8; // 启动冲击峰值
             int sampleCount = 500;
@@ -216,23 +216,35 @@ namespace MotorTestSystem.ViewModels
             for (int i = 0; i < sampleCount; i++)
             {
                 double t = i / (double)sampleCount;
-                if (t < 0.05)
+                
+                // 1. 启动冲击与衰减复合波形（从0起动，快速上升至peak，后指数衰减）
+                double startupShock = 0;
+                if (t < 0.15)
                 {
-                    // 启动冲击阶段：指数衰减
-                    double decay = Math.Exp(-t / 0.012);
-                    currentData[i] = baseCurrent + (peakCurrent - baseCurrent) * decay + rng.NextDouble() * 0.05;
+                    double rise = 1.0 - Math.Exp(-t / 0.002);
+                    double decay = Math.Exp(-t / 0.015);
+                    startupShock = (peakCurrent - baseCurrent) * rise * decay;
+                }
+
+                // 2. 稳态高频与低频正弦微幅波动
+                double ripple = Math.Sin(i * 0.25) * 0.02 * baseCurrent + Math.Sin(i * 0.8) * 0.005 * baseCurrent;
+                
+                // 3. 随机毛刺噪声
+                double noise = (rng.NextDouble() - 0.5) * 0.03 * baseCurrent;
+
+                if (t < 0.001)
+                {
+                    currentData[i] = 0;
                 }
                 else
                 {
-                    // 稳态波动阶段：小幅正弦 + 随机噪声
-                    double ripple = Math.Sin(i * 0.3) * 0.06 * baseCurrent;
-                    double noise = (rng.NextDouble() - 0.5) * 0.04 * baseCurrent;
-                    currentData[i] = baseCurrent + ripple + noise;
+                    double initialFilter = 1.0 - Math.Exp(-t / 0.001);
+                    currentData[i] = (baseCurrent + startupShock + ripple + noise) * initialFilter;
                 }
             }
 
             // 阈值线
-            double currentLimit = 1.5; // 空载电流上限
+            double currentLimit = 2.5; // 空载电流上限一致
 
             NoLoadWaveformSeries = new ISeries[]
             {
@@ -241,9 +253,9 @@ namespace MotorTestSystem.ViewModels
                     Name = "空载电流",
                     Values = currentData,
                     Stroke = new SolidColorPaint(SKColor.Parse("#00DFFF"), 2),
-                    Fill = null,
+                    Fill = new SolidColorPaint(SKColor.Parse("#1400DFFF")), // 填充半透明区域
                     GeometrySize = 0,
-                    LineSmoothness = 0.3,
+                    LineSmoothness = 0.1, // 减小平滑度，避免尖峰失真
                     IsVisibleAtLegend = true
                 },
                 new LineSeries<double>
@@ -264,8 +276,6 @@ namespace MotorTestSystem.ViewModels
             {
                 new Axis
                 {
-                    Name = "电流 (A)",
-                    NamePaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
                     LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
                     SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C")),
                     MinLimit = 0,
@@ -275,7 +285,7 @@ namespace MotorTestSystem.ViewModels
             };
 
             // ---- 噪音波形 ----
-            // 模拟正转/反转噪音频谱时间序列
+            // 模拟高频采样的正转/反转噪音频谱时间序列
             double fwdBase = motor.FwdNoise ?? 55.0;
             double revBase = motor.RevNoise ?? 55.0;
             var fwdNoiseData = new double[sampleCount];
@@ -283,20 +293,18 @@ namespace MotorTestSystem.ViewModels
 
             for (int i = 0; i < sampleCount; i++)
             {
-                double t = i / (double)sampleCount;
-
-                // 正转噪音：基础值 + 低频波动 + 随机噪声
-                double fwdRipple = Math.Sin(i * 0.08) * 2.5 + Math.Sin(i * 0.22) * 1.2;
-                double fwdNoise = (rng.NextDouble() - 0.5) * 3.0;
+                // 正转噪音：高频颤动 + 随机声学噪声
+                double fwdRipple = Math.Sin(i * 0.6) * 0.6 + Math.Sin(i * 1.4) * 0.3;
+                double fwdNoise = (rng.NextDouble() - 0.5) * 4.0;
                 fwdNoiseData[i] = fwdBase + fwdRipple + fwdNoise;
 
-                // 反转噪音：类似但稍有差异
-                double revRipple = Math.Sin(i * 0.09 + 1.0) * 2.8 + Math.Sin(i * 0.19) * 1.0;
-                double revNoise = (rng.NextDouble() - 0.5) * 2.8;
+                // 反转噪音：高频颤动 + 随机声学噪声
+                double revRipple = Math.Sin(i * 0.7 + 1.5) * 0.5 + Math.Sin(i * 1.5) * 0.2;
+                double revNoise = (rng.NextDouble() - 0.5) * 3.8;
                 revNoiseData[i] = revBase + revRipple + revNoise;
             }
 
-            double noiseLimit = 60.0; // 噪音上限
+            double noiseLimit = 70.0; // 噪音上限一致
             double noiseMax = Math.Max(fwdBase, revBase) + 15;
 
             NoiseWaveformSeries = new ISeries[]
@@ -305,19 +313,19 @@ namespace MotorTestSystem.ViewModels
                 {
                     Name = "正转噪音",
                     Values = fwdNoiseData,
-                    Stroke = new SolidColorPaint(SKColor.Parse("#FFA500"), 2),
-                    Fill = null,
+                    Stroke = new SolidColorPaint(SKColor.Parse("#FFA500"), 1.8f),
+                    Fill = new SolidColorPaint(SKColor.Parse("#0AFFA500")), // 填充半透明区域
                     GeometrySize = 0,
-                    LineSmoothness = 0.3
+                    LineSmoothness = 0.15
                 },
                 new LineSeries<double>
                 {
                     Name = "反转噪音",
                     Values = revNoiseData,
-                    Stroke = new SolidColorPaint(SKColor.Parse("#A855F7"), 2),
-                    Fill = null,
+                    Stroke = new SolidColorPaint(SKColor.Parse("#A855F7"), 1.8f),
+                    Fill = new SolidColorPaint(SKColor.Parse("#0AA855F7")), // 填充半透明区域
                     GeometrySize = 0,
-                    LineSmoothness = 0.3
+                    LineSmoothness = 0.15
                 },
                 new LineSeries<double>
                 {
@@ -337,8 +345,6 @@ namespace MotorTestSystem.ViewModels
             {
                 new Axis
                 {
-                    Name = "噪音 (dB)",
-                    NamePaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
                     LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
                     SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C")),
                     MinLimit = Math.Min(fwdBase, revBase) - 15,
@@ -351,8 +357,6 @@ namespace MotorTestSystem.ViewModels
             {
                 new Axis
                 {
-                    Name = "采样点",
-                    NamePaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
                     LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
                     SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C")),
                     MinLimit = 0,

@@ -58,6 +58,7 @@ namespace MotorTestSystem.Views
                 TextAlignment = TextAlignment.Center,
                 Margin = new Thickness(0, 0, 0, 16)
             };
+
             doc.Blocks.Add(subtitle);
 
             // 分割线
@@ -88,16 +89,16 @@ namespace MotorTestSystem.Views
             noLoadRG.Rows.Add(CreateTableHeaderRow("检测项目", "实测值", "标准下限", "标准上限", "判定"));
             noLoadRG.Rows.Add(CreateDataRow(
                 "空载电流 (A)",
-                motor.NoLoadCurrent?.ToString("F3") ?? "-",
+                motor.NoLoadCurrent.HasValue ? motor.NoLoadCurrent.Value.ToString("F3") : "-",
                 "-",
-                "1.500",
+                "2.500",
                 motor.IsNoLoadCurrentAbnormal ? "NG" : "OK",
                 motor.IsNoLoadCurrentAbnormal));
             noLoadRG.Rows.Add(CreateDataRow(
                 "空载转速 (r/min)",
-                motor.NoLoadSpeed?.ToString("F0") ?? "-",
-                "2900",
-                "3100",
+                motor.NoLoadSpeed.HasValue ? motor.NoLoadSpeed.Value.ToString("F0") : "-",
+                "1800",
+                "2200",
                 motor.IsNoLoadSpeedAbnormal ? "NG" : "OK",
                 motor.IsNoLoadSpeedAbnormal));
             noLoadTable.RowGroups.Add(noLoadRG);
@@ -113,16 +114,16 @@ namespace MotorTestSystem.Views
             noiseRG.Rows.Add(CreateTableHeaderRow("检测项目", "实测值", "标准下限", "标准上限", "判定"));
             noiseRG.Rows.Add(CreateDataRow(
                 "正转噪音 (dB)",
-                motor.FwdNoise?.ToString("F1") ?? "-",
+                motor.FwdNoise.HasValue ? motor.FwdNoise.Value.ToString("F1") : "-",
                 "-",
-                "60.0",
+                "70.0",
                 motor.IsFwdNoiseAbnormal ? "NG" : "OK",
                 motor.IsFwdNoiseAbnormal));
             noiseRG.Rows.Add(CreateDataRow(
                 "反转噪音 (dB)",
-                motor.RevNoise?.ToString("F1") ?? "-",
+                motor.RevNoise.HasValue ? motor.RevNoise.Value.ToString("F1") : "-",
                 "-",
-                "60.0",
+                "70.0",
                 motor.IsRevNoiseAbnormal ? "NG" : "OK",
                 motor.IsRevNoiseAbnormal));
             noiseTable.RowGroups.Add(noiseRG);
@@ -138,16 +139,16 @@ namespace MotorTestSystem.Views
             loadRG.Rows.Add(CreateTableHeaderRow("检测项目", "实测值", "标准下限", "标准上限", "判定"));
             loadRG.Rows.Add(CreateDataRow(
                 "负载电流 (A)",
-                motor.LoadCurrent?.ToString("F3") ?? "-",
+                motor.LoadCurrent.HasValue ? motor.LoadCurrent.Value.ToString("F3") : "-",
                 "-",
-                "4.500",
+                "3.000",
                 motor.IsLoadCurrentAbnormal ? "NG" : "OK",
                 motor.IsLoadCurrentAbnormal));
             loadRG.Rows.Add(CreateDataRow(
                 "负载转速 (r/min)",
-                motor.LoadSpeed?.ToString("F0") ?? "-",
-                "2900",
-                "3100",
+                motor.LoadSpeed.HasValue ? motor.LoadSpeed.Value.ToString("F0") : "-",
+                "1000",
+                "-",
                 motor.IsLoadSpeedAbnormal ? "NG" : "OK",
                 motor.IsLoadSpeedAbnormal));
             loadTable.RowGroups.Add(loadRG);

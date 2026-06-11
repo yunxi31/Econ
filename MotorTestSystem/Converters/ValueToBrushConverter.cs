@@ -19,21 +19,25 @@ namespace MotorTestSystem.Converters
             }
 
             string colType = parameter?.ToString() ?? string.Empty;
+
             if (double.TryParse(value.ToString(), out double val))
             {
                 switch (colType)
                 {
                     case "NoLoadCurrent":
-                        if (val > 1.5) return RedBrush;
+                        if (val > 2.5) return RedBrush;
                         break;
                     case "NoLoadSpeed":
-                        if (val < 2900 || val > 3100) return RedBrush;
+                        if (val < 1800 || val > 2200) return RedBrush;
                         break;
                     case "Noise":
-                        if (val > 60.0) return RedBrush;
+                        if (val > 70.0) return RedBrush;
                         break;
                     case "LoadCurrent":
-                        if (val > 4.5) return RedBrush;
+                        if (val > 3.0) return RedBrush;
+                        break;
+                    case "LoadSpeed":
+                        if (val < 1000) return RedBrush;
                         break;
                 }
             }

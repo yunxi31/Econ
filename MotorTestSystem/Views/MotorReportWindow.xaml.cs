@@ -102,72 +102,72 @@ namespace MotorTestSystem.Views
         {
             var items = new List<ThresholdCheckItem>();
 
-            // 空载电流: 上限 1.5A
+            // 空载电流: 上限 2.5A
             items.Add(new ThresholdCheckItem
             {
                 Item = "空载电流 (A)",
                 Actual = motor.NoLoadCurrent?.ToString("F3") ?? "-",
                 Lower = "-",
-                Upper = "1.500",
-                Judge = motor.NoLoadCurrent.HasValue ? (motor.NoLoadCurrent > 1.5 ? "NG" : "OK") : "-",
-                IsPass = !motor.NoLoadCurrent.HasValue || motor.NoLoadCurrent <= 1.5
+                Upper = "2.500",
+                Judge = motor.NoLoadCurrent.HasValue ? (motor.NoLoadCurrent > 2.5 ? "NG" : "OK") : "-",
+                IsPass = !motor.NoLoadCurrent.HasValue || motor.NoLoadCurrent <= 2.5
             });
 
-            // 空载转速: 2900~3100 r/min
+            // 空载转速: 1800~2200 r/min
             items.Add(new ThresholdCheckItem
             {
                 Item = "空载转速 (r/min)",
                 Actual = motor.NoLoadSpeed?.ToString("F0") ?? "-",
-                Lower = "2900",
-                Upper = "3100",
+                Lower = "1800",
+                Upper = "2200",
                 Judge = motor.NoLoadSpeed.HasValue
-                    ? (motor.NoLoadSpeed < 2900 || motor.NoLoadSpeed > 3100 ? "NG" : "OK") : "-",
-                IsPass = !motor.NoLoadSpeed.HasValue || (motor.NoLoadSpeed >= 2900 && motor.NoLoadSpeed <= 3100)
+                    ? (motor.NoLoadSpeed < 1800 || motor.NoLoadSpeed > 2200 ? "NG" : "OK") : "-",
+                IsPass = !motor.NoLoadSpeed.HasValue || (motor.NoLoadSpeed >= 1800 && motor.NoLoadSpeed <= 2200)
             });
 
-            // 正转噪音: 上限 60 dB
+            // 正转噪音: 上限 70 dB
             items.Add(new ThresholdCheckItem
             {
                 Item = "正转噪音 (dB)",
                 Actual = motor.FwdNoise?.ToString("F1") ?? "-",
                 Lower = "-",
-                Upper = "60.0",
-                Judge = motor.FwdNoise.HasValue ? (motor.FwdNoise > 60.0 ? "NG" : "OK") : "-",
-                IsPass = !motor.FwdNoise.HasValue || motor.FwdNoise <= 60.0
+                Upper = "70.0",
+                Judge = motor.FwdNoise.HasValue ? (motor.FwdNoise > 70.0 ? "NG" : "OK") : "-",
+                IsPass = !motor.FwdNoise.HasValue || motor.FwdNoise <= 70.0
             });
 
-            // 反转噪音: 上限 60 dB
+            // 反转噪音: 上限 70 dB
             items.Add(new ThresholdCheckItem
             {
                 Item = "反转噪音 (dB)",
                 Actual = motor.RevNoise?.ToString("F1") ?? "-",
                 Lower = "-",
-                Upper = "60.0",
-                Judge = motor.RevNoise.HasValue ? (motor.RevNoise > 60.0 ? "NG" : "OK") : "-",
-                IsPass = !motor.RevNoise.HasValue || motor.RevNoise <= 60.0
+                Upper = "70.0",
+                Judge = motor.RevNoise.HasValue ? (motor.RevNoise > 70.0 ? "NG" : "OK") : "-",
+                IsPass = !motor.RevNoise.HasValue || motor.RevNoise <= 70.0
             });
 
-            // 负载电流: 上限 4.5A
+            // 负载电流: 上限 3.0A
             items.Add(new ThresholdCheckItem
             {
                 Item = "负载电流 (A)",
                 Actual = motor.LoadCurrent?.ToString("F3") ?? "-",
                 Lower = "-",
-                Upper = "4.500",
-                Judge = motor.LoadCurrent.HasValue ? (motor.LoadCurrent > 4.5 ? "NG" : "OK") : "-",
-                IsPass = !motor.LoadCurrent.HasValue || motor.LoadCurrent <= 4.5
+                Upper = "3.000",
+                Judge = motor.LoadCurrent.HasValue ? (motor.LoadCurrent > 3.0 ? "NG" : "OK") : "-",
+                IsPass = !motor.LoadCurrent.HasValue || motor.LoadCurrent <= 3.0
             });
 
-            // 负载转速: 2900~3100 r/min
+            // 负载转速: 下限 1000 r/min
             items.Add(new ThresholdCheckItem
             {
                 Item = "负载转速 (r/min)",
                 Actual = motor.LoadSpeed?.ToString("F0") ?? "-",
-                Lower = "2900",
-                Upper = "3100",
+                Lower = "1000",
+                Upper = "-",
                 Judge = motor.LoadSpeed.HasValue
-                    ? (motor.LoadSpeed < 2900 || motor.LoadSpeed > 3100 ? "NG" : "OK") : "-",
-                IsPass = !motor.LoadSpeed.HasValue || (motor.LoadSpeed >= 2900 && motor.LoadSpeed <= 3100)
+                    ? (motor.LoadSpeed < 1000 ? "NG" : "OK") : "-",
+                IsPass = !motor.LoadSpeed.HasValue || motor.LoadSpeed >= 1000
             });
 
             ThresholdGrid.ItemsSource = items;
@@ -200,11 +200,11 @@ namespace MotorTestSystem.Views
             else
             {
                 var reasons = new List<string>();
-                if (motor.IsNoLoadCurrentAbnormal) reasons.Add($"空载电流超限（{motor.NoLoadCurrent:F3}A > 1.500A）");
+                if (motor.IsNoLoadCurrentAbnormal) reasons.Add($"空载电流超限（{motor.NoLoadCurrent:F3}A > 2.500A）");
                 if (motor.IsNoLoadSpeedAbnormal) reasons.Add($"空载转速异常（{motor.NoLoadSpeed:F0} r/min）");
-                if (motor.IsFwdNoiseAbnormal) reasons.Add($"正转噪音超限（{motor.FwdNoise:F1}dB > 60.0dB）");
-                if (motor.IsRevNoiseAbnormal) reasons.Add($"反转噪音超限（{motor.RevNoise:F1}dB > 60.0dB）");
-                if (motor.IsLoadCurrentAbnormal) reasons.Add($"负载电流超限（{motor.LoadCurrent:F3}A > 4.500A）");
+                if (motor.IsFwdNoiseAbnormal) reasons.Add($"正转噪音超限（{motor.FwdNoise:F1}dB > 70.0dB）");
+                if (motor.IsRevNoiseAbnormal) reasons.Add($"反转噪音超限（{motor.RevNoise:F1}dB > 70.0dB）");
+                if (motor.IsLoadCurrentAbnormal) reasons.Add($"负载电流超限（{motor.LoadCurrent:F3}A > 3.000A）");
                 if (motor.IsLoadSpeedAbnormal) reasons.Add($"负载转速异常（{motor.LoadSpeed:F0} r/min）");
 
                 string reasonText = reasons.Count > 0 ? "不合格项：" + string.Join("；", reasons) + "。" : "";
