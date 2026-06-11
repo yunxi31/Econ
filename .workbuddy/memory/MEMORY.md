@@ -9,13 +9,27 @@
   - Maintainer: 监控、看板、追溯、诊断、校准、报警、数据导出
 - 导航项根据权限动态显示/隐藏（MainViewModel.IsXxxVisible + BoolToVisibilityConverter）
 - 认证流程：LoginWindow → AuthService.Login() → App.SetAuthenticatedUser() → MainViewModel 刷新权限
-- 密码存储：SHA256 哈希（InMemoryUserService）
-- 种子用户 10 个（InMemoryUserService.SeedDefaultUsers）
+- 密码存储：SHA256 哈希（SqlSugarUserService.HashPassword + InMemoryUserService.HashPassword）
+- 种子用户 16 个（管理员3 + 操作员8 + 维护员5）
 
 ## 技术栈
 - WPF (.NET 8/10)，MVVM 架构（CommunityToolkit.Mvvm）
-- 后端运行时单例：BackendRuntime.Shared（包含 Repository + UserService + AuthService + PollingService）
+- 后端运行时单例：BackendRuntime.Shared（包含 DbContext + Repository + UserService + AuthService + PollingService）
 - 用户管理已对接 IUserService，右侧权限面板动态绑定
+
+## 数据层 — SQLite + SqlSugar
+- ORM：SqlSugarCore 5.1.4.214，数据库：SQLite（Data/MotorTest.db）
+- SqlSugarDbContext：管理连接 + CodeFirst 建表 + 种子数据（仅在表为空时插入）
+- 数据库实体类（Models/Entities/）：
+  - MotorTestRecordEntity（自增主键 + 条码业务键）
+  - UserEntity（枚举 Role/Status 存为 int）
+  - StationConfigEntity
+  - NotificationEntity
+- SqlMotorTestRepository：实现 IMotorTestRepository，Entity↔Model 转换
+- SqlSugarUserService：实现 IUserService，枚举 int 存储，ID 自增序列从数据库推导
+- 工位配置从数据库加载（非硬编码），BackendRuntime 构造函数新增 DbContext 参数
+- 旧 InMemory 实现保留但不再使用（InMemoryMotorTestRepository / InMemoryUserService）
+- 密码存储：SHA256 哈希（HashPassword 方法在 InMemoryUserService 和 SqlSugarUserService 均有实现）
 
 ## Dashboard 后端
 - 数据全部从 IMotorTestRepository 动态获取，无硬编码 Mock 数据

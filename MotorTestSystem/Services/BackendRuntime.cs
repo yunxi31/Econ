@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using MotorTestSystem.Models;
+using MotorTestSystem.Models.Entities;
 
 namespace MotorTestSystem.Services
 {
@@ -13,8 +14,12 @@ namespace MotorTestSystem.Services
 
         public static BackendRuntime Shared { get; } = CreateDefault();
 
+        /// <summary>SqlSugar 数据库上下文（公开以供其他服务直接访问）</summary>
+        public SqlSugarDbContext DbContext { get; }
+
         public BackendRuntime(
             ObservableCollection<StationConfig> stationConfigs,
+            SqlSugarDbContext dbContext,
             IMotorTestRepository repository,
             IPlcClientFactory plcClientFactory,
             IUserService userService,
@@ -23,6 +28,7 @@ namespace MotorTestSystem.Services
             HikvisionSdkService? hikvisionService = null)
         {
             StationConfigs = stationConfigs;
+            DbContext = dbContext;
             Repository = repository;
             UserService = userService;
             AuthService = authService;
@@ -140,36 +146,40 @@ namespace MotorTestSystem.Services
 
         private static BackendRuntime CreateDefault()
         {
-            var configs = new ObservableCollection<StationConfig>
-            {
-                new() { Id = "A1", Name = "A1", PlcModel = "FX5U", IpAddress = "192.168.10.11", Port = 502, Protocol = "ModbusTCP", IsConnected = true, Status = "在线" },
-                new() { Id = "A2", Name = "A2", PlcModel = "S7-1200", IpAddress = "192.168.10.12", Port = 102, Protocol = "S7 Protocol (TCP)", IsConnected = true, Status = "在线" },
-                new() { Id = "A3", Name = "A3", PlcModel = "AM600", IpAddress = "192.168.10.13", Port = 502, Protocol = "ModbusTCP", IsConnected = false, Status = "故障" },
-                new() { Id = "A4", Name = "A4", PlcModel = "FX5U", IpAddress = "192.168.10.14", Port = 502, Protocol = "ModbusTCP", IsConnected = false, Status = "离线" },
-                new() { Id = "A5", Name = "A5", PlcModel = "S7-1500", IpAddress = "192.168.10.15", Port = 102, Protocol = "S7 Protocol (TCP)", IsConnected = true, Status = "在线" },
-                new() { Id = "A6", Name = "A6", PlcModel = "AM600", IpAddress = "192.168.10.16", Port = 502, Protocol = "ModbusTCP", IsConnected = true, Status = "在线" }
-            };
+            // 1. 初始化 SqlSugar + SQLite 数据库上下文（自动建表 + 种子数据）
+            var dbContext = new SqlSugarDbContext();
 
-            var repository = new InMemoryMotorTestRepository();
-            SeedRepositoryAsync(repository).GetAwaiter().GetResult();
+            // 2. 从数据库加载工位配置
+            var configEntities = dbContext.Db.Queryable<StationConfigEntity>().ToList();
+            var configs = new ObservableCollection<StationConfig>(
+                configEntities.Select(ToStationConfigModel));
 
-            var userService = new InMemoryUserService();
+            // 3. 创建仓储和用户服务
+            var repository = new SqlMotorTestRepository(dbContext);
+            var userService = new SqlSugarUserService(dbContext);
             var authService = new AuthService(userService);
             var notificationService = new InMemoryNotificationService();
             var hikvisionService = new HikvisionSdkService();
 
-            return new BackendRuntime(configs, repository, new PlcClientFactory(useSimulation: false),
+            // 4. 首次运行时播种测试数据（表为空时）
+            SeedRepositoryIfEmptyAsync(repository, dbContext).GetAwaiter().GetResult();
+
+            return new BackendRuntime(configs, dbContext, repository, new PlcClientFactory(useSimulation: false),
                 userService, authService, notificationService, hikvisionService);
         }
 
-        private static async Task SeedRepositoryAsync(IMotorTestRepository repository)
+        /// <summary>
+        /// 仅在数据库为空时播种测试数据（首次启动）
+        /// </summary>
+        private static async Task SeedRepositoryIfEmptyAsync(IMotorTestRepository repository, SqlSugarDbContext dbContext)
         {
-            var now = DateTime.Now;
-            int idx = 0; // 全局 barcode 计数器
+            if (dbContext.Db.Queryable<MotorTestRecordEntity>().Any())
+                return; // 已有数据，不重复播种
 
-            // ========================================
-            // 1. 本月前 3 周的历史数据（测试"本月"良率趋势）
-            // ========================================
+            var now = DateTime.Now;
+            int idx = 0;
+
+            // 1. 本月前 3 周的历史数据
             for (int weekAgo = 3; weekAgo >= 1; weekAgo--)
             {
                 DateTime weekStart = now.Date.AddDays(-weekAgo * 7);
@@ -178,9 +188,7 @@ namespace MotorTestSystem.Services
                 idx = await SeedWeekDataAsync(repository, weekStart, weekOk, weekNg, idx);
             }
 
-            // ========================================
-            // 2. 本周每天的数据（测试"本周"良率趋势），跳过今天
-            // ========================================
+            // 2. 本周每天的数据（跳过今天）
             DateTime thisWeekStart = now.Date.AddDays(-(int)now.DayOfWeek + (int)DayOfWeek.Monday);
             for (int dayOffset = 0; dayOffset <= Math.Min((int)now.DayOfWeek, 6); dayOffset++)
             {
@@ -194,9 +202,7 @@ namespace MotorTestSystem.Services
                 idx = await SeedDayDataAsync(repository, day, dayOk, dayNg, idx);
             }
 
-            // ========================================
-            // 3. 今天过去 8 小时（测试"今日"小时级图表 + 不良分布 + 故障排行）
-            // ========================================
+            // 3. 今天过去 8 小时
             var todayHourly = new (int hoursAgo, int ok, int ng, NgPattern[] patterns)[]
             {
                 (7, 45, 3, new[] { NgPattern.NoiseHighDiff, NgPattern.NoLoadHighCurrent, NgPattern.NoiseHighDiff }),
@@ -228,6 +234,24 @@ namespace MotorTestSystem.Services
                     await SeedNgRecordAsync(repository, barcode, collectedAt, pattern);
                 }
             }
+        }
+
+        // ===== 工位配置 Entity → Model 转换 =====
+
+        private static StationConfig ToStationConfigModel(StationConfigEntity entity)
+        {
+            return new StationConfig
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                PlcModel = entity.PlcModel,
+                IpAddress = entity.IpAddress,
+                Port = entity.Port,
+                Protocol = entity.Protocol,
+                StationId = (byte)entity.StationId,
+                IsConnected = entity.IsConnected,
+                Status = entity.Status
+            };
         }
 
         private static string MakeBarcode(int index) => $"DES-SR-150GEN{1992900399000 + index}";
