@@ -32,10 +32,6 @@ namespace MotorTestSystem.Services
 
             string barcode = data.Barcode.Trim();
 
-            await _ctx.Db.Updateable<MotorTestRecordEntity>()
-                .Where(r => r.Barcode == barcode)
-                .ExecuteCommandAsync(cancellationToken);
-
             var existing = await _ctx.Db.Queryable<MotorTestRecordEntity>()
                 .FirstAsync(r => r.Barcode == barcode);
 

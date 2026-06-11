@@ -26,6 +26,8 @@
   - StationConfigEntity
   - NotificationEntity
 - SqlMotorTestRepository：实现 IMotorTestRepository，Entity↔Model 转换
+  - ⚠️ 已修复：UpsertStageResultAsync 中删除了多余的空 Updateable（会清空已有数据）
+  - Upsert 流程：先查询 → 存在则更新 → 不存在则插入
 - SqlSugarUserService：实现 IUserService，枚举 int 存储，ID 自增序列从数据库推导
 - 工位配置从数据库加载（非硬编码），BackendRuntime 构造函数新增 DbContext 参数
 - 旧 InMemory 实现保留但不再使用（InMemoryMotorTestRepository / InMemoryUserService）
