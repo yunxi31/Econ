@@ -78,6 +78,15 @@ namespace MotorTestSystem.ViewModels
         private string _selectedFilter = "全部"; // "全部", "报警", "维护", "系统"
 
         [ObservableProperty]
+        private string _searchText = string.Empty;
+
+        [ObservableProperty]
+        private string _selectedSource = "全部";
+
+        [ObservableProperty]
+        private ObservableCollection<string> _sources = new() { "全部" };
+
+        [ObservableProperty]
         private int _allCount;
 
         [ObservableProperty]
@@ -192,10 +201,9 @@ namespace MotorTestSystem.ViewModels
         // 筛选和计数
         // ========================================
 
-        partial void OnSelectedFilterChanged(string value)
-        {
-            FilterNotifications();
-        }
+        partial void OnSelectedFilterChanged(string value) => FilterNotifications();
+        partial void OnSearchTextChanged(string value) => FilterNotifications();
+        partial void OnSelectedSourceChanged(string value) => FilterNotifications();
 
         private void FilterNotifications()
         {
@@ -213,6 +221,19 @@ namespace MotorTestSystem.ViewModels
                 filtered = filtered.Where(n => n.TypeDisplay == targetType);
             }
 
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                filtered = filtered.Where(n => 
+                    (n.Content != null && n.Content.Contains(SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                    (n.Title != null && n.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                );
+            }
+
+            if (!string.IsNullOrEmpty(SelectedSource) && SelectedSource != "全部")
+            {
+                filtered = filtered.Where(n => n.Source == SelectedSource);
+            }
+
             // 按时间倒序
             Notifications = new ObservableCollection<NotificationItemViewModel>(
                 filtered.OrderByDescending(n => n.Timestamp));
@@ -225,6 +246,34 @@ namespace MotorTestSystem.ViewModels
             MaintenanceCount = _allNotificationVms.Count(n => n.Type == NotificationType.Maintenance);
             SystemCount = _allNotificationVms.Count(n => n.Type == NotificationType.System);
             UnreadCount = _allNotificationVms.Count(n => !n.IsRead);
+            UpdateSources();
+        }
+
+        private void UpdateSources()
+        {
+            var currentSelected = SelectedSource;
+            var uniqueSources = _allNotificationVms
+                .Select(n => n.Source)
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Distinct()
+                .OrderBy(s => s)
+                .ToList();
+            
+            Sources.Clear();
+            Sources.Add("全部");
+            foreach (var src in uniqueSources)
+            {
+                Sources.Add(src);
+            }
+            
+            if (Sources.Contains(currentSelected))
+            {
+                SelectedSource = currentSelected;
+            }
+            else
+            {
+                SelectedSource = "全部";
+            }
         }
 
         // ========================================

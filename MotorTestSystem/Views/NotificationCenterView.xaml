@@ -166,363 +166,510 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Pagination Button Style -->
+        <Style x:Key="PaginationButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#1B1C28"/>
+            <Setter Property="BorderBrush" Value="#333645"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#8A8D99"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#252736"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Log Tab Button Style -->
+        <Style x:Key="LogTabButtonStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Foreground" Value="#8A8D99"/>
+            <Setter Property="GroupName" Value="LogTabs"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,24,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="TabBorder"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="0,0,0,2"
+                                Padding="4,4,4,8">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#00D2E6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Foreground" Value="#00D2E6"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Level Filter Button Style -->
+        <Style x:Key="LevelFilterButtonStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="#1B1C28"/>
+            <Setter Property="BorderBrush" Value="#333645"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#8A8D99"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#252736"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="38,30,38,30">
         <Grid.RowDefinitions>
-            <!-- 1. Header (Title + Buttons) -->
+            <!-- 0. Header (Title + Buttons) -->
             <RowDefinition Height="Auto"/>
-            <!-- Spacer -->
-            <RowDefinition Height="24"/>
-            <!-- 2. Filters -->
+            <!-- 1. Filters -->
             <RowDefinition Height="Auto"/>
-            <!-- Spacer -->
-            <RowDefinition Height="20"/>
-            <!-- 3. Notification List -->
+            <!-- 2. Tabs (运行日志 / 操作日志) -->
+            <RowDefinition Height="Auto"/>
+            <!-- 3. Main DataGrid -->
             <RowDefinition Height="*"/>
+            <!-- 4. Bottom Pagination -->
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- 1. Header -->
-        <Grid Grid.Row="0">
+        <!-- 0. Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,24">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left: Bell icon + Title -->
+            <!-- Left: Icon + Title -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <materialDesign:PackIcon Kind="BellOutline"
+                <materialDesign:PackIcon Kind="FolderOpenOutline"
                                          Width="28"
                                          Height="28"
                                          Foreground="#FFFFFF"
                                          VerticalAlignment="Center"/>
-                <TextBlock Text="通知中心"
-                           Foreground="#FFFFFF"
-                           FontSize="24"
-                           FontWeight="Bold"
-                           Margin="12,0,0,0"
-                           VerticalAlignment="Center"/>
+                <TextBlock Text="日志中心"
+                            Foreground="#FFFFFF"
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center"/>
             </StackPanel>
 
-            <!-- Right: Actions -->
+            <!-- Right: Export Action -->
+            <Button Grid.Column="1" Style="{StaticResource HeaderButtonStyle}" Padding="12,0" Height="40">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="DownloadOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="导出" FontSize="10" Foreground="#8A8D99" FontWeight="Medium"/>
+                        <TextBlock Text="CSV" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF"/>
+                    </StackPanel>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- 1. Filters -->
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/> <!-- 时间范围 -->
+                <ColumnDefinition Width="24"/>
+                <ColumnDefinition Width="Auto"/> <!-- 来源/机台 -->
+                <ColumnDefinition Width="24"/>
+                <ColumnDefinition Width="Auto"/> <!-- 级别筛选 -->
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="260"/> <!-- 搜索框 -->
+            </Grid.ColumnDefinitions>
+
+            <!-- 1.1 时间范围 -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="时间范围" Foreground="#8A8D99" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                <Border Background="#1B1C28" BorderBrush="#333645" BorderThickness="1" CornerRadius="4" Padding="10,6">
+                    <TextBlock Text="2026-06-11 00:00" Foreground="#FFFFFF" FontFamily="Consolas" FontSize="12" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="至" Foreground="#8A8D99" FontSize="12" Margin="8,0" VerticalAlignment="Center"/>
+                <Border Background="#1B1C28" BorderBrush="#333645" BorderThickness="1" CornerRadius="4" Padding="10,6">
+                    <TextBlock Text="2026-06-11 23:59" Foreground="#FFFFFF" FontFamily="Consolas" FontSize="12" VerticalAlignment="Center"/>
+                </Border>
+            </StackPanel>
+
+            <!-- 1.2 来源/机台 -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="来源/机台" Foreground="#8A8D99" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                <ComboBox Width="130" Height="32"
+                          ItemsSource="{Binding Sources}"
+                          SelectedItem="{Binding SelectedSource, Mode=TwoWay}"
+                          Background="#1B1C28"
+                          BorderBrush="#333645"
+                          Foreground="#FFFFFF"
+                          FontSize="12"
+                          VerticalAlignment="Center">
+                    <ComboBox.Resources>
+                        <SolidColorBrush x:Key="MaterialDesignPaper" Color="#1B1C28"/>
+                        <SolidColorBrush x:Key="MaterialDesignBody" Color="#FFFFFF"/>
+                    </ComboBox.Resources>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- 1.3 级别筛选 -->
+            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="级别" Foreground="#8A8D99" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                
+                <RadioButton Content="ALL"
+                             Style="{StaticResource LevelFilterButtonStyle}"
+                             IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=全部, Mode=TwoWay}">
+                    <RadioButton.Resources>
+                        <Style TargetType="RadioButton" BasedOn="{StaticResource LevelFilterButtonStyle}">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Background" Value="#00D2E6"/>
+                                    <Setter Property="BorderBrush" Value="#00D2E6"/>
+                                    <Setter Property="Foreground" Value="#090E12"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </RadioButton.Resources>
+                </RadioButton>
+
+                <RadioButton Content="INFO"
+                             Style="{StaticResource LevelFilterButtonStyle}"
+                             IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=系统, Mode=TwoWay}">
+                    <RadioButton.Resources>
+                        <Style TargetType="RadioButton" BasedOn="{StaticResource LevelFilterButtonStyle}">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Background" Value="#2B2D38"/>
+                                    <Setter Property="BorderBrush" Value="#5C6070"/>
+                                    <Setter Property="Foreground" Value="#B8C4CC"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </RadioButton.Resources>
+                </RadioButton>
+
+                <RadioButton Content="WARN"
+                             Style="{StaticResource LevelFilterButtonStyle}"
+                             IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=维护, Mode=TwoWay}">
+                    <RadioButton.Resources>
+                        <Style TargetType="RadioButton" BasedOn="{StaticResource LevelFilterButtonStyle}">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Background" Value="#2A2114"/>
+                                    <Setter Property="BorderBrush" Value="#F39C12"/>
+                                    <Setter Property="Foreground" Value="#F39C12"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </RadioButton.Resources>
+                </RadioButton>
+
+                <RadioButton Content="ERROR"
+                             Style="{StaticResource LevelFilterButtonStyle}"
+                             IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=报警, Mode=TwoWay}">
+                    <RadioButton.Resources>
+                        <Style TargetType="RadioButton" BasedOn="{StaticResource LevelFilterButtonStyle}">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Background" Value="#2A1418"/>
+                                    <Setter Property="BorderBrush" Value="#F74C5B"/>
+                                    <Setter Property="Foreground" Value="#F74C5B"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </RadioButton.Resources>
+                </RadioButton>
+            </StackPanel>
+
+            <!-- 1.4 搜索框 -->
+            <Grid Grid.Column="6" VerticalAlignment="Center">
+                <TextBox Height="32"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Background="#1B1C28"
+                         BorderBrush="#333645"
+                         BorderThickness="1"
+                         Foreground="#FFFFFF"
+                         FontSize="12"
+                         Padding="30,0,10,0"
+                         VerticalContentAlignment="Center"
+                         materialDesign:HintAssist.Hint="搜索事件消息..."
+                         materialDesign:HintAssist.Foreground="#5C6070"
+                         materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                <materialDesign:PackIcon Kind="Magnify"
+                                         Width="16"
+                                         Height="16"
+                                         Foreground="#5C6070"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Center"
+                                         Margin="10,0,0,0"/>
+            </Grid>
+        </Grid>
+
+        <!-- 2. Tabs -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
+            <RadioButton Content="运行日志" IsChecked="True" Style="{StaticResource LogTabButtonStyle}"/>
+            <RadioButton Content="操作日志" Style="{StaticResource LogTabButtonStyle}"/>
+        </StackPanel>
+
+        <!-- 3. Main DataGrid -->
+        <DataGrid x:Name="LogGrid" Grid.Row="3"
+                  ItemsSource="{Binding Notifications}"
+                  AutoGenerateColumns="False"
+                  HeadersVisibility="Column"
+                  Background="#13141E"
+                  BorderThickness="1"
+                  BorderBrush="#1A1D2A"
+                  GridLinesVisibility="Horizontal"
+                  HorizontalGridLinesBrush="#191C28"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserResizeRows="False"
+                  CanUserReorderColumns="False"
+                  FontFamily="Segoe UI"
+                  FontSize="13"
+                  RowHeight="44"
+                  ColumnHeaderHeight="36"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  SelectionUnit="FullRow">
+            
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#171A24"/>
+                    <Setter Property="Foreground" Value="#636775"/>
+                    <Setter Property="FontFamily" Value="Segoe UI"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="FontSize" Value="11"/>
+                    <Setter Property="Padding" Value="20,0"/>
+                    <Setter Property="Height" Value="36"/>
+                    <Setter Property="BorderBrush" Value="#1E2130"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="20,0"/>
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                </Style>
+            </DataGrid.CellStyle>
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <!-- INFO: 标准暗底 -->
+                    <Setter Property="Background" Value="#13141E"/>
+                    <Setter Property="Foreground" Value="#B8C4CC"/>
+                    <Setter Property="FontFamily" Value="Segoe UI"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="BorderBrush" Value="#1A1D2A"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Style.Triggers>
+                        <!-- ERROR 行: 极淡暗红底，约 10% 不透明度 wash -->
+                        <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
+                            <Setter Property="Background" Value="#16200A08"/>
+                            <Setter Property="Foreground" Value="#B8C4CC"/>
+                        </DataTrigger>
+                        <!-- WARN 行: 极淡琥珀底 wash -->
+                        <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
+                            <Setter Property="Background" Value="#16201108"/>
+                            <Setter Property="Foreground" Value="#B8C4CC"/>
+                        </DataTrigger>
+                        <!-- 常规 INFO 行 -->
+                        <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
+                            <Setter Property="Background" Value="#13141E"/>
+                            <Setter Property="Foreground" Value="#B8C4CC"/>
+                        </DataTrigger>
+                        <!-- 悬停高亮 -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#1C1E2C"/>
+                        </Trigger>
+                        <!-- 选中行 -->
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#1F2438"/>
+                            <Setter Property="Foreground" Value="#E8EDF2"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+
+            <DataGrid.Columns>
+                <!-- 时间戳: Consolas 等宽字体确保垂直对齐 -->
+                <DataGridTemplateColumn Header="TIMESTAMP" Width="210">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Timestamp}"
+                                       FontFamily="Consolas"
+                                       FontSize="12.5"
+                                       Foreground="#737A8C"
+                                       VerticalAlignment="Center"
+                                       Margin="0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 级别 badge -->
+                <DataGridTemplateColumn Header="LEVEL" Width="90">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border x:Name="LevelBadge"
+                                    Width="58"
+                                    Height="20"
+                                    CornerRadius="2"
+                                    BorderThickness="0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center">
+                                <TextBlock x:Name="LevelText"
+                                           Text="INFO"
+                                           FontFamily="Segoe UI"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <!-- INFO: 暗灰底 + 灰字 -->
+                                <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
+                                    <Setter TargetName="LevelBadge" Property="Background" Value="#262A38"/>
+                                    <Setter TargetName="LevelText" Property="Text" Value="INFO"/>
+                                    <Setter TargetName="LevelText" Property="Foreground" Value="#636775"/>
+                                </DataTrigger>
+                                <!-- WARN: 纯实色琥珀底 + 深色字 -->
+                                <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
+                                    <Setter TargetName="LevelBadge" Property="Background" Value="#D4860A"/>
+                                    <Setter TargetName="LevelText" Property="Text" Value="WARN"/>
+                                    <Setter TargetName="LevelText" Property="Foreground" Value="#1A1200"/>
+                                </DataTrigger>
+                                <!-- ERROR: 纯实色红底 + 白字 -->
+                                <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
+                                    <Setter TargetName="LevelBadge" Property="Background" Value="#D63031"/>
+                                    <Setter TargetName="LevelText" Property="Text" Value="ERROR"/>
+                                    <Setter TargetName="LevelText" Property="Foreground" Value="#FFFFFF"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 来源/机台 -->
+                <DataGridTemplateColumn Header="SOURCE" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Source}"
+                                       FontFamily="Segoe UI"
+                                       FontSize="13"
+                                       FontWeight="Medium"
+                                       Foreground="#9AA0B0"
+                                       VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 事件消息 -->
+                <DataGridTemplateColumn Header="MESSAGE" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Content}"
+                                       FontFamily="Segoe UI"
+                                       FontSize="13"
+                                       Foreground="#C2C8D6"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- 4. Bottom Pagination -->
+        <Grid Grid.Row="4" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左下角统计 -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="显示第 1 到 " Foreground="#5C6070" FontSize="12"/>
+                <TextBlock Text="{Binding Notifications.Count}" Foreground="#8A8D99" FontSize="12"/>
+                <TextBlock Text=" 条，共 " Foreground="#5C6070" FontSize="12"/>
+                <TextBlock Text="{Binding Notifications.Count}" Foreground="#8A8D99" FontSize="12"/>
+                <TextBlock Text=" 条记录" Foreground="#5C6070" FontSize="12"/>
+            </StackPanel>
+            
+            <!-- 右下角分页控制 -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Style="{StaticResource HeaderButtonStyle}" Command="{Binding MarkAllAsReadCommand}">
+                <!-- 上一页 -->
+                <Button Style="{StaticResource PaginationButtonStyle}" Width="64" Height="28">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Check" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="全部标记为已读" VerticalAlignment="Center"/>
+                        <materialDesign:PackIcon Kind="ChevronLeft" Width="14" Height="14" VerticalAlignment="Center"/>
+                        <TextBlock Text="上一页" FontSize="11" Margin="2,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
-                <Button Style="{StaticResource HeaderButtonStyle}" Command="{Binding ClearAllCommand}">
+                <!-- 页码 -->
+                <Border BorderBrush="#333645" BorderThickness="1" Background="#1B1C28" CornerRadius="4" Padding="10,4" Margin="8,0">
+                    <TextBlock Text="第 1 / 1 页" Foreground="#8A8D99" FontSize="11" VerticalAlignment="Center"/>
+                </Border>
+                <!-- 下一页 -->
+                <Button Style="{StaticResource PaginationButtonStyle}" Width="64" Height="28">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="DeleteOutline" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="清空所有" VerticalAlignment="Center"/>
+                        <TextBlock Text="下一页" FontSize="11" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                        <materialDesign:PackIcon Kind="ChevronRight" Width="14" Height="14" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </StackPanel>
         </Grid>
-
-        <!-- 2. Filters -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal">
-            <!-- 全部 Pill -->
-            <RadioButton Style="{StaticResource AllPillStyle}"
-                         IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=全部, Mode=TwoWay}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="全部" VerticalAlignment="Center"/>
-                    <Border Margin="8,0,0,0" CornerRadius="9" Padding="6,2" VerticalAlignment="Center">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Background" Value="#2C303E"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=RadioButton}}" Value="True">
-                                        <Setter Property="Background" Value="#152A36"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <TextBlock Text="{Binding AllCount}" FontSize="11" FontWeight="Bold">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="#8A8D99"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=RadioButton}}" Value="True">
-                                            <Setter Property="Foreground" Value="#00D2E6"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Border>
-                </StackPanel>
-            </RadioButton>
-
-            <!-- 报警 Pill -->
-            <RadioButton Style="{StaticResource AlarmPillStyle}" Tag="AlertCircleOutline"
-                         IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=报警, Mode=TwoWay}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="报警" VerticalAlignment="Center"/>
-                    <Border Margin="8,0,0,0" CornerRadius="9" Padding="6,2" VerticalAlignment="Center">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Background" Value="#2C303E"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=RadioButton}}" Value="True">
-                                        <Setter Property="Background" Value="#4A1519"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <TextBlock Text="{Binding AlarmCount}" FontSize="11" FontWeight="Bold">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="#8A8D99"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=RadioButton}}" Value="True">
-                                            <Setter Property="Foreground" Value="#F74C5B"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Border>
-                </StackPanel>
-            </RadioButton>
-
-            <!-- 维护 Pill -->
-            <RadioButton Style="{StaticResource MaintenancePillStyle}" Tag="WrenchOutline"
-                         IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=维护, Mode=TwoWay}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="维护" VerticalAlignment="Center"/>
-                    <Border Margin="8,0,0,0" CornerRadius="9" Padding="6,2" VerticalAlignment="Center">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Background" Value="#2C303E"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=RadioButton}}" Value="True">
-                                        <Setter Property="Background" Value="#4A3615"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <TextBlock Text="{Binding MaintenanceCount}" FontSize="11" FontWeight="Bold">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="#8A8D99"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=RadioButton}}" Value="True">
-                                            <Setter Property="Foreground" Value="#F39C12"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Border>
-                </StackPanel>
-            </RadioButton>
-
-            <!-- 系统 Pill -->
-            <RadioButton Style="{StaticResource SystemPillStyle}" Tag="InformationOutline"
-                         IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=系统, Mode=TwoWay}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="系统" VerticalAlignment="Center"/>
-                    <Border Margin="8,0,0,0" CornerRadius="9" Padding="6,2" VerticalAlignment="Center">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Setter Property="Background" Value="#2C303E"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=RadioButton}}" Value="True">
-                                        <Setter Property="Background" Value="#2B2D38"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <TextBlock Text="{Binding SystemCount}" FontSize="11" FontWeight="Bold">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="#8A8D99"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=RadioButton}}" Value="True">
-                                            <Setter Property="Foreground" Value="#FFFFFF"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Border>
-                </StackPanel>
-            </RadioButton>
-        </StackPanel>
-
-        <!-- 3. Notification List -->
-        <ListBox Grid.Row="4"
-                 ItemsSource="{Binding Notifications}"
-                 Background="Transparent"
-                 BorderThickness="0"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 ItemContainerStyle="{StaticResource NotificationListBoxItemStyle}">
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type vm:NotificationItemViewModel}">
-                    <Border Background="#212431"
-                            BorderBrush="#333645"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            MinHeight="82"
-                            Padding="0,0,0,0">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick"
-                                          Command="{Binding DataContext.ToggleReadStatusCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                          CommandParameter="{Binding}"/>
-                        </Border.InputBindings>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <!-- Left Indicator bar -->
-                                <ColumnDefinition Width="4"/>
-                                <!-- Icon container -->
-                                <ColumnDefinition Width="64"/>
-                                <!-- Main Content -->
-                                <ColumnDefinition Width="*"/>
-                                <!-- Right Timestamp -->
-                                <ColumnDefinition Width="200"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- 1. Left indicator bar -->
-                            <Border Grid.Column="0" CornerRadius="4,0,0,4">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
-                                                <Setter Property="Background" Value="#F74C5B"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
-                                                <Setter Property="Background" Value="#F39C12"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
-                                                <Setter Property="Background" Value="#5C6070"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                            </Border>
-
-                            <!-- 2. Status icon area -->
-                            <Border Grid.Column="1"
-                                    Width="36"
-                                    Height="36"
-                                    CornerRadius="6"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
-                                                <Setter Property="Background" Value="#2C1E21"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
-                                                <Setter Property="Background" Value="#2C261E"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
-                                                <Setter Property="Background" Value="#1E222D"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <materialDesign:PackIcon Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <materialDesign:PackIcon.Style>
-                                        <Style TargetType="materialDesign:PackIcon">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
-                                                    <Setter Property="Kind" Value="AlertCircleOutline"/>
-                                                    <Setter Property="Foreground" Value="#F74C5B"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
-                                                    <Setter Property="Kind" Value="WrenchOutline"/>
-                                                    <Setter Property="Foreground" Value="#F39C12"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
-                                                    <Setter Property="Kind" Value="InformationOutline"/>
-                                                    <Setter Property="Foreground" Value="#8A8D99"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </materialDesign:PackIcon.Style>
-                                </materialDesign:PackIcon>
-                            </Border>
-
-                            <!-- 3. Content area -->
-                            <Grid Grid.Column="2" VerticalAlignment="Center" Margin="8,14,16,14">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-
-                                <!-- Row 0: Title + Status Badge -->
-                                <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,6">
-                                    <TextBlock Text="{Binding Title}"
-                                               Foreground="#FFFFFF"
-                                               FontSize="15"
-                                               FontWeight="Bold"
-                                               VerticalAlignment="Center"/>
-
-                                    <Border Margin="10,0,0,0"
-                                            BorderThickness="1"
-                                            CornerRadius="4"
-                                            Padding="6,1"
-                                            VerticalAlignment="Center">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsRead}" Value="False">
-                                                        <Setter Property="BorderBrush" Value="#F74C5B"/>
-                                                        <Setter Property="Background" Value="#2C1E21"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding IsRead}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="#333645"/>
-                                                        <Setter Property="Background" Value="Transparent"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock FontSize="10" VerticalAlignment="Center" FontWeight="Normal">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsRead}" Value="False">
-                                                            <Setter Property="Text" Value="未读"/>
-                                                            <Setter Property="Foreground" Value="#F74C5B"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsRead}" Value="True">
-                                                            <Setter Property="Text" Value="已读"/>
-                                                            <Setter Property="Foreground" Value="#8A8D99"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </Border>
-                                </StackPanel>
-
-                                <!-- Row 1: Content -->
-                                <TextBlock Grid.Row="1"
-                                           Text="{Binding Content}"
-                                           Foreground="#8A8D99"
-                                           FontSize="13"
-                                           TextTrimming="CharacterEllipsis"
-                                           TextWrapping="NoWrap"
-                                           VerticalAlignment="Center"/>
-                            </Grid>
-
-                            <!-- 4. Timestamp -->
-                            <TextBlock Grid.Column="3"
-                                       Text="{Binding Timestamp}"
-                                       Foreground="#8A8D99"
-                                       FontSize="13"
-                                       FontFamily="Consolas"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Center"
-                                       Margin="0,0,24,0"/>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
     </Grid>
 </UserControl>

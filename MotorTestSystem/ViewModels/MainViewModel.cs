@@ -162,6 +162,13 @@ namespace MotorTestSystem.ViewModels
         [RelayCommand]
         private void Navigate(string destination)
         {
+            if (destination == "LogCenter")
+            {
+                _previousViewBeforeNotification = null;
+                CurrentView = NotificationVM;
+                return;
+            }
+
             if (destination == "Notification")
             {
                 if (CurrentView == NotificationVM)
@@ -192,6 +199,7 @@ namespace MotorTestSystem.ViewModels
                 "History" => HistoryVM,
                 "Config" => ConfigVM,
                 "User" => UserVM,
+                "LogCenter" => NotificationVM,
                 _ => DashboardVM
             };
         }
@@ -206,6 +214,7 @@ namespace MotorTestSystem.ViewModels
             "Dashboard" => IsDashboardVisible,
             "User" => IsUserVisible,
             "Config" => IsConfigVisible,
+            "LogCenter" => true,
             _ => true
         };
 

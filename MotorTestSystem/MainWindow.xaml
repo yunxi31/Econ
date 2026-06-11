@@ -360,6 +360,24 @@
                             <TextBlock Text="用户管理" Style="{StaticResource NavLabelStyle}"/>
                         </StackPanel>
                     </RadioButton>
+
+                    <RadioButton Command="{Binding NavigateCommand}"
+                                 CommandParameter="LogCenter"
+                                 IsChecked="{Binding CurrentView, Mode=OneWay, Converter={StaticResource ViewTypeToBoolConverter}, ConverterParameter=Notification}"
+                                 Style="{StaticResource SidebarTabStyle}">
+                        <StackPanel>
+                            <Path Data="M8,4 L32,4 L40,12 L40,44 L8,44 Z M8,12 L32,12 L32,4 M14,20 L34,20 M14,28 L34,28 M14,36 L26,36"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                  StrokeThickness="4.5"
+                                  StrokeLineJoin="Round"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  Width="34"
+                                  Height="34"
+                                  Stretch="Uniform"/>
+                            <TextBlock Text="日志中心" Style="{StaticResource NavLabelStyle}"/>
+                        </StackPanel>
+                    </RadioButton>
                 </StackPanel>
 
                 <RadioButton Grid.Row="2"
