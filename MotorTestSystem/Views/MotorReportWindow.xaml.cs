@@ -303,6 +303,20 @@ namespace MotorTestSystem.Views
         {
             Close();
         }
+
+        private void UIElement_OnPreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                e.Handled = true;
+                var eventArg = new System.Windows.Input.MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+                {
+                    RoutedEvent = UIElement.MouseWheelEvent,
+                    Source = sender
+                };
+                MainScrollViewer?.RaiseEvent(eventArg);
+            }
+        }
     }
 
     /// <summary>

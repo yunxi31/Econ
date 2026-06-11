@@ -9,9 +9,24 @@
         Width="960" Height="720"
         MinWidth="800" MinHeight="600"
         WindowStartupLocation="CenterOwner"
-        Background="#13141E"
         FontFamily="Microsoft YaHei UI"
-        ResizeMode="CanResize">
+        ResizeMode="CanResize"
+        WindowStyle="None">
+
+    <Window.Background>
+        <RadialGradientBrush Center="0.5,0.5" RadiusX="0.8" RadiusY="0.8">
+            <GradientStop Color="#141724" Offset="0"/>
+            <GradientStop Color="#08090D" Offset="1"/>
+        </RadialGradientBrush>
+    </Window.Background>
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome GlassFrameThickness="0" 
+                      CornerRadius="0" 
+                      CaptionHeight="50" 
+                      UseAeroCaptionButtons="False" 
+                      ResizeBorderThickness="7" />
+    </WindowChrome.WindowChrome>
 
     <Window.Resources>
         <!-- 报告内使用的样式 -->
@@ -26,10 +41,10 @@
         <SolidColorBrush x:Key="ReportAccentOrange" Color="#FFA500"/>
 
         <Style x:Key="SectionHeaderText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="{StaticResource ReportAccentCyan}"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
 
         <Style x:Key="DataLabel" TargetType="TextBlock">
@@ -44,6 +59,19 @@
             <Setter Property="Foreground" Value="{StaticResource ReportTextPrimary}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+
+        <Style x:Key="GridDataLabelCenter" TargetType="TextBlock" BasedOn="{StaticResource DataLabel}">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="GridDataValueCenter" TargetType="TextBlock" BasedOn="{StaticResource DataValue}">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="GridDataLabelLeft" TargetType="TextBlock" BasedOn="{StaticResource DataLabel}">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="12,0,0,0"/>
         </Style>
 
         <Style x:Key="ResultBadgeOK" TargetType="Border">
@@ -64,341 +92,457 @@
     </Window.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        <!-- Vertical left and right page margins acting as an empty, dark frame -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="24"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="24"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- 标题栏 -->
-        <Border Grid.Row="0" Background="#18212B" BorderBrush="#25313F" BorderThickness="0,0,0,1"
-                Padding="20,14">
+        <Border Grid.Column="1" Background="#13141E" BorderThickness="1,0,1,0" BorderBrush="#1F2233" Margin="0" ClipToBounds="True">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="25" ShadowDepth="0" Opacity="0.7"/>
+            </Border.Effect>
+            
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,11V17H13V11H11M9,13V17H11V13H9M13,13V17H15V13H13Z"
-                          Fill="#00D2E6" Width="20" Height="20" Margin="0,0,10,0"
-                          Stretch="Uniform" VerticalAlignment="Center"/>
-                    <TextBlock Text="电机电性能测试报告" FontSize="16" FontWeight="Bold"
-                               Foreground="#E8ECF1" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="ReportBarcode" Text="" FontSize="14" Foreground="#8A8D99"
-                               VerticalAlignment="Center" Margin="16,0,0,0"/>
-                </StackPanel>
-                <Button Grid.Column="1" Content="✕" Width="32" Height="32"
-                        Background="Transparent" Foreground="#8A8D99" BorderThickness="0"
-                        FontSize="16" Cursor="Hand" Click="CloseButton_Click"
-                        VerticalAlignment="Center"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- 标题栏 -->
+                <Border Grid.Row="0" Height="50" Background="#18212B" BorderBrush="#25313F" BorderThickness="0,0,0,1" Padding="20,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,11V17H13V11H11M9,13V17H11V13H9M13,13V17H15V13H13Z"
+                                  Fill="#00D2E6" Width="20" Height="20" Margin="0,0,10,0"
+                                  Stretch="Uniform" VerticalAlignment="Center"/>
+                            <TextBlock Text="电机电性能测试报告" FontSize="15" FontWeight="Bold"
+                                       Foreground="#E8ECF1" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="ReportBarcode" Text="" FontSize="13" Foreground="#8A8D99"
+                                       VerticalAlignment="Center" Margin="12,0,0,0"/>
+                        </StackPanel>
+
+                        <!-- 关闭按钮，支持 WindowChrome 点击与悬浮动画 -->
+                        <Button Grid.Column="1" Content="✕" Width="36" Height="36"
+                                WindowChrome.IsHitTestVisibleInChrome="True"
+                                Background="Transparent" Foreground="#8A8D99" BorderThickness="0"
+                                FontSize="16" Cursor="Hand" Click="CloseButton_Click"
+                                VerticalAlignment="Center">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border CornerRadius="18" Background="{TemplateBinding Background}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#E81123"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- 报告内容区 -->
+                <ScrollViewer Grid.Row="1" x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" Padding="20,16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Row 0: 产品基本信息 + 检验结论 -->
+                    <RowDefinition Height="Auto"/> <!-- Row 1: 三个测试阶段卡片并排 -->
+                    <RowDefinition Height="Auto"/> <!-- Row 2: 阈值判定详情 -->
+                    <RowDefinition Height="Auto"/> <!-- Row 3: 两个波形图并排 -->
+                    <RowDefinition Height="Auto"/> <!-- Row 4: 签章区 -->
+                </Grid.RowDefinitions>
+
+                <!-- 1. 产品基本信息 + 检验结论 -->
+                <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="6*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 产品基本信息 -->
+                    <Border Grid.Column="0" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
+                            BorderThickness="1" CornerRadius="8" Padding="16,12">
+                        <StackPanel>
+                            <TextBlock Text="一、产品基本信息" Style="{StaticResource SectionHeaderText}"/>
+                            <Grid Margin="0,4,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="产品条码：" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtBarcode" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Foreground="{StaticResource ReportAccentCyan}"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="测试时间：" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtTestTime" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left"/>
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="报告时间：" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtReportTime" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 检验结论与最终判定 -->
+                    <Border Grid.Column="2" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
+                            BorderThickness="1" CornerRadius="8" Padding="16,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,16,0" VerticalAlignment="Center">
+                                <TextBlock Text="二、检验结论" Style="{StaticResource SectionHeaderText}"/>
+                                <TextBlock x:Name="TxtConclusion" TextWrapping="Wrap" FontSize="12.5"
+                                           Foreground="{StaticResource ReportTextPrimary}" LineHeight="19"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0,0,0">
+                                <TextBlock Text="最终判定" Style="{StaticResource DataLabel}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                <Border x:Name="FinalResultBadge" Style="{StaticResource ResultBadgeOK}" Width="80" Height="46" VerticalAlignment="Center">
+                                    <TextBlock x:Name="TxtFinalResult" Text="OK" FontWeight="Black" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- 2. 三个测试阶段卡片并排 -->
+                <Grid Grid.Row="1" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 空载测试 -->
+                    <Border Grid.Column="0" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
+                            BorderThickness="1" CornerRadius="8" Padding="16,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="三、空载测试" Style="{StaticResource SectionHeaderText}" Margin="0"/>
+                                <Border Grid.Column="1" x:Name="NoLoadResultBadge" Style="{StaticResource ResultBadgeOK}" Padding="8,2" CornerRadius="4">
+                                    <TextBlock x:Name="TxtNoLoadResult" Text="-" FontWeight="Bold" FontSize="11"/>
+                                </Border>
+                            </Grid>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="空载电流" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtNoLoadCurrent" Text="-" Style="{StaticResource DataValue}"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="空载转速" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtNoLoadSpeed" Text="-" Style="{StaticResource DataValue}"/>
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="轴长" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtShaftLength" Text="-" Style="{StaticResource DataValue}"/>
+
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text="滚花直径" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="6" Grid.Column="1" x:Name="TxtKnurlDiameter" Text="-" Style="{StaticResource DataValue}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 噪音测试 -->
+                    <Border Grid.Column="2" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
+                            BorderThickness="1" CornerRadius="8" Padding="16,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="四、噪音测试" Style="{StaticResource SectionHeaderText}" Margin="0"/>
+                                <Border Grid.Column="1" x:Name="NoiseResultBadge" Style="{StaticResource ResultBadgeOK}" Padding="8,2" CornerRadius="4">
+                                    <TextBlock x:Name="TxtNoiseResult" Text="-" FontWeight="Bold" FontSize="11"/>
+                                </Border>
+                            </Grid>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <!-- 对齐高度 -->
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="正转噪音" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtFwdNoise" Text="-" Style="{StaticResource DataValue}"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="反转噪音" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtRevNoise" Text="-" Style="{StaticResource DataValue}"/>
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="噪音差值" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtNoiseDiff" Text="-" Style="{StaticResource DataValue}"/>
+
+                                <!-- 占位行，用于和空载卡片对齐高度 -->
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text=" " Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="6" Grid.Column="1" Text=" " Style="{StaticResource DataValue}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 负载测试 -->
+                    <Border Grid.Column="4" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
+                            BorderThickness="1" CornerRadius="8" Padding="16,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="五、负载测试" Style="{StaticResource SectionHeaderText}" Margin="0"/>
+                                <Border Grid.Column="1" x:Name="LoadResultBadge" Style="{StaticResource ResultBadgeOK}" Padding="8,2" CornerRadius="4">
+                                    <TextBlock x:Name="TxtLoadResult" Text="-" FontWeight="Bold" FontSize="11"/>
+                                </Border>
+                            </Grid>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <!-- 对齐高度 -->
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="负载电流" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtLoadCurrent" Text="-" Style="{StaticResource DataValue}"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="负载转速" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtLoadSpeed" Text="-" Style="{StaticResource DataValue}"/>
+
+                                <!-- 占位行，用于和空载卡片对齐高度 -->
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text=" " Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="1" Text=" " Style="{StaticResource DataValue}"/>
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text=" " Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="6" Grid.Column="1" Text=" " Style="{StaticResource DataValue}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- 3. 阈值判定详情 -->
+                <Grid Grid.Row="2" Margin="0,0,0,16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="六、阈值判定详情" Style="{StaticResource SectionHeaderText}"/>
+                    <Border Grid.Row="1" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
+                            BorderThickness="1" CornerRadius="8" Padding="1">
+                        <DataGrid x:Name="ThresholdGrid" AutoGenerateColumns="False"
+                                  HeadersVisibility="Column"
+                                  Background="#212431" RowBackground="#212431"
+                                  AlternatingRowBackground="#252937"
+                                  BorderThickness="0" GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="#333645"
+                                  IsReadOnly="True" SelectionMode="Single"
+                                  CanUserAddRows="False" CanUserDeleteRows="False"
+                                  CanUserResizeRows="False" CanUserReorderColumns="False"
+                                  FontSize="12" RowHeight="32" ColumnHeaderHeight="34"
+                                  Foreground="#E8ECF1"
+                                  PreviewMouseWheel="UIElement_OnPreviewMouseWheel">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="#1F222F"/>
+                                    <Setter Property="Foreground" Value="#8A8D99"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="FontSize" Value="11.5"/>
+                                    <Setter Property="Padding" Value="12,6"/>
+                                    <Setter Property="BorderBrush" Value="#333645"/>
+                                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Padding" Value="4,0"/>
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="Background" Value="#212431"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="AlternationIndex" Value="1">
+                                            <Setter Property="Background" Value="#252937"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="检测项目" Binding="{Binding Item}" Width="1.5*"
+                                                    ElementStyle="{StaticResource GridDataLabelLeft}"/>
+                                <DataGridTextColumn Header="实测值" Binding="{Binding Actual}" Width="*"
+                                                    ElementStyle="{StaticResource GridDataValueCenter}"/>
+                                <DataGridTextColumn Header="标准下限" Binding="{Binding Lower}" Width="*"
+                                                    ElementStyle="{StaticResource GridDataLabelCenter}"/>
+                                <DataGridTextColumn Header="标准上限" Binding="{Binding Upper}" Width="*"
+                                                    ElementStyle="{StaticResource GridDataLabelCenter}"/>
+                                <DataGridTextColumn Header="判定" Binding="{Binding Judge}" Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPass}" Value="True">
+                                                    <Setter Property="Foreground" Value="#26DE81"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsPass}" Value="False">
+                                                    <Setter Property="Foreground" Value="#F74C5B"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </Grid>
+
+                <!-- 4. 两个波形图并排 -->
+                <Grid Grid.Row="3" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 空载电流波形 -->
+                    <Border Grid.Column="0" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
+                            BorderThickness="1" CornerRadius="8" Padding="12,8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="160"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="空载电流波形" FontSize="12" Foreground="#00D2E6"
+                                       FontWeight="SemiBold" Margin="4,0,0,6"/>
+                            <lvc:CartesianChart Grid.Row="1" x:Name="NoLoadChart"
+                                                Series="{Binding NoLoadWaveformSeries}"
+                                                XAxes="{Binding WaveformXAxes}"
+                                                YAxes="{Binding NoLoadWaveformYAxes}"
+                                                Background="Transparent"
+                                                TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
+                                                TooltipTextPaint="{Binding WaveformTooltipTextPaint}"
+                                                PreviewMouseWheel="UIElement_OnPreviewMouseWheel"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- 噪音频谱波形 -->
+                    <Border Grid.Column="2" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
+                            BorderThickness="1" CornerRadius="8" Padding="12,8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="160"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="噪音频谱波形" FontSize="12" Foreground="#FFA500"
+                                       FontWeight="SemiBold" Margin="4,0,0,6"/>
+                            <lvc:CartesianChart Grid.Row="1" x:Name="NoiseChart"
+                                                Series="{Binding NoiseWaveformSeries}"
+                                                XAxes="{Binding WaveformXAxes}"
+                                                YAxes="{Binding NoiseWaveformYAxes}"
+                                                Background="Transparent"
+                                                TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
+                                                TooltipTextPaint="{Binding WaveformTooltipTextPaint}"
+                                                PreviewMouseWheel="UIElement_OnPreviewMouseWheel"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- 5. 签章区 -->
+                <Grid Grid.Row="4" Margin="0,0,0,10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="七、签章" Style="{StaticResource SectionHeaderText}"/>
+                    <Border Grid.Row="1" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
+                            BorderThickness="1" CornerRadius="8" Padding="20,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="检验员" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
+                                <Border BorderBrush="#333645" BorderThickness="0,0,0,1" MinHeight="26"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="审核员" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
+                                <Border BorderBrush="#333645" BorderThickness="0,0,0,1" MinHeight="26"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="批准人" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
+                                <Border BorderBrush="#333645" BorderThickness="0,0,0,1" MinHeight="26"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
             </Grid>
-        </Border>
-
-        <!-- 报告内容区 -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                      Padding="24,20">
-            <StackPanel x:Name="ReportContent">
-
-                <!-- 一、产品基本信息 -->
-                <TextBlock Text="一、产品基本信息" Style="{StaticResource SectionHeaderText}"/>
-                <Border Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
-                        BorderThickness="1" CornerRadius="8" Padding="20,16" Margin="0,0,0,20">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Row 0 -->
-                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12">
-                            <TextBlock Text="产品条码" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtBarcode" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
-                            <TextBlock Text="测试时间" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtTestTime" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,12">
-                            <TextBlock Text="最终判定" Style="{StaticResource DataLabel}"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                <Border x:Name="FinalResultBadge" Style="{StaticResource ResultBadgeOK}">
-                                    <TextBlock x:Name="TxtFinalResult" Text="OK" FontWeight="Bold" FontSize="14"/>
-                                </Border>
-                            </StackPanel>
-                        </StackPanel>
-                        <StackPanel Grid.Row="0" Grid.Column="3" Margin="0,0,0,12">
-                            <TextBlock Text="报告生成时间" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtReportTime" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- 二、空载测试 -->
-                <TextBlock Text="二、空载测试阶段" Style="{StaticResource SectionHeaderText}"/>
-                <Border Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
-                        BorderThickness="1" CornerRadius="8" Padding="20,16" Margin="0,0,0,20">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0" Margin="0,0,0,4">
-                            <TextBlock Text="空载电流 (A)" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtNoLoadCurrent" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Margin="0,0,0,4">
-                            <TextBlock Text="空载转速 (r/min)" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtNoLoadSpeed" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" Margin="0,0,0,4">
-                            <TextBlock Text="轴长 (mm)" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtShaftLength" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="3" Margin="0,0,0,4">
-                            <TextBlock Text="滚花直径 (mm)" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtKnurlDiameter" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="4" Margin="0,0,0,4">
-                            <TextBlock Text="阶段判定" Style="{StaticResource DataLabel}"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                <Border x:Name="NoLoadResultBadge" Style="{StaticResource ResultBadgeOK}">
-                                    <TextBlock x:Name="TxtNoLoadResult" Text="-" FontWeight="Bold" FontSize="13"/>
-                                </Border>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- 三、噪音测试 -->
-                <TextBlock Text="三、噪音测试阶段" Style="{StaticResource SectionHeaderText}"/>
-                <Border Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
-                        BorderThickness="1" CornerRadius="8" Padding="20,16" Margin="0,0,0,20">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0" Margin="0,0,0,4">
-                            <TextBlock Text="正转噪音 (dB)" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtFwdNoise" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Margin="0,0,0,4">
-                            <TextBlock Text="反转噪音 (dB)" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtRevNoise" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" Margin="0,0,0,4">
-                            <TextBlock Text="噪音差值 (dB)" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtNoiseDiff" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="3" Margin="0,0,0,4">
-                            <TextBlock Text="阶段判定" Style="{StaticResource DataLabel}"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                <Border x:Name="NoiseResultBadge" Style="{StaticResource ResultBadgeOK}">
-                                    <TextBlock x:Name="TxtNoiseResult" Text="-" FontWeight="Bold" FontSize="13"/>
-                                </Border>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- 四、负载测试 -->
-                <TextBlock Text="四、负载测试阶段" Style="{StaticResource SectionHeaderText}"/>
-                <Border Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
-                        BorderThickness="1" CornerRadius="8" Padding="20,16" Margin="0,0,0,20">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0" Margin="0,0,0,4">
-                            <TextBlock Text="负载电流 (A)" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtLoadCurrent" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Margin="0,0,0,4">
-                            <TextBlock Text="负载转速 (r/min)" Style="{StaticResource DataLabel}"/>
-                            <TextBlock x:Name="TxtLoadSpeed" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" Margin="0,0,0,4">
-                            <TextBlock Text="阶段判定" Style="{StaticResource DataLabel}"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                <Border x:Name="LoadResultBadge" Style="{StaticResource ResultBadgeOK}">
-                                    <TextBlock x:Name="TxtLoadResult" Text="-" FontWeight="Bold" FontSize="13"/>
-                                </Border>
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- 五、阈值判定详情 -->
-                <TextBlock Text="五、阈值判定详情" Style="{StaticResource SectionHeaderText}"/>
-                <Border Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
-                        BorderThickness="1" CornerRadius="8" Margin="0,0,0,20">
-                    <DataGrid x:Name="ThresholdGrid" AutoGenerateColumns="False"
-                              HeadersVisibility="Column"
-                              Background="#212431" RowBackground="#212431"
-                              AlternatingRowBackground="#252937"
-                              BorderThickness="0" GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#333645"
-                              IsReadOnly="True" SelectionMode="Single"
-                              CanUserAddRows="False" CanUserDeleteRows="False"
-                              CanUserResizeRows="False" CanUserReorderColumns="False"
-                              FontSize="12" RowHeight="36" ColumnHeaderHeight="38"
-                              Foreground="#E8ECF1">
-                        <DataGrid.ColumnHeaderStyle>
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="#1F222F"/>
-                                <Setter Property="Foreground" Value="#8A8D99"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="FontSize" Value="11"/>
-                                <Setter Property="Padding" Value="8,6"/>
-                                <Setter Property="BorderBrush" Value="#333645"/>
-                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                            </Style>
-                        </DataGrid.ColumnHeaderStyle>
-                        <DataGrid.CellStyle>
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="BorderBrush" Value="Transparent"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Padding" Value="4,0"/>
-                                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                            </Style>
-                        </DataGrid.CellStyle>
-                        <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="Background" Value="#212431"/>
-                                <Style.Triggers>
-                                    <Trigger Property="AlternationIndex" Value="1">
-                                        <Setter Property="Background" Value="#252937"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.RowStyle>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="检测项目" Binding="{Binding Item}" Width="*"
-                                                ElementStyle="{StaticResource DataLabel}"/>
-                            <DataGridTextColumn Header="实测值" Binding="{Binding Actual}" Width="*"
-                                                ElementStyle="{StaticResource DataValue}"/>
-                            <DataGridTextColumn Header="标准下限" Binding="{Binding Lower}" Width="*"
-                                                ElementStyle="{StaticResource DataLabel}"/>
-                            <DataGridTextColumn Header="标准上限" Binding="{Binding Upper}" Width="*"
-                                                ElementStyle="{StaticResource DataLabel}"/>
-                            <DataGridTextColumn Header="判定" Binding="{Binding Judge}" Width="80">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Center"/>
-                                        <Setter Property="VerticalAlignment" Value="Center"/>
-                                        <Setter Property="FontWeight" Value="Bold"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsPass}" Value="True">
-                                                <Setter Property="Foreground" Value="#26DE81"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsPass}" Value="False">
-                                                <Setter Property="Foreground" Value="#F74C5B"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Border>
-
-                <!-- 六、波形图 -->
-                <TextBlock Text="六、测试波形" Style="{StaticResource SectionHeaderText}"/>
-
-                <!-- 空载电流波形 -->
-                <Border Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
-                        BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,12">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="180"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="空载电流波形" FontSize="12" Foreground="#00D2E6"
-                                   FontWeight="SemiBold" Margin="4,0,0,4"/>
-                        <lvc:CartesianChart Grid.Row="1" x:Name="NoLoadChart"
-                                            Series="{Binding NoLoadWaveformSeries}"
-                                            XAxes="{Binding WaveformXAxes}"
-                                            YAxes="{Binding NoLoadWaveformYAxes}"
-                                            Background="Transparent"
-                                            TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
-                                            TooltipTextPaint="{Binding WaveformTooltipTextPaint}"/>
-                    </Grid>
-                </Border>
-
-                <!-- 噪音波形 -->
-                <Border Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
-                        BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,20">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="180"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="噪音频谱波形" FontSize="12" Foreground="#FFA500"
-                                   FontWeight="SemiBold" Margin="4,0,0,4"/>
-                        <lvc:CartesianChart Grid.Row="1" x:Name="NoiseChart"
-                                            Series="{Binding NoiseWaveformSeries}"
-                                            XAxes="{Binding WaveformXAxes}"
-                                            YAxes="{Binding NoiseWaveformYAxes}"
-                                            Background="Transparent"
-                                            TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
-                                            TooltipTextPaint="{Binding WaveformTooltipTextPaint}"/>
-                    </Grid>
-                </Border>
-
-                <!-- 七、结论 -->
-                <TextBlock Text="七、检验结论" Style="{StaticResource SectionHeaderText}"/>
-                <Border Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
-                        BorderThickness="1" CornerRadius="8" Padding="20,20" Margin="0,0,0,20">
-                    <StackPanel>
-                        <TextBlock x:Name="TxtConclusion" TextWrapping="Wrap" FontSize="13"
-                                   Foreground="{StaticResource ReportTextPrimary}" LineHeight="22"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- 八、签章区 -->
-                <TextBlock Text="八、签章" Style="{StaticResource SectionHeaderText}"/>
-                <Border Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
-                        BorderThickness="1" CornerRadius="8" Padding="20,16" Margin="0,0,0,20">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="检验员" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
-                            <Border BorderBrush="#333645" BorderThickness="0,0,0,1" MinHeight="30" Margin="0,0,20,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Text="审核员" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
-                            <Border BorderBrush="#333645" BorderThickness="0,0,0,1" MinHeight="30" Margin="0,0,20,0"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="批准人" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
-                            <Border BorderBrush="#333645" BorderThickness="0,0,0,1" MinHeight="30"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-            </StackPanel>
         </ScrollViewer>
 
         <!-- 底部按钮栏 -->
@@ -424,6 +568,8 @@
                         Background="#00D2E6" Foreground="#090E12" BorderThickness="0"
                         Cursor="Hand" Click="CloseButton_Click"
                         FontSize="13" FontWeight="Bold"/>
+            </Grid>
+        </Border>
             </Grid>
         </Border>
     </Grid>
