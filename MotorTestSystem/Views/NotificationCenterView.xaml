@@ -358,7 +358,10 @@
                           BorderBrush="#333645"
                           Foreground="#FFFFFF"
                           FontSize="14"
-                          VerticalAlignment="Center">
+                          VerticalAlignment="Center"
+                          HorizontalContentAlignment="Center"
+                          VerticalContentAlignment="Center"
+                          Padding="0">
                     <ComboBox.Resources>
                         <SolidColorBrush x:Key="MaterialDesignPaper" Color="#1B1C28"/>
                         <SolidColorBrush x:Key="MaterialDesignBody" Color="#FFFFFF"/>
@@ -562,7 +565,7 @@
 
             <DataGrid.Columns>
                 <!-- 时间戳: Consolas 等宽字体确保垂直对齐 -->
-                <DataGridTemplateColumn Header="TIMESTAMP" Width="210">
+                <DataGridTemplateColumn Header="时间" Width="210">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Timestamp}"
@@ -576,7 +579,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- 级别 badge -->
-                <DataGridTemplateColumn Header="LEVEL" Width="90">
+                <DataGridTemplateColumn Header="级别" Width="90">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border x:Name="LevelBadge"
@@ -619,7 +622,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- 来源/机台 -->
-                <DataGridTemplateColumn Header="SOURCE" Width="150">
+                <DataGridTemplateColumn Header="来源/机台" Width="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Source}"
@@ -633,7 +636,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- 事件消息 -->
-                <DataGridTemplateColumn Header="MESSAGE" Width="*">
+                <DataGridTemplateColumn Header="消息内容" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Content}"

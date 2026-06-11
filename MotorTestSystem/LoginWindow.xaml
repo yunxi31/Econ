@@ -129,13 +129,6 @@
                         </Style>
                     </Button.Resources>
                 </Button>
-                <!-- Help Tips -->
-                <TextBlock Margin="0,12,0,0" Foreground="#6C7A87" FontSize="10" TextAlignment="Center" 
-                           Text="默认密码：操作员(123) | 维护员(maint123) | 管理员(admin123)"/>
-                <TextBlock Margin="0,4,0,0" Foreground="#4A5568" FontSize="9" TextAlignment="Center" 
-                           Text="测试账号：admin / operator / maintainer / ad_liwei / mt_zhaomin"/>
-                <TextBlock Margin="0,2,0,0" Foreground="#3A4558" FontSize="9" TextAlignment="Center" 
-                           Text="禁用账号测试：op_zhaolei / ad_sunyan / mt_chenhao"/>
             </StackPanel>
         </Grid>
     </Border>
