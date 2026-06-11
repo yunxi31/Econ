@@ -332,8 +332,6 @@
                 <Border Background="#1B1C28" BorderBrush="#333645" BorderThickness="1" CornerRadius="4" Padding="8,0" Height="36">
                     <DatePicker x:Name="StartDatePicker"
                                 SelectedDate="{Binding StartDate}"
-                                DisplayDateStart="{Binding StartCalendarDisplayStart, Mode=OneWay}"
-                                DisplayDateEnd="{Binding StartCalendarDisplayEnd, Mode=OneWay}"
                                 materialDesign:CalendarAssist.IsHeaderVisible="False"
                                 Foreground="#FFFFFF" FontFamily="Consolas" FontSize="14"
                                 VerticalAlignment="Center" BorderThickness="0" Background="Transparent" Width="110"
@@ -343,8 +341,6 @@
                 <Border Background="#1B1C28" BorderBrush="#333645" BorderThickness="1" CornerRadius="4" Padding="8,0" Height="36">
                     <DatePicker x:Name="EndDatePicker"
                                 SelectedDate="{Binding EndDate}"
-                                DisplayDateStart="{Binding EndCalendarDisplayStart, Mode=OneWay}"
-                                DisplayDateEnd="{Binding EndCalendarDisplayEnd, Mode=OneWay}"
                                 materialDesign:CalendarAssist.IsHeaderVisible="False"
                                 Foreground="#FFFFFF" FontFamily="Consolas" FontSize="14"
                                 VerticalAlignment="Center" BorderThickness="0" Background="Transparent" Width="110"

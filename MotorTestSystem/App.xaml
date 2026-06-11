@@ -91,14 +91,6 @@
                 </Style.Triggers>
             </Style>
 
-            <!-- Hide adjacent month days in all calendars -->
-            <Style TargetType="CalendarDayButton" BasedOn="{StaticResource {x:Type CalendarDayButton}}">
-                <Style.Triggers>
-                    <Trigger Property="IsInactive" Value="True">
-                        <Setter Property="Visibility" Value="Hidden"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
