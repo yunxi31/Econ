@@ -23,7 +23,8 @@ namespace MotorTestSystem.Services
             {
                 "ModbusTCP" => new ModbusTcpClient(config),
                 "MelsecMC" or "MC Protocol (TCP)" or "MC Protocol / TCP" => new MelsecMcClient(config),
-                _ => new MockPlcClient(config) // S7 or other unsupported protocols fall back to mock
+                "S7 Protocol (TCP)" or "S7 Protocol / TCP" or "S7" => new S7PlcClient(config),
+                _ => new MockPlcClient(config) // Other unsupported protocols fall back to mock
             };
         }
     }

@@ -10,7 +10,8 @@
         "dependencies": {
           "CommunityToolkit.Mvvm": "8.4.2",
           "LiveChartsCore.SkiaSharpView.WPF": "2.0.4",
-          "MaterialDesignThemes": "5.3.2"
+          "MaterialDesignThemes": "5.3.2",
+          "S7netplus": "0.20.0"
         },
         "runtime": {
           "MotorTestSystem.dll": {}
@@ -142,6 +143,14 @@
           "lib/net452/GLWpfControl.dll": {
             "assemblyVersion": "3.3.0.0",
             "fileVersion": "3.3.0.0"
+          }
+        }
+      },
+      "S7netplus/0.20.0": {
+        "runtime": {
+          "lib/net7.0/S7.Net.dll": {
+            "assemblyVersion": "0.20.0.0",
+            "fileVersion": "0.20.0.0"
           }
         }
       },
@@ -313,6 +322,13 @@
       "sha512": "sha512-viHlwA0RIYLA1EyoA+gOkfqpA9xMZV6HigVYhaHaEsYb3jk518RdCKEdFggu/P4oYUNYZmmHaUYDC9pwarkXjA==",
       "path": "opentk.glwpfcontrol/3.3.0",
       "hashPath": "opentk.glwpfcontrol.3.3.0.nupkg.sha512"
+    },
+    "S7netplus/0.20.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-XAubZ076bhWHQZlnBkzwQO4WxqF5ofwhrkDxfBhGbeD1JC1jBDn3EbWIqMLW6+G0RsxzxirSjLERCQZPfjwGdw==",
+      "path": "s7netplus/0.20.0",
+      "hashPath": "s7netplus.0.20.0.nupkg.sha512"
     },
     "SkiaSharp/3.119.0": {
       "type": "package",

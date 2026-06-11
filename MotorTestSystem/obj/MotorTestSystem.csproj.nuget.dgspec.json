@@ -55,6 +55,10 @@
             "MaterialDesignThemes": {
               "target": "Package",
               "version": "[5.3.2, )"
+            },
+            "S7netplus": {
+              "target": "Package",
+              "version": "[0.20.0, )"
             }
           },
           "imports": [

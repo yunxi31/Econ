@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("scratch_baml")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+33b4d9848b18ca74d7f69a806126491bef5dc4c8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3df201501302f61cb6dfabea8e4098d6dda66bbd")]
 [assembly: System.Reflection.AssemblyProductAttribute("scratch_baml")]
 [assembly: System.Reflection.AssemblyTitleAttribute("scratch_baml")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

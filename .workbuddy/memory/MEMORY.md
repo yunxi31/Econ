@@ -33,6 +33,18 @@
 - MotorTestRecordModel 已扩展：含 ShaftLength/KnurlDiameter/NoiseDiff 及各阶段判定结果
 - LiveCharts 波形图数据在 HistoryViewModel 中生成，通过 SetWaveformData() 传递给报告窗口
 
+## PLC 通信协议
+- IPlcClient 接口：ConnectAsync / ReadSnapshotAsync / ResetCompletionSignalAsync
+- PlcClientFactory 根据协议字符串创建对应客户端
+- 已实现协议：
+  - ModbusTCP → ModbusTcpClient（手写 TCP 帧通信）
+  - MelsecMC / MC Protocol → MelsecMcClient（三菱 MC 协议帧）
+  - S7 Protocol (TCP) → S7PlcClient（S7netPlus 0.20.0 库）
+- S7PlcClient 地址映射：M100.0 完成信号，DB1.DBW100+ 测试数据，DB1.DBD200 条码
+- S7netPlus 构造函数：`Plc(CpuType, ip, port, short rack, short slot)`
+- S7netPlus ReadAsync 返回 object?，需安全拆箱处理
+- 工位 A2 (S7-1200) 和 A5 (S7-1500) 使用 S7 协议
+
 ## 通知中心
 - INotificationService 接口 + InMemoryNotificationService 内存实现
 - NotificationItem 模型（NotificationType枚举：Alarm/Maintenance/System，NotificationSeverity枚举：Info/Warning/Critical）

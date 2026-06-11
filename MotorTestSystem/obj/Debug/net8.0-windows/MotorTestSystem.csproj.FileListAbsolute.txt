@@ -101,3 +101,4 @@ C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\bin\Debug\net8.0-windows\HCNetSDKCom
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\bin\Debug\net8.0-windows\HCNetSDKCom\libiconv2.dll
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\Views\MotorReportWindow.baml
 C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\obj\Debug\net8.0-windows\Views\MotorReportWindow.g.cs
+C:\Users\Yunxi\Desktop\Econ\MotorTestSystem\bin\Debug\net8.0-windows\S7.Net.dll
