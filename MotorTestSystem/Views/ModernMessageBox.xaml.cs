@@ -38,8 +38,8 @@ namespace MotorTestSystem.Views
         private static MessageBoxResult ShowInternal(string message, string title, MessageBoxButton button, MessageBoxImage icon)
         {
             var dialog = new ModernMessageBox();
-            dialog.TitleText.Text = title;
-            dialog.MessageText.Text = message;
+            dialog.TitleText.Text = LanguageManager.Instance[title];
+            dialog.MessageText.Text = LanguageManager.Instance[message];
 
             // 设置图标类型和色彩
             switch (icon)
@@ -71,21 +71,21 @@ namespace MotorTestSystem.Views
             switch (button)
             {
                 case MessageBoxButton.OK:
-                    dialog.BtnOK.Content = "确定";
+                    dialog.BtnOK.Content = LanguageManager.Instance["确定"];
                     dialog.BtnCancel.Visibility = Visibility.Collapsed;
                     break;
                 case MessageBoxButton.OKCancel:
-                    dialog.BtnOK.Content = "确定";
-                    dialog.BtnCancel.Content = "取消";
+                    dialog.BtnOK.Content = LanguageManager.Instance["确定"];
+                    dialog.BtnCancel.Content = LanguageManager.Instance["取消"];
                     dialog.BtnCancel.Visibility = Visibility.Visible;
                     break;
                 case MessageBoxButton.YesNo:
-                    dialog.BtnOK.Content = "是";
-                    dialog.BtnCancel.Content = "否";
+                    dialog.BtnOK.Content = LanguageManager.Instance["是"];
+                    dialog.BtnCancel.Content = LanguageManager.Instance["否"];
                     dialog.BtnCancel.Visibility = Visibility.Visible;
                     break;
                 default:
-                    dialog.BtnOK.Content = "确定";
+                    dialog.BtnOK.Content = LanguageManager.Instance["确定"];
                     dialog.BtnCancel.Visibility = Visibility.Collapsed;
                     break;
             }
@@ -116,13 +116,13 @@ namespace MotorTestSystem.Views
 
         private void BtnOK_Click(object sender, RoutedEventArgs e)
         {
-            _result = BtnOK.Content.ToString() == "是" ? MessageBoxResult.Yes : MessageBoxResult.OK;
+            _result = BtnOK.Content.ToString() == LanguageManager.Instance["是"] ? MessageBoxResult.Yes : MessageBoxResult.OK;
             Close();
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
-            _result = BtnCancel.Content.ToString() == "否" ? MessageBoxResult.No : MessageBoxResult.Cancel;
+            _result = BtnCancel.Content.ToString() == LanguageManager.Instance["否"] ? MessageBoxResult.No : MessageBoxResult.Cancel;
             Close();
         }
     }

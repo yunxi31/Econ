@@ -158,6 +158,11 @@ public partial class MainWindow : Window
         this.Close();
     }
 
+    private void LanguageToggleButton_Click(object sender, RoutedEventArgs e)
+    {
+        LanguageManager.Instance.ToggleLanguage();
+    }
+
     private void MainWindow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
         if (UserCardPopup.IsOpen)

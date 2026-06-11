@@ -158,8 +158,11 @@ namespace MotorTestSystem.ViewModels
             // 订阅 PLC 轮询事件，实时刷新
             _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
 
-            // 首次加载
-            RefreshAllData();
+            // 首次加载：异步启动，避免在 UI 线程同步等待造成死锁
+            Application.Current?.Dispatcher?.InvokeAsync(async () =>
+            {
+                await RefreshAllDataAsync();
+            });
 
             _refreshTimer = new DispatcherTimer
             {
@@ -181,17 +184,7 @@ namespace MotorTestSystem.ViewModels
 
         #region Refresh Methods
 
-        private void RefreshAllData()
-        {
-            try
-            {
-                RefreshAllDataAsync().GetAwaiter().GetResult();
-            }
-            catch
-            {
-                // 静默处理，下次定时器会重试
-            }
-        }
+        // RefreshAllData() 已移除，直接通过 Dispatcher.InvokeAsync 异步调用 RefreshAllDataAsync()
 
         private async System.Threading.Tasks.Task RefreshAllDataAsync()
         {
@@ -345,10 +338,10 @@ namespace MotorTestSystem.ViewModels
             };
 
             // 更新良率趋势折线图
-            UpdatePassRateChart(labels, passRateValues, useRealData);
+            await UpdatePassRateChartAsync(labels, passRateValues, useRealData);
         }
 
-        private void UpdatePassRateChart(string[] todayLabels, double[] todayValues, bool hasRealData)
+        private async System.Threading.Tasks.Task UpdatePassRateChartAsync(string[] todayLabels, double[] todayValues, bool hasRealData)
         {
             if (_currentDimension == "今日")
             {
@@ -360,38 +353,37 @@ namespace MotorTestSystem.ViewModels
             else if (_currentDimension == "本周")
             {
                 var weekLabels = new[] { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
-                var weekValues = CalculateWeeklyPassRates();
+                var weekValues = await CalculateWeeklyPassRatesAsync();
                 PassRateXAxes = CreateAxis(weekLabels, -0.5, 6.5);
                 PassRateSeries = CreateLineSeries(weekValues, true);
             }
             else if (_currentDimension == "本月")
             {
                 var monthLabels = new[] { "第一周", "第二周", "第三周", "第四周" };
-                var monthValues = CalculateMonthlyPassRates();
+                var monthValues = await CalculateMonthlyPassRatesAsync();
                 PassRateXAxes = CreateAxis(monthLabels, -0.5, 3.5);
                 PassRateSeries = CreateLineSeries(monthValues, true);
             }
         }
 
-        private double[] CalculateWeeklyPassRates()
+        private async System.Threading.Tasks.Task<double[]> CalculateWeeklyPassRatesAsync()
         {
             var result = new double[7];
             DateTime today = DateTime.Now.Date;
 
             for (int i = 0; i < 7; i++)
             {
-                // 从本周一开始
                 DateTime day = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday + i);
                 if (day > today) break;
 
-                var summary = _repository.GetSummaryAsync(day, day.AddDays(1).AddTicks(-1)).GetAwaiter().GetResult();
+                var summary = await _repository.GetSummaryAsync(day, day.AddDays(1).AddTicks(-1));
                 result[i] = summary.TotalChecked > 0 ? Math.Round(summary.PassRate, 1) : 0;
             }
 
             return result;
         }
 
-        private double[] CalculateMonthlyPassRates()
+        private async System.Threading.Tasks.Task<double[]> CalculateMonthlyPassRatesAsync()
         {
             var result = new double[4];
             DateTime today = DateTime.Now.Date;
@@ -404,7 +396,7 @@ namespace MotorTestSystem.ViewModels
                 if (weekStart > today) break;
                 if (weekEnd > today) weekEnd = today.AddDays(1).AddTicks(-1);
 
-                var summary = _repository.GetSummaryAsync(weekStart, weekEnd).GetAwaiter().GetResult();
+                var summary = await _repository.GetSummaryAsync(weekStart, weekEnd);
                 result[i] = summary.TotalChecked > 0 ? Math.Round(summary.PassRate, 1) : 0;
             }
 

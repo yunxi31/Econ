@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:MotorTestSystem"
         mc:Ignorable="d"
-        Title="系统登录" Height="420" Width="380"
+        Title="{local:Loc 系统登录}" Height="420" Width="380"
         WindowStyle="None"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
@@ -31,12 +32,40 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,0,0,0">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="15,0,0,0">
                     <Ellipse Width="8" Height="8" Fill="#00DFFF" Margin="0,0,8,0"/>
-                    <TextBlock Text="系统安全登录" Foreground="#A0AAB2" FontSize="12" FontWeight="Bold"/>
+                    <TextBlock Text="{local:Loc 系统安全登录}" Foreground="#A0AAB2" FontSize="12" FontWeight="Bold"/>
                 </StackPanel>
-                <Button Grid.Column="1" Content="✕" Width="40" Height="40" Background="Transparent" BorderThickness="0" Foreground="#A0AAB2" FontSize="14" Click="CloseButton_Click" VerticalAlignment="Center" HorizontalAlignment="Right">
+                <Button Grid.Column="1" Click="LanguageToggleButton_Click" Width="40" Height="40" Background="Transparent" BorderThickness="0" Foreground="#A0AAB2" VerticalAlignment="Center">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}">
+                                            <TextBlock x:Name="Txt"
+                                                       Text="{Binding Source={x:Static local:LanguageManager.Instance}, Path=CurrentLanguage}"
+                                                       Foreground="#A0AAB2" 
+                                                       FontSize="12" 
+                                                       FontWeight="Bold" 
+                                                       HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#252F3C"/>
+                                                <Setter TargetName="Txt" Property="Foreground" Value="#00DFFF"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Grid.Column="2" Content="✕" Width="40" Height="40" Background="Transparent" BorderThickness="0" Foreground="#A0AAB2" FontSize="14" Click="CloseButton_Click" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <Button.Style>
                         <Style TargetType="Button">
                             <Setter Property="Template">
@@ -62,7 +91,7 @@
             <!-- Brand Header -->
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,30,0,10">
                 <TextBlock Text="MOTOR TEST" Foreground="White" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Text="电机电性能测试系统" Foreground="#00DFFF" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                <TextBlock Text="{local:Loc 电机电性能测试系统}" Foreground="#00DFFF" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
             </StackPanel>
 
             <!-- Input Fields -->
@@ -76,7 +105,7 @@
 
                 <!-- Role Selection -->
                 <ComboBox x:Name="RoleComboBox" Grid.Row="0" Margin="0,10,0,14"
-                          materialDesign:HintAssist.Hint="选择身份角色"
+                          materialDesign:HintAssist.Hint="{local:Loc 选择身份角色}"
                           Style="{StaticResource MaterialDesignFloatingHintComboBox}"
                           Foreground="White"
                           BorderBrush="#3A4250"
@@ -90,14 +119,14 @@
                         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#00DFFF"/>
                         <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#22262F"/>
                     </ComboBox.Resources>
-                    <ComboBoxItem Content="操作员 (Operator)"/>
-                    <ComboBoxItem Content="维护员 (Maintainer)"/>
-                    <ComboBoxItem Content="管理员 (Admin)"/>
+                    <ComboBoxItem Content="{local:Loc 操作员 (Operator)}"/>
+                    <ComboBoxItem Content="{local:Loc 维护员 (Maintainer)}"/>
+                    <ComboBoxItem Content="{local:Loc 管理员 (Admin)}"/>
                 </ComboBox>
 
                 <!-- Username -->
                 <TextBox x:Name="UsernameTextBox" Grid.Row="1" Margin="0,10,0,15"
-                         materialDesign:HintAssist.Hint="用户账号"
+                         materialDesign:HintAssist.Hint="{local:Loc 用户账号}"
                          Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                          Foreground="White"
                          BorderBrush="#2B303C"
@@ -105,7 +134,7 @@
 
                 <!-- Password -->
                 <PasswordBox x:Name="PasswordInput" Grid.Row="2" Margin="0,10,0,10"
-                             materialDesign:HintAssist.Hint="安全密码"
+                             materialDesign:HintAssist.Hint="{local:Loc 安全密码}"
                              Style="{StaticResource MaterialDesignFloatingHintPasswordBox}"
                              Foreground="White"
                              BorderBrush="#2B303C"
@@ -120,7 +149,7 @@
             <!-- Actions Footer -->
             <StackPanel Grid.Row="3" Margin="35,0,35,30">
                 <!-- Login Button -->
-                <Button Content="登 录" Height="42" FontSize="14" FontWeight="Bold"
+                <Button Content="{local:Loc 登 录}" Height="42" FontSize="14" FontWeight="Bold"
                         Background="#00DFFF" Foreground="Black" BorderThickness="0"
                         Click="LoginButton_Click">
                     <Button.Resources>

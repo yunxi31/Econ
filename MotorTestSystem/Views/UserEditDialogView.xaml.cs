@@ -44,12 +44,12 @@ namespace MotorTestSystem.Views
             // Validation
             if (string.IsNullOrWhiteSpace(vm.Account))
             {
-                MessageBox.Show("账号不能为空！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ModernMessageBox.Show("账号不能为空！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             if (string.IsNullOrWhiteSpace(vm.Name))
             {
-                MessageBox.Show("姓名不能为空！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ModernMessageBox.Show("姓名不能为空！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -58,12 +58,12 @@ namespace MotorTestSystem.Views
             {
                 if (string.IsNullOrEmpty(vm.Password))
                 {
-                    MessageBox.Show("请输入登录密码！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ModernMessageBox.Show("请输入登录密码！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
                 if (vm.Password != vm.ConfirmPassword)
                 {
-                    MessageBox.Show("两次输入的密码不一致！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ModernMessageBox.Show("两次输入的密码不一致！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
             }
@@ -72,7 +72,7 @@ namespace MotorTestSystem.Views
                 // If editing and password is not empty, check match
                 if (!string.IsNullOrEmpty(vm.Password) && vm.Password != vm.ConfirmPassword)
                 {
-                    MessageBox.Show("两次输入的密码不一致！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ModernMessageBox.Show("两次输入的密码不一致！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
             }

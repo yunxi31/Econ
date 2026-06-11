@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MotorTestSystem.Models;
@@ -171,6 +172,14 @@ namespace MotorTestSystem.ViewModels
 
         private void OnServiceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            // CollectionChanged 可能从后台线程触发（PLC 轮询），必须回到 UI 线程
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(() => OnServiceCollectionChanged(sender, e));
+                return;
+            }
+
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
@@ -219,7 +228,13 @@ namespace MotorTestSystem.ViewModels
 
         private void OnNotificationReceived(object? sender, NotificationItem item)
         {
-            // 新通知到达时刷新筛选和计数（UI 线程安全由 Dispatcher 保证）
+            // 新通知到达时刷新筛选和计数 — 事件可能来自后台线程，必须 Dispatch 到 UI
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(() => OnNotificationReceived(sender, item));
+                return;
+            }
             UpdateCounts();
             FilterNotifications();
         }

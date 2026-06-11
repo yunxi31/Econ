@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MotorTestSystem.Models;
 using MotorTestSystem.Services;
+using MotorTestSystem.Views;
 
 namespace MotorTestSystem.ViewModels
 {
@@ -235,7 +236,7 @@ namespace MotorTestSystem.ViewModels
 
                 if (error != null)
                 {
-                    System.Windows.MessageBox.Show(error, "创建失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    ModernMessageBox.Show(error, "创建失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                     return;
                 }
 
@@ -272,7 +273,7 @@ namespace MotorTestSystem.ViewModels
 
                 if (error != null)
                 {
-                    System.Windows.MessageBox.Show(error, "更新失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    ModernMessageBox.Show(error, "更新失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                     return;
                 }
 
@@ -285,7 +286,7 @@ namespace MotorTestSystem.ViewModels
         {
             if (user == null) return;
 
-            var result = System.Windows.MessageBox.Show(
+            var result = ModernMessageBox.Show(
                 $"确定要重置用户 {user.Name} ({user.Account}) 的密码为初始密码吗？",
                 "密码重置确认",
                 System.Windows.MessageBoxButton.YesNo,
@@ -297,11 +298,11 @@ namespace MotorTestSystem.ViewModels
             var error = _userService.ResetPassword(user.Id, "123456");
             if (error != null)
             {
-                System.Windows.MessageBox.Show(error, "重置失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                ModernMessageBox.Show(error, "重置失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                 return;
             }
 
-            System.Windows.MessageBox.Show(
+            ModernMessageBox.Show(
                 $"用户 {user.Name} 的密码已重置为：123456",
                 "密码重置成功",
                 System.Windows.MessageBoxButton.OK,

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MotorTestSystem.Views"
+             xmlns:root="clr-namespace:MotorTestSystem"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="600">
 
@@ -297,12 +298,18 @@
                 </Grid.ColumnDefinitions>
                 
                 <!-- Title binds to VM Title property, fallback to "新增用户" -->
-                <TextBlock Text="{Binding Title, FallbackValue='新增用户'}" 
-                           Foreground="#FFFFFF" 
+                <TextBlock Foreground="#FFFFFF" 
                            FontSize="16" 
                            FontWeight="Bold" 
                            VerticalAlignment="Center"
-                           IsHitTestVisible="False"/>
+                           IsHitTestVisible="False">
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource LocMultiConverter}">
+                            <Binding Path="Title" FallbackValue="新增用户" />
+                            <Binding Source="{x:Static root:LanguageManager.Instance}" Path="CurrentLanguage" />
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
                            
                 <!-- Close Button -->
                 <Button Grid.Column="1" 
@@ -328,7 +335,7 @@
                 <!-- ROW 0: Account & Name -->
                 <StackPanel Grid.Row="0" Grid.Column="0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                        <TextBlock Text="账号" Foreground="#8A8D99" FontSize="12"/>
+                        <TextBlock Text="{root:Loc 账号}" Foreground="#8A8D99" FontSize="12"/>
                         <TextBlock Text=" *" Foreground="#FF5258" FontSize="12" Margin="2,0,0,0"/>
                     </StackPanel>
                     <TextBox Text="{Binding Account, UpdateSourceTrigger=PropertyChanged}"/>
@@ -336,7 +343,7 @@
 
                 <StackPanel Grid.Row="0" Grid.Column="2">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                        <TextBlock Text="姓名" Foreground="#8A8D99" FontSize="12"/>
+                        <TextBlock Text="{root:Loc 姓名}" Foreground="#8A8D99" FontSize="12"/>
                         <TextBlock Text=" *" Foreground="#FF5258" FontSize="12" Margin="2,0,0,0"/>
                     </StackPanel>
                     <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
@@ -345,7 +352,7 @@
                 <!-- ROW 1: Password & Confirm Password -->
                 <StackPanel Grid.Row="2" Grid.Column="0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                        <TextBlock Text="登录密码" Foreground="#8A8D99" FontSize="12"/>
+                        <TextBlock Text="{root:Loc 登录密码}" Foreground="#8A8D99" FontSize="12"/>
                         <TextBlock Text=" *" Foreground="#FF5258" FontSize="12" Margin="2,0,0,0"/>
                     </StackPanel>
                     <PasswordBox x:Name="PbPassword"/>
@@ -353,7 +360,7 @@
 
                 <StackPanel Grid.Row="2" Grid.Column="2">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                        <TextBlock Text="确认密码" Foreground="#8A8D99" FontSize="12"/>
+                        <TextBlock Text="{root:Loc 确认密码}" Foreground="#8A8D99" FontSize="12"/>
                         <TextBlock Text=" *" Foreground="#FF5258" FontSize="12" Margin="2,0,0,0"/>
                     </StackPanel>
                     <PasswordBox x:Name="PbConfirmPassword"/>
@@ -361,21 +368,34 @@
 
                 <!-- ROW 2: Role & Status -->
                 <StackPanel Grid.Row="4" Grid.Column="0">
-                    <TextBlock Text="所属角色" Foreground="#8A8D99" FontSize="12" Margin="0,0,0,6"/>
+                    <TextBlock Text="{root:Loc 所属角色}" Foreground="#8A8D99" FontSize="12" Margin="0,0,0,6"/>
                     <ComboBox ItemsSource="{Binding Roles}" 
-                              SelectedItem="{Binding SelectedRole}"/>
+                              SelectedItem="{Binding SelectedRole}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource LocMultiConverter}">
+                                            <Binding Path="." />
+                                            <Binding Source="{x:Static root:LanguageManager.Instance}" Path="CurrentLanguage" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                 </StackPanel>
 
                 <StackPanel Grid.Row="4" Grid.Column="2">
-                    <TextBlock Text="状态" Foreground="#8A8D99" FontSize="12" Margin="0,0,0,6"/>
+                    <TextBlock Text="{root:Loc 状态}" Foreground="#8A8D99" FontSize="12" Margin="0,0,0,6"/>
                     <Border Background="#181924" BorderBrush="#333645" BorderThickness="1" CornerRadius="4" Height="36" Padding="2">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <RadioButton Grid.Column="0" Content="启用" IsChecked="{Binding IsEnabled, Mode=TwoWay}" Style="{StaticResource SegmentRadioButtonStyle}"/>
-                            <RadioButton Grid.Column="1" Content="禁用" IsChecked="{Binding IsDisabled, Mode=TwoWay}" Style="{StaticResource SegmentRadioButtonStyle}"/>
+                            <RadioButton Grid.Column="0" Content="{root:Loc 启用}" IsChecked="{Binding IsEnabled, Mode=TwoWay}" Style="{StaticResource SegmentRadioButtonStyle}"/>
+                            <RadioButton Grid.Column="1" Content="{root:Loc 禁用}" IsChecked="{Binding IsDisabled, Mode=TwoWay}" Style="{StaticResource SegmentRadioButtonStyle}"/>
                         </Grid>
                     </Border>
                 </StackPanel>
@@ -383,11 +403,11 @@
 
             <!-- 3. FOOTER BUTTON AREA -->
             <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-                <Button Content="取消" 
+                <Button Content="{root:Loc 取消}" 
                         Click="Cancel_Click"
                         Style="{StaticResource DialogCancelButtonStyle}" 
                         Margin="0,0,16,0"/>
-                <Button Content="保存" 
+                <Button Content="{root:Loc 保存}" 
                         Click="Save_Click"
                         Style="{StaticResource DialogSaveButtonStyle}"/>
             </StackPanel>

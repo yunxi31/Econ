@@ -34,6 +34,11 @@ namespace MotorTestSystem
             Close();
         }
 
+        private void LanguageToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            LanguageManager.Instance.ToggleLanguage();
+        }
+
         private void RoleComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (IsLoaded)
@@ -117,7 +122,7 @@ namespace MotorTestSystem
 
         private void ShowError(string message)
         {
-            ErrorTextBlock.Text = message;
+            ErrorTextBlock.Text = LanguageManager.Instance[message];
             ErrorTextBlock.Visibility = Visibility.Visible;
         }
     }

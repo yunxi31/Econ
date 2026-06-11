@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:MotorTestSystem.Views"
              xmlns:converters="clr-namespace:MotorTestSystem.Converters"
              xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             xmlns:root="clr-namespace:MotorTestSystem"
              mc:Ignorable="d"
              d:DesignHeight="750" d:DesignWidth="1100">
 
@@ -309,22 +310,22 @@
 
         <!-- ROW 0: TITLE -->
         <Grid Grid.Row="0" Margin="20,15,20,10">
-            <TextBlock Text="数据追溯与查询" Foreground="{DynamicResource TextPrimary}" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+            <TextBlock Text="{root:Loc 数据追溯与查询}" Foreground="{DynamicResource TextPrimary}" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
         </Grid>
 
         <!-- ROW 1: KPI CARDS -->
         <UniformGrid Grid.Row="1" Columns="4" Margin="20,5,20,15">
             <!-- Card 1: 总测试数 -->
-            <local:KpiCardControl Title="总测试数" Value="{Binding TotalTestsCount}" ValueForeground="{DynamicResource TextPrimary}" Margin="0,0,8,0"/>
+            <local:KpiCardControl Title="{root:Loc 总测试数}" Value="{Binding TotalTestsCount}" ValueForeground="{DynamicResource TextPrimary}" Margin="0,0,8,0"/>
 
             <!-- Card 2: 合格总数 -->
-            <local:KpiCardControl Title="合格总数" Value="{Binding PassedCount}" ValueForeground="{DynamicResource AccentGreen}" Margin="8,0,8,0"/>
+            <local:KpiCardControl Title="{root:Loc 合格总数}" Value="{Binding PassedCount}" ValueForeground="{DynamicResource AccentGreen}" Margin="8,0,8,0"/>
 
             <!-- Card 3: 不合格总数 -->
-            <local:KpiCardControl Title="不合格总数" Value="{Binding FailedCount}" ValueForeground="{DynamicResource AccentRed}" Margin="8,0,8,0"/>
+            <local:KpiCardControl Title="{root:Loc 不合格总数}" Value="{Binding FailedCount}" ValueForeground="{DynamicResource AccentRed}" Margin="8,0,8,0"/>
 
             <!-- Card 4: 良率 -->
-            <local:KpiCardControl Title="良率" Value="{Binding PassRateString}" ValueForeground="{DynamicResource AccentCyan}" Margin="8,0,0,0"/>
+            <local:KpiCardControl Title="{root:Loc 良率}" Value="{Binding PassRateString}" ValueForeground="{DynamicResource AccentCyan}" Margin="8,0,0,0"/>
         </UniformGrid>
 
         <!-- ROW 2: FILTER BAR -->
@@ -344,12 +345,12 @@
 
                 <!-- 快捷时间胶囊按钮组 (Row 0, 跨全列) -->
                 <StackPanel Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal" Margin="0,0,0,12">
-                    <TextBlock Text="快捷筛选：" Foreground="#8A8D99" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <RadioButton Content="最近一小时" Style="{StaticResource CapsuleRadioStyle}" Margin="0,0,6,0"
+                    <TextBlock Text="{root:Loc 快捷筛选：}" Foreground="#8A8D99" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="{root:Loc 最近一小时}" Style="{StaticResource CapsuleRadioStyle}" Margin="0,0,6,0"
                                  IsChecked="{Binding SelectedQuickFilter, Converter={x:Static converters:EnumToBoolConverter.Instance}, ConverterParameter=LastHour}"/>
-                    <RadioButton Content="当班" Style="{StaticResource CapsuleRadioStyle}" Margin="0,0,6,0"
+                    <RadioButton Content="{root:Loc 当班}" Style="{StaticResource CapsuleRadioStyle}" Margin="0,0,6,0"
                                  IsChecked="{Binding SelectedQuickFilter, Converter={x:Static converters:EnumToBoolConverter.Instance}, ConverterParameter=CurrentShift}"/>
-                    <RadioButton Content="今日" Style="{StaticResource CapsuleRadioStyle}"
+                    <RadioButton Content="{root:Loc 今日}" Style="{StaticResource CapsuleRadioStyle}"
                                  IsChecked="{Binding SelectedQuickFilter, Converter={x:Static converters:EnumToBoolConverter.Instance}, ConverterParameter=Today}"/>
                 </StackPanel>
 
@@ -357,7 +358,7 @@
 
                 <!-- Search Barcode (Row 1) -->
                 <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,0">
-                    <TextBlock Text="电机条码" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
+                    <TextBlock Text="{root:Loc 电机条码}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
                     <Grid>
                         <TextBox Text="{Binding SearchBarcode, UpdateSourceTrigger=PropertyChanged}" 
                                  Style="{StaticResource DarkTextBoxStyle}" Padding="8,0,28,0">
@@ -367,7 +368,7 @@
                         </TextBox>
                         <Button HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" 
                                 Width="20" Height="20" Background="Transparent" BorderThickness="0" Cursor="Hand"
-                                Command="{Binding SearchCommand}" ToolTip="搜索">
+                                Command="{Binding SearchCommand}" ToolTip="{root:Loc 搜索}">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="Transparent">
@@ -387,29 +388,42 @@
 
                 <!-- Result Filter (Row 1) -->
                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,15,0">
-                    <TextBlock Text="测试结果" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
+                    <TextBlock Text="{root:Loc 测试结果}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
                     <ComboBox ItemsSource="{Binding ResultFilters}" 
                               SelectedItem="{Binding SelectedResultFilter}" 
-                              Style="{StaticResource DarkComboBoxStyle}"/>
+                              Style="{StaticResource DarkComboBoxStyle}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource LocMultiConverter}">
+                                            <Binding Path="." />
+                                            <Binding Source="{x:Static root:LanguageManager.Instance}" Path="CurrentLanguage" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                 </StackPanel>
 
                 <!-- Start Date (Row 1) -->
                 <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,15,0">
-                    <TextBlock Text="开始日期" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
+                    <TextBlock Text="{root:Loc 开始日期}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
                     <DatePicker SelectedDate="{Binding StartDate}" 
                                 Style="{StaticResource DarkDatePickerStyle}"/>
                 </StackPanel>
 
                 <!-- End Date (Row 1) -->
                 <StackPanel Grid.Row="1" Grid.Column="3" Margin="0,0,15,0">
-                    <TextBlock Text="结束日期" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
+                    <TextBlock Text="{root:Loc 结束日期}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
                     <DatePicker SelectedDate="{Binding EndDate}" 
                                 Style="{StaticResource DarkDatePickerStyle}"/>
                 </StackPanel>
 
                 <!-- Action Buttons (Row 1) -->
                 <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Bottom">
-                    <Button Content="查询" 
+                    <Button Content="{root:Loc 查询}" 
                             Command="{Binding SearchCommand}" 
                             Width="80" Height="32" 
                             Background="{DynamicResource AccentCyan}" Foreground="Black" 
@@ -420,7 +434,7 @@
                             </Style>
                         </Button.Resources>
                     </Button>
-                    <Button Content="重置" 
+                    <Button Content="{root:Loc 重置}" 
                             Command="{Binding ResetCommand}" 
                             Width="80" Height="32" 
                             Background="Transparent" Foreground="{DynamicResource TextPrimary}" 
@@ -501,12 +515,12 @@
  
                     <DataGrid.Columns>
                         <!-- Motor Barcode -->
-                        <DataGridTemplateColumn Header="电机条码" SortMemberPath="Barcode" Width="250">
+                        <DataGridTemplateColumn Header="{root:Loc 电机条码}" SortMemberPath="Barcode" Width="250">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel x:Name="CellGrid" Orientation="Horizontal" Background="Transparent" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Barcode}" Foreground="{DynamicResource AccentCyan}" Cursor="Hand" VerticalAlignment="Center" Margin="10,0,5,0" FontWeight="SemiBold"/>
-                                        <Button x:Name="CopyButton" Background="Transparent" BorderThickness="0" Width="24" Height="24" Padding="0" VerticalAlignment="Center" Margin="0,0,10,0" Command="{Binding DataContext.CopyBarcodeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding Barcode}" ToolTip="复制条码" Visibility="Hidden">
+                                        <Button x:Name="CopyButton" Background="Transparent" BorderThickness="0" Width="24" Height="24" Padding="0" VerticalAlignment="Center" Margin="0,0,10,0" Command="{Binding DataContext.CopyBarcodeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding Barcode}" ToolTip="{root:Loc 复制条码}" Visibility="Hidden">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
                                                     <Border Background="Transparent" CornerRadius="4" x:Name="btnBorder">
@@ -533,7 +547,7 @@
                         </DataGridTemplateColumn>
  
                         <!-- Test Time -->
-                        <DataGridTemplateColumn Header="检测时间" SortMemberPath="TestTime" Width="160">
+                        <DataGridTemplateColumn Header="{root:Loc 检测时间}" SortMemberPath="TestTime" Width="160">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding TestTime, StringFormat=\{0:yyyy-MM-dd HH:mm:ss\}}" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,10,0"/>
@@ -542,7 +556,7 @@
                         </DataGridTemplateColumn>
                         
                         <!-- Final Result styled Badge (OK / NG) -->
-                        <DataGridTemplateColumn Header="最终结果" Width="90">
+                        <DataGridTemplateColumn Header="{root:Loc 最终结果}" Width="90">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <ContentControl Content="{Binding FinalResult}">
@@ -574,7 +588,7 @@
                         </DataGridTemplateColumn>
 
                         <!-- Measurement Columns with Condition-based highlighting -->
-                        <DataGridTemplateColumn Header="空载电流(A)" Width="100">
+                        <DataGridTemplateColumn Header="{root:Loc 空载电流(A)}" Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding NoLoadCurrentText}" VerticalAlignment="Center" Margin="10,0,10,0">
@@ -596,7 +610,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="空载转速(r/min)" Width="120">
+                        <DataGridTemplateColumn Header="{root:Loc 空载转速(r/min)}" Width="120">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding NoLoadSpeedText}" VerticalAlignment="Center" Margin="10,0,10,0">
@@ -618,7 +632,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="正转综合(dB)" Width="110">
+                        <DataGridTemplateColumn Header="{root:Loc 正转综合(dB)}" Width="110">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding FwdNoiseText}" VerticalAlignment="Center" Margin="10,0,10,0">
@@ -640,7 +654,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="反转综合(dB)" Width="110">
+                        <DataGridTemplateColumn Header="{root:Loc 反转综合(dB)}" Width="110">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding RevNoiseText}" VerticalAlignment="Center" Margin="10,0,10,0">
@@ -662,7 +676,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="负载电流(A)" Width="100">
+                        <DataGridTemplateColumn Header="{root:Loc 负载电流(A)}" Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding LoadCurrentText}" VerticalAlignment="Center" Margin="10,0,10,0">
@@ -684,7 +698,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="负载转速(r/min)" Width="120">
+                        <DataGridTemplateColumn Header="{root:Loc 负载转速(r/min)}" Width="120">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding LoadSpeedText}" VerticalAlignment="Center" Margin="10,0,10,0">
@@ -756,7 +770,7 @@
                         <!-- Content Area: Parameters & Waveform -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <StackPanel>
-                                <TextBlock Text="测试指标详细数据" Foreground="{DynamicResource TextSecondary}" FontSize="11" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                                <TextBlock Text="{root:Loc 测试指标详细数据}" Foreground="{DynamicResource TextSecondary}" FontSize="11" FontWeight="SemiBold" Margin="0,5,0,5"/>
                                 
                                 <!-- Detailed Parameters Grid -->
                                 <Border Background="#252937" CornerRadius="6" Padding="12" Margin="0,5,0,0">
@@ -773,31 +787,31 @@
                                         
                                         <!-- Row 0: No Load Current & Speed -->
                                         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12">
-                                            <TextBlock Text="空载电流" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 空载电流}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="1.85 A" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource AccentRed}"/>
                                         </StackPanel>
                                         <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
-                                            <TextBlock Text="空载转速" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 空载转速}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="3050 r/min" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
                                         </StackPanel>
 
                                         <!-- Row 1: Noise Fwd & Rev -->
                                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,12">
-                                            <TextBlock Text="正转综合噪音" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 正转综合噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="68.5 dB" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource AccentRed}"/>
                                         </StackPanel>
                                         <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,12">
-                                            <TextBlock Text="反转综合噪音" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 反转综合噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="69.2 dB" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource AccentRed}"/>
                                         </StackPanel>
 
                                         <!-- Row 2: Load Current & Speed -->
                                         <StackPanel Grid.Row="2" Grid.Column="0">
-                                            <TextBlock Text="负载电流" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 负载电流}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="4.85 A" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource AccentRed}"/>
                                         </StackPanel>
                                         <StackPanel Grid.Row="2" Grid.Column="1">
-                                            <TextBlock Text="负载转速" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 负载转速}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="2950 r/min" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
                                         </StackPanel>
                                     </Grid>
@@ -817,14 +831,14 @@
                                     <Grid Grid.Row="0" Margin="0,0,0,6">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Border Width="3" Height="12" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="空载电流波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                            <TextBlock Text="（启动冲击 → 稳态波动）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                            <TextBlock Text="{root:Loc 空载电流波形}" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '（启动冲击 → 稳态波动）'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                             <Ellipse Width="6" Height="6" Fill="#00DFFF" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="当前电流" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 当前电流}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                             <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="上限 (2.5A)" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '上限 (2.5A)'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Grid>
                                     <Border Grid.Row="1" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
@@ -843,16 +857,16 @@
                                     <Grid Grid.Row="3" Margin="0,0,0,6">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Border Width="3" Height="12" Background="#FFA500" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="噪音波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                            <TextBlock Text="（正转 / 反转）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                            <TextBlock Text="{root:Loc 噪音波形}" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '（正转 / 反转）'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                             <Ellipse Width="6" Height="6" Fill="#FFA500" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="正转噪音" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 正转噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                             <Ellipse Width="6" Height="6" Fill="#A855F7" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="反转噪音" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 反转噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                             <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="上限 (70dB)" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '上限 (70dB)'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Grid>
                                     <Border Grid.Row="4" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
@@ -886,7 +900,7 @@
                                 </Button.Resources>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Path Data="M18,3H6V7H18M19,12A1,1 0 0,1 18,11A1,1 0 0,1 17,12A1,1 0 0,1 18,13A1,1 0 0,1 19,12M16,19H8V14H16M19,8H5A3,3 0 0,0 2,11V17H6V21H18V17H22V11A3,3 0 0,0 19,8Z" Fill="{DynamicResource TextPrimary}" Width="14" Height="14" Stretch="Fill" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="打印追溯单" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{root:Loc 打印追溯单}" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Button>
 
@@ -899,7 +913,7 @@
                                 </Button.Resources>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M7,20H17V18H7V20M7,16H17V14H7V16M7,12H13V10H7V12Z" Fill="Black" Width="14" Height="14" Stretch="Fill" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="查看完整报告" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{root:Loc 查看完整报告}" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Button>
                         </Grid>
@@ -959,7 +973,7 @@
                         <!-- Content Area: Parameters & Waveform -->
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <StackPanel>
-                                <TextBlock Text="测试指标详细数据" Foreground="{DynamicResource TextSecondary}" FontSize="11" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                                <TextBlock Text="{root:Loc 测试指标详细数据}" Foreground="{DynamicResource TextSecondary}" FontSize="11" FontWeight="SemiBold" Margin="0,5,0,5"/>
                                 
                                 <!-- Detailed Parameters Grid -->
                                 <Border Background="#252937" CornerRadius="6" Padding="12" Margin="0,5,0,0">
@@ -976,7 +990,7 @@
                                         
                                         <!-- Row 0: No Load Current & Speed -->
                                         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12">
-                                            <TextBlock Text="空载电流" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 空载电流}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="{Binding SelectedMotor.NoLoadCurrentText, StringFormat=\{0\} A}" FontSize="14" FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -991,7 +1005,7 @@
                                             </TextBlock>
                                         </StackPanel>
                                         <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
-                                            <TextBlock Text="空载转速" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 空载转速}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="{Binding SelectedMotor.NoLoadSpeedText, StringFormat=\{0\} r/min}" FontSize="14" FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -1008,7 +1022,7 @@
 
                                         <!-- Row 1: Noise Fwd & Rev -->
                                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,12">
-                                            <TextBlock Text="正转综合噪音" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 正转综合噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="{Binding SelectedMotor.FwdNoiseText, StringFormat=\{0\} dB}" FontSize="14" FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -1023,7 +1037,7 @@
                                             </TextBlock>
                                         </StackPanel>
                                         <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,12">
-                                            <TextBlock Text="反转综合噪音" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 反转综合噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="{Binding SelectedMotor.RevNoiseText, StringFormat=\{0\} dB}" FontSize="14" FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -1040,7 +1054,7 @@
 
                                         <!-- Row 2: Load Current & Speed -->
                                         <StackPanel Grid.Row="2" Grid.Column="0">
-                                            <TextBlock Text="负载电流" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 负载电流}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="{Binding SelectedMotor.LoadCurrentText, StringFormat=\{0\} A}" FontSize="14" FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -1055,7 +1069,7 @@
                                             </TextBlock>
                                         </StackPanel>
                                         <StackPanel Grid.Row="2" Grid.Column="1">
-                                            <TextBlock Text="负载转速" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{root:Loc 负载转速}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
                                             <TextBlock Text="{Binding SelectedMotor.LoadSpeedText, StringFormat=\{0\} r/min}" FontSize="14" FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -1086,14 +1100,14 @@
                                     <Grid Grid.Row="0" Margin="0,0,0,6">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Border Width="3" Height="12" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="空载电流波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                            <TextBlock Text="（启动冲击 → 稳态波动）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                            <TextBlock Text="{root:Loc 空载电流波形}" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '（启动冲击 → 稳态波动）'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                             <Ellipse Width="6" Height="6" Fill="#00DFFF" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="当前电流" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 当前电流}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                             <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="上限 (2.5A)" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '上限 (2.5A)'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Grid>
                                     <Border Grid.Row="1" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
@@ -1112,16 +1126,16 @@
                                     <Grid Grid.Row="3" Margin="0,0,0,6">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Border Width="3" Height="12" Background="#FFA500" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="噪音波形" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                            <TextBlock Text="（正转 / 反转）" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                            <TextBlock Text="{root:Loc 噪音波形}" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '（正转 / 反转）'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                             <Ellipse Width="6" Height="6" Fill="#FFA500" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="正转噪音" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 正转噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                             <Ellipse Width="6" Height="6" Fill="#A855F7" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="反转噪音" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 反转噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                             <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="上限 (70dB)" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '上限 (70dB)'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Grid>
                                     <Border Grid.Row="4" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
@@ -1155,7 +1169,7 @@
                                 </Button.Resources>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Path Data="M18,3H6V7H18M19,12A1,1 0 0,1 18,11A1,1 0 0,1 17,12A1,1 0 0,1 18,13A1,1 0 0,1 19,12M16,19H8V14H16M19,8H5A3,3 0 0,0 2,11V17H6V21H18V17H22V11A3,3 0 0,0 19,8Z" Fill="{DynamicResource TextPrimary}" Width="14" Height="14" Stretch="Fill" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="打印追溯单" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{root:Loc 打印追溯单}" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Button>
 
@@ -1168,7 +1182,7 @@
                                 </Button.Resources>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M7,20H17V18H7V20M7,16H17V14H7V16M7,12H13V10H7V12Z" Fill="Black" Width="14" Height="14" Stretch="Fill" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="查看完整报告" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{root:Loc 查看完整报告}" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Button>
                         </Grid>
@@ -1187,7 +1201,7 @@
             <!-- Pagination Controls (Left) -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <!-- Prev Page Button -->
-                <Button Content="&lt; 上一页" 
+                <Button Content="{root:Loc '&lt; 上一页'}" 
                         Command="{Binding PreviousPageCommand}" 
                         Background="#2B303C" Foreground="White" BorderThickness="0" 
                         Height="28" Padding="12,0,12,0" FontWeight="SemiBold" FontSize="11" Margin="0,0,15,0">
@@ -1200,15 +1214,15 @@
 
                 <!-- Page Info -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0">
-                    <TextBlock Text="第 " Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
-                    <TextBlock Text="{Binding CurrentPage}" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="12"/>
-                    <TextBlock Text=" 页 / 共 " Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
-                    <TextBlock Text="{Binding TotalPages}" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="12"/>
-                    <TextBlock Text=" 页" Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
+                    <TextBlock Text="{root:Loc 第}" Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
+                    <TextBlock Text="{Binding CurrentPage}" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="12" Margin="3,0,3,0"/>
+                    <TextBlock Text="{root:Loc '页 / 共'}" Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
+                    <TextBlock Text="{Binding TotalPages}" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="12" Margin="3,0,3,0"/>
+                    <TextBlock Text="{root:Loc 页}" Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
                 </StackPanel>
 
                 <!-- Next Page Button -->
-                <Button Content="下一页 &gt;" 
+                <Button Content="{root:Loc '下一页 &gt;'}" 
                         Command="{Binding NextPageCommand}" 
                         Background="#2B303C" Foreground="White" BorderThickness="0" 
                         Height="28" Padding="12,0,12,0" FontWeight="SemiBold" FontSize="11" Margin="0,0,20,0">
@@ -1220,10 +1234,12 @@
                 </Button>
 
                 <!-- Total Count Info using Run for rich styling -->
-                <TextBlock VerticalAlignment="Center">
-                    <Run Text="共 " Foreground="{DynamicResource TextSecondary}"/>
-                    <Run Text="{Binding TotalTestsCount}" Foreground="{DynamicResource AccentCyan}" FontWeight="Bold"/>
-                    <Run Text=" 条测试数据" Foreground="{DynamicResource TextSecondary}"/>
+                <TextBlock VerticalAlignment="Center" xml:space="preserve">
+                    <Run Text="{root:Loc 共}" Foreground="{DynamicResource TextSecondary}"/>
+                    <Run Text=" "/>
+                    <Run Text="{Binding TotalTestsCount, Mode=OneWay}" Foreground="{DynamicResource AccentCyan}" FontWeight="Bold"/>
+                    <Run Text=" "/>
+                    <Run Text="{root:Loc 条测试数据}" Foreground="{DynamicResource TextSecondary}"/>
                 </TextBlock>
             </StackPanel>
 
@@ -1240,7 +1256,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" 
                           Fill="Black" Width="14" Height="14" Stretch="Fill" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <TextBlock Text="导出数据" VerticalAlignment="Center"/>
+                    <TextBlock Text="{root:Loc 导出数据}" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
         </Grid>
@@ -1278,7 +1294,7 @@
                         </Ellipse>
                     </Grid>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="正在打印追溯单" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="{root:Loc 正在打印追溯单}" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <TextBlock Text="{Binding PrintStatus}" Foreground="#8A8D99" FontSize="12"/>
                     </StackPanel>
                 </StackPanel>

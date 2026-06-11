@@ -1,0 +1,967 @@
+Found 966 entries:
+LoginWindow.xaml.cs:92: ShowError("请输入用户名！");
+LoginWindow.xaml.cs:105: ShowError("请输入密码！");
+MainWindow.xaml:543: <!-- 用户信息悬浮卡片 -->
+MainWindow.xaml:562: <!-- 用户名 -->
+MainWindow.xaml:576: <!-- 角色 -->
+MainWindow.xaml:590: <!-- 退出登录按钮 -->
+MainWindow.xaml.cs:71: return; // 双击头像或用户信息卡片时，不退出全屏
+MainWindow.xaml.cs:74: ToggleFullscreen(); // 退出全屏
+MainWindow.xaml.cs:143: ToggleFullscreen(); // 退出全屏
+Converters\ProgressToDashArrayConverter.cs:16: return value; // passthrough，实际绑定由 code-behind 处理
+Converters\StatusToTextConverter.cs:15: 0 => "待机",
+Converters\StatusToTextConverter.cs:16: 1 => "运行中",
+Converters\StatusToTextConverter.cs:17: 2 => "故障",
+Converters\StatusToTextConverter.cs:18: _ => "未知"
+Converters\StatusToTextConverter.cs:22: return "未知";
+Models\AppUser.cs:10: Active,    // 启用
+Models\AppUser.cs:11: Disabled   // 禁用
+Models\AppUser.cs:19: Admin,      // 管理员
+Models\AppUser.cs:20: Operator,   // 操作员
+Models\AppUser.cs:21: Maintainer  // 维护员
+Models\AppUser.cs:88: AppRole.Admin => "管理员",
+Models\AppUser.cs:89: AppRole.Operator => "操作员",
+Models\AppUser.cs:90: AppRole.Maintainer => "维护员",
+Models\AppUser.cs:97: UserStatus.Active => "在线",
+Models\AppUser.cs:98: UserStatus.Disabled => "禁用",
+Models\AppUser.cs:169: AppPermission.Monitor => "生产监控",
+Models\AppUser.cs:170: AppPermission.DeviceControl => "设备控制",
+Models\AppUser.cs:171: AppPermission.Dashboard => "生产看板",
+Models\AppUser.cs:172: AppPermission.History => "数据追溯",
+Models\AppUser.cs:173: AppPermission.Diagnosis => "诊断功能",
+Models\AppUser.cs:174: AppPermission.Calibration => "设备校准",
+Models\AppUser.cs:175: AppPermission.SystemConfig => "系统配置",
+Models\AppUser.cs:176: AppPermission.UserManagement => "用户管理",
+Models\AppUser.cs:177: AppPermission.AlarmManagement => "报警管理",
+Models\AppUser.cs:178: AppPermission.DataExport => "数据导出",
+Models\MotorTestQuery.cs:8: public string ResultFilter { get; set; } = "全部";
+Models\NotificationItem.cs:10: Alarm,       // 报警
+Models\NotificationItem.cs:11: Maintenance, // 维护
+Models\NotificationItem.cs:12: System       // 系统
+Models\NotificationItem.cs:20: Info,     // 信息
+Models\NotificationItem.cs:21: Warning,  // 警告
+Models\NotificationItem.cs:22: Critical  // 严重
+Models\NotificationItem.cs:59: NotificationType.Alarm => "报警",
+Models\NotificationItem.cs:60: NotificationType.Maintenance => "维护",
+Models\NotificationItem.cs:61: NotificationType.System => "系统",
+Models\NotificationItem.cs:62: _ => "未知"
+Models\NotificationItem.cs:69: public string BadgeText => IsRead ? "已读" : "未读";
+Models\StationConfig.cs:32: private string _status = "离线"; // 在线, 离线, 故障
+Models\StationState.cs:21: private string _barcode = "等待扫码...";
+Models\StationState.cs:25: private int _status = 0; // 0-待机, 1-运行, 2-故障
+Models\StationState.cs:66: public string DisplayToolTip => $"{Id}工位 ({GetTestTypeName(Id)}): {GetStatusName(Status)}";
+Models\StationState.cs:72: "A1" or "A2" => "空载测试",
+Models\StationState.cs:73: "A3" or "A4" => "噪音测试",
+Models\StationState.cs:74: "A5" or "A6" => "负载测试",
+Models\StationState.cs:75: _ => "测试"
+Models\StationState.cs:83: 0 => "待机",
+Models\StationState.cs:84: 1 => "运行中",
+Models\StationState.cs:85: 2 => "故障",
+Models\StationState.cs:86: _ => "未知"
+Models\Entities\StationConfigEntity.cs:46: public string Status { get; set; } = "离线";
+Services\AuthService.cs:32: errorMessage = "请输入用户名！";
+Services\AuthService.cs:39: errorMessage = "用户不存在！";
+Services\AuthService.cs:45: errorMessage = "该账号已被禁用，请联系管理员！";
+Services\AuthService.cs:51: errorMessage = "密码错误！";
+Services\BackendRuntime.cs:12: private static readonly Random _rng = new(42); // 固定种子保证可复现 — 必须在 Shared 之前
+Services\BackendRuntime.cs:70: string plcModel = config?.PlcModel ?? "未知型号";
+Services\BackendRuntime.cs:73: Title = $"{snapshot.StationId}工位通信中断",
+Services\BackendRuntime.cs:74: Content = $"工位 {snapshot.StationId}(PLC型号:{plcModel})与上位机失去连接，当前状态：离线。请检查网络连接及PLC电源状态。",
+Services\BackendRuntime.cs:98: Title = $"{snapshot.StationId}工位测试不合格",
+Services\BackendRuntime.cs:99: Content = $"电机 [{barcode}] 在{stage}阶段测试未通过。{reason}请及时处理。",
+Services\BackendRuntime.cs:115: if (data.NoLoadCurrent > 2.5) reasons.Add($"空载电流超限({data.NoLoadCurrent:F2}A)");
+Services\BackendRuntime.cs:116: if (data.NoLoadSpeed > 2200 || data.NoLoadSpeed < 1800) reasons.Add($"空载转速异常({data.NoLoadSpeed}r/min)");
+Services\BackendRuntime.cs:117: if (data.FwdNoise > 70) reasons.Add($"正转噪音超限({data.FwdNoise:F1}dB)");
+Services\BackendRuntime.cs:118: if (data.NoiseDiff > 15) reasons.Add($"噪音差值过大({data.NoiseDiff:F1}dB)");
+Services\BackendRuntime.cs:119: if (data.LoadCurrent > 3.0) reasons.Add($"负载电流超限({data.LoadCurrent:F2}A)");
+Services\BackendRuntime.cs:120: if (data.LoadSpeed < 1000) reasons.Add($"负载转速偏低({data.LoadSpeed}r/min)");
+Services\BackendRuntime.cs:124: : "具体原因待诊断。";
+Services\BackendRuntime.cs:134: || log.Contains("异常", StringComparison.OrdinalIgnoreCase)
+Services\BackendRuntime.cs:135: || log.Contains("故障", StringComparison.OrdinalIgnoreCase))
+Services\BackendRuntime.cs:139: Title = "PLC通信异常",
+Services\BackendRuntime.cs:140: Content = $"PLC轮询服务报告异常：{log}",
+Services\BackendRuntime.cs:177: return; // 已有数据，不重复播种
+Services\BackendRuntime.cs:264: NoLoadHighCurrent,   // 空载电流超限 (>2.5) → "电机起动电流超限"
+Services\BackendRuntime.cs:265: NoLoadHighSpeed,     // 空载转速异常 (>2200) → "空载转速异常"
+Services\BackendRuntime.cs:266: NoiseHighDiff,       // 噪音差值过大 (>15)   → "空载噪声过大"
+Services\BackendRuntime.cs:267: NoiseFwdLoud,        // 正转噪声超限 (>70)   → "正转噪声超限"
+Services\BackendRuntime.cs:268: LoadHighCurrent,     // 负载电流超限 (>3.0)   → "负载电流超限"
+Services\BackendRuntime.cs:269: LoadLowSpeed,        // 负载转速偏低 (<1000)  → "负载转速偏低"
+Services\HikvisionSdkService.cs:14: #region Native SDK 常量定义
+Services\HikvisionSdkService.cs:29: private const int NET_DVR_REALDATA = 1;  // 实时流
+Services\HikvisionSdkService.cs:30: private const int NET_DVR_PLAYRTSP = 4;   // RTSP流
+Services\HikvisionSdkService.cs:38: #region Native SDK 结构体定义
+Services\HikvisionSdkService.cs:92: #region Native SDK 委托定义
+Services\HikvisionSdkService.cs:99: #region Native SDK 函数导入
+Services\HikvisionSdkService.cs:136: #region 结构体定义
+Services\HikvisionSdkService.cs:147: #region 私有字段
+Services\HikvisionSdkService.cs:155: #region 公共属性
+Services\HikvisionSdkService.cs:169: #region 构造函数
+Services\HikvisionSdkService.cs:178: #region 公共方法
+Services\HikvisionSdkService.cs:194: NET_DVR_SetConnectTime(2000, 1);  // 2秒超时，重试1次
+Services\HikvisionSdkService.cs:200: System.Diagnostics.Debug.WriteLine($"海康SDK初始化失败: {ex.Message}");
+Services\HikvisionSdkService.cs:219: return new LoginResult { Success = false, ErrorMessage = "SDK未初始化" };
+Services\HikvisionSdkService.cs:288: dwStreamType = 0,  // 主码流
+Services\HikvisionSdkService.cs:289: dwLinkMode = 0,    // TCP方式
+Services\HikvisionSdkService.cs:292: byProtoType = 0,   // 私有协议
+Services\HikvisionSdkService.cs:293: byPreviewMode = 0  // 正常预览
+Services\HikvisionSdkService.cs:342: #region 私有方法
+Services\HikvisionSdkService.cs:348: NET_DVR_PASSWORD_ERROR => "密码错误",
+Services\HikvisionSdkService.cs:349: NET_DVR_USER_NO_EXIST => "用户不存在",
+Services\HikvisionSdkService.cs:350: NET_DVR_LOGIN_TIMEOUT => "登录超时",
+Services\HikvisionSdkService.cs:351: NET_DVR_NET_RECV_CONNECT_ERROR => "网络连接失败",
+Services\HikvisionSdkService.cs:352: _ => $"错误代码: {errorCode}"
+Services\HikvisionSdkService.cs:358: #region IDisposable 实现
+Services\HikvisionSdkService.cs:387: #region 数据模型
+Services\InMemoryMotorTestRepository.cs:149: IncrementFault(faultCounts, "电机起动电流超限");
+Services\InMemoryMotorTestRepository.cs:151: IncrementFault(faultCounts, "空载转速异常");
+Services\InMemoryMotorTestRepository.cs:153: IncrementFault(faultCounts, "空载综合不合格");
+Services\InMemoryMotorTestRepository.cs:160: IncrementFault(faultCounts, "空载噪声过大");
+Services\InMemoryMotorTestRepository.cs:162: IncrementFault(faultCounts, "正转噪声超限");
+Services\InMemoryMotorTestRepository.cs:164: IncrementFault(faultCounts, "噪音综合不合格");
+Services\InMemoryMotorTestRepository.cs:171: IncrementFault(faultCounts, "负载电流超限");
+Services\InMemoryMotorTestRepository.cs:173: IncrementFault(faultCounts, "负载转速偏低");
+Services\InMemoryMotorTestRepository.cs:175: IncrementFault(faultCounts, "负载综合不合格");
+Services\InMemoryMotorTestRepository.cs:248: filter == "全部" ||
+Services\InMemoryNotificationService.cs:46: Title = "A4机台噪音超标",
+Services\InMemoryNotificationService.cs:47: Content = "A4机台噪音 85dB，超出安全阈值上限 75dB (自动暂停)",
+Services\InMemoryNotificationService.cs:54: Title = "PLC 通信异常",
+Services\InMemoryNotificationService.cs:55: Content = "工位3 (GW-M02) 丢失心跳包超 5s (状态: 离线)",
+Services\InMemoryNotificationService.cs:62: Title = "机温预警限制触发",
+Services\InMemoryNotificationService.cs:63: Content = "工位1 (GW-M01) 电机测试温度 72°C，接近安全阈值 80°C",
+Services\InMemoryNotificationService.cs:72: Title = "例行维护周期提醒",
+Services\InMemoryNotificationService.cs:73: Content = "C区夹具例行润滑与校准到期，建议交班停机维护",
+Services\InMemoryNotificationService.cs:80: Title = "传感器标定超期",
+Services\InMemoryNotificationService.cs:81: Content = "工位A2 扭矩传感器标定超期 3 天",
+Services\InMemoryNotificationService.cs:88: Title = "清洁过滤网警告",
+Services\InMemoryNotificationService.cs:89: Content = "配电柜冷风机过滤网压差异常，请清洁更换",
+Services\InMemoryNotificationService.cs:96: Title = "UPS 电池包寿命警告",
+Services\InMemoryNotificationService.cs:97: Content = "主UPS电池自检警告: 电池寿命不足15%",
+Services\InMemoryNotificationService.cs:106: Title = "固件更新可用",
+Services\InMemoryNotificationService.cs:107: Content = "系统固件 v2.4.2-Stable 可用，包含高采样性能优化",
+Services\InMemoryNotificationService.cs:114: Title = "数据备份完成",
+Services\InMemoryNotificationService.cs:115: Content = "每日数据库备份完成，大小 4.2 GB (同步至数据湖)",
+Services\InMemoryNotificationService.cs:122: Title = "系统时间校准成功",
+Services\InMemoryNotificationService.cs:123: Content = "NTP 时间同步成功，偏差 +0.023s，全节点时钟已同步",
+Services\InMemoryNotificationService.cs:130: Title = "网络延迟预警",
+Services\InMemoryNotificationService.cs:131: Content = "交换机丢包，延迟 45ms (已切换至冗余物理链路)",
+Services\InMemoryNotificationService.cs:138: Title = "报表导出成功",
+Services\InMemoryNotificationService.cs:139: Content = "电机能效及测试合格率分析报表导出成功",
+Services\InMemoryNotificationService.cs:160: _notifications.Insert(0, notification); // 最新的排最前面
+Services\InMemoryUserService.cs:37: return "账号不能为空";
+Services\InMemoryUserService.cs:40: return "姓名不能为空";
+Services\InMemoryUserService.cs:43: return "密码不能为空";
+Services\InMemoryUserService.cs:46: return $"账号 {account} 已存在";
+Services\InMemoryUserService.cs:61: return null; // 成功
+Services\InMemoryUserService.cs:68: return "用户不存在";
+Services\InMemoryUserService.cs:71: return "姓名不能为空";
+Services\InMemoryUserService.cs:84: return "用户不存在";
+Services\InMemoryUserService.cs:96: return "用户不存在";
+Services\InMemoryUserService.cs:99: return "新密码不能为空";
+Services\InMemoryUserService.cs:110: return "用户不存在";
+Services\InMemoryUserService.cs:113: return "旧密码不正确";
+Services\InMemoryUserService.cs:116: return "新密码不能为空";
+Services\InMemoryUserService.cs:155: Create("admin", "系统管理员", "admin123", AppRole.Admin);
+Services\InMemoryUserService.cs:158: Create("ad_liwei", "李威", "admin123", AppRole.Admin);
+Services\InMemoryUserService.cs:161: Create("ad_sunyan", "孙燕", "admin123", AppRole.Admin, UserStatus.Disabled);
+Services\InMemoryUserService.cs:165: Create("operator", "默认操作员", "123", AppRole.Operator);
+Services\InMemoryUserService.cs:168: Create("op_zhangwei", "张伟", "123", AppRole.Operator);
+Services\InMemoryUserService.cs:171: Create("op_lina", "李娜", "123", AppRole.Operator);
+Services\InMemoryUserService.cs:174: Create("op_zhaolei", "赵雷", "123", AppRole.Operator, UserStatus.Disabled);
+Services\InMemoryUserService.cs:177: Create("op_chenjing", "陈静", "123", AppRole.Operator);
+Services\InMemoryUserService.cs:180: Create("op_zhoumei", "周梅", "123", AppRole.Operator);
+Services\InMemoryUserService.cs:183: Create("op_wugang", "吴刚", "123", AppRole.Operator);
+Services\InMemoryUserService.cs:184: SetLoginAndCreated("op_wugang", null, now.AddDays(-14));  // 从未登录
+Services\InMemoryUserService.cs:186: Create("op_huangli", "黄丽", "123", AppRole.Operator, UserStatus.Disabled);
+Services\InMemoryUserService.cs:190: Create("maintainer", "默认维护员", "maint123", AppRole.Maintainer);
+Services\InMemoryUserService.cs:193: Create("mt_wangqiang", "王强", "maint123", AppRole.Maintainer);
+Services\InMemoryUserService.cs:196: Create("mt_liuyang", "刘洋", "maint123", AppRole.Maintainer);
+Services\InMemoryUserService.cs:199: Create("mt_zhaomin", "赵敏", "maint123", AppRole.Maintainer);
+Services\InMemoryUserService.cs:202: Create("mt_chenhao", "陈昊", "maint123", AppRole.Maintainer, UserStatus.Disabled);
+Services\LanguageManager.cs:46: if (trimmedKey.StartsWith("账号 ") && trimmedKey.EndsWith(" 已存在"))
+Services\LanguageManager.cs:53: if (trimmedKey.StartsWith("确定要重置用户 ") && trimmedKey.EndsWith(" 的密码为初始密码吗？"))
+Services\LanguageManager.cs:60: if (trimmedKey.StartsWith("用户 ") && trimmedKey.EndsWith(" 的密码已重置为：123456"))
+Services\LanguageManager.cs:67: if (trimmedKey.StartsWith("摄像头连接成功！"))
+Services\LanguageManager.cs:69: int snIdx = trimmedKey.IndexOf("设备序列号:");
+Services\LanguageManager.cs:70: int chIdx = trimmedKey.IndexOf("通道数:");
+Services\LanguageManager.cs:77: if (trimmedKey.StartsWith("连接失败: "))
+Services\LanguageManager.cs:84: if (trimmedKey.StartsWith("连接异常: "))
+Services\LanguageManager.cs:91: if (trimmedKey.StartsWith("抓图路径: ") && trimmedKey.Contains("注意:"))
+Services\LanguageManager.cs:93: int noticeIndex = trimmedKey.IndexOf("注意:");
+Services\LanguageManager.cs:99: if (trimmedKey.StartsWith("抓图失败: "))
+Services\LanguageManager.cs:106: if (trimmedKey.EndsWith(" 连接正常。"))
+Services\LanguageManager.cs:113: if (trimmedKey.EndsWith(" 无法建立连接，请检查 IP、端口、协议与网线连接。"))
+Services\LanguageManager.cs:120: if (trimmedKey.StartsWith("电机 [") && trimmedKey.EndsWith("] 的追溯单已发送至打印机。"))
+Services\LanguageManager.cs:127: if (trimmedKey.StartsWith("打印失败: "))
+Services\LanguageManager.cs:134: if (trimmedKey.StartsWith("打开报告失败: "))
+Services\LanguageManager.cs:141: if (trimmedKey.StartsWith("复制条码失败: "))
+Services\LanguageManager.cs:148: if (trimmedKey.StartsWith("成功导出 ") && trimmedKey.Contains(" 条记录至桌面"))
+Services\LanguageManager.cs:150: int midIndex = trimmedKey.IndexOf(" 条记录至桌面");
+Services\LanguageManager.cs:158: if (trimmedKey.StartsWith("导出数据失败: "))
+Services\LanguageManager.cs:176: { "电机电性能测试系统", "Motor Test System" },
+Services\LanguageManager.cs:177: { "生产监控", "Monitor" },
+Services\LanguageManager.cs:178: { "数据追溯", "Data Trace" },
+Services\LanguageManager.cs:179: { "生产看板", "Dashboard" },
+Services\LanguageManager.cs:180: { "用户管理", "User" },
+Services\LanguageManager.cs:181: { "日志中心", "Log Center" },
+Services\LanguageManager.cs:182: { "系统配置", "Config" },
+Services\LanguageManager.cs:183: { "节点状态", "Node Status" },
+Services\LanguageManager.cs:184: { "用户名", "Username" },
+Services\LanguageManager.cs:185: { "用户角色", "Role" },
+Services\LanguageManager.cs:186: { "退出登录", "Logout" },
+Services\LanguageManager.cs:187: { "未登录", "Not Logged In" },
+Services\LanguageManager.cs:188: { "未知", "Unknown" },
+Services\LanguageManager.cs:189: { "用户主页", "User Home" },
+Services\LanguageManager.cs:192: { "待机", "Standby" },
+Services\LanguageManager.cs:193: { "运行中", "Running" },
+Services\LanguageManager.cs:194: { "故障", "Fault" },
+Services\LanguageManager.cs:195: { "在线", "Online" },
+Services\LanguageManager.cs:196: { "离线", "Offline" },
+Services\LanguageManager.cs:197: { "设备运行状态", "Equipment Status" },
+Services\LanguageManager.cs:198: { "正常", "Normal" },
+Services\LanguageManager.cs:199: { "异常", "Abnormal" },
+Services\LanguageManager.cs:200: { "站号", "Station" },
+Services\LanguageManager.cs:201: { "电压", "Voltage" },
+Services\LanguageManager.cs:202: { "电流", "Current" },
+Services\LanguageManager.cs:203: { "转速", "Speed" },
+Services\LanguageManager.cs:204: { "扭矩", "Torque" },
+Services\LanguageManager.cs:205: { "温度", "Temp" },
+Services\LanguageManager.cs:206: { "振动值", "Vibration" },
+Services\LanguageManager.cs:207: { "噪音分贝", "Noise (dB)" },
+Services\LanguageManager.cs:208: { "测试指标详细数据", "Detailed Test Metrics" },
+Services\LanguageManager.cs:209: { "当前电流", "Current" },
+Services\LanguageManager.cs:210: { "最大扭矩", "Max Torque" },
+Services\LanguageManager.cs:211: { "最高温度", "Max Temp" },
+Services\LanguageManager.cs:212: { "累计加工总数", "Total Output" },
+Services\LanguageManager.cs:213: { "不合格总数", "Total NG" },
+Services\LanguageManager.cs:214: { "完成进度", "Progress" },
+Services\LanguageManager.cs:215: { "准备就绪", "Ready" },
+Services\LanguageManager.cs:216: { "正在连接...", "Connecting..." },
+Services\LanguageManager.cs:217: { "已连接", "Connected" },
+Services\LanguageManager.cs:218: { "已断开", "Disconnected" },
+Services\LanguageManager.cs:219: { "测试连接", "Test Conn" },
+Services\LanguageManager.cs:220: { "连接成功", "Conn Success" },
+Services\LanguageManager.cs:221: { "连接失败", "Conn Failed" },
+Services\LanguageManager.cs:222: { "抓图", "Capture" },
+Services\LanguageManager.cs:223: { "摄像头连接成功！", "Camera connected successfully!" },
+Services\LanguageManager.cs:224: { "请先连接摄像头", "Please connect camera first" },
+Services\LanguageManager.cs:225: { "抓图成功", "Capture successful" },
+Services\LanguageManager.cs:226: { "抓图失败", "Capture failed" },
+Services\LanguageManager.cs:229: { "数据追溯与查询", "Data Trace & Query" },
+Services\LanguageManager.cs:230: { "产品条码", "Product Barcode" },
+Services\LanguageManager.cs:231: { "电机条码", "Motor Barcode" },
+Services\LanguageManager.cs:232: { "开始日期", "Start Date" },
+Services\LanguageManager.cs:233: { "结束日期", "End Date" },
+Services\LanguageManager.cs:234: { "最终判定", "Final Decision" },
+Services\LanguageManager.cs:235: { "检测结果", "Test Result" },
+Services\LanguageManager.cs:236: { "合格", "PASS" },
+Services\LanguageManager.cs:237: { "不合格", "NG" },
+Services\LanguageManager.cs:238: { "查询", "Query" },
+Services\LanguageManager.cs:239: { "重置", "Reset" },
+Services\LanguageManager.cs:240: { "导出 CSV", "Export CSV" },
+Services\LanguageManager.cs:241: { "打印追溯单", "Print Slip" },
+Services\LanguageManager.cs:242: { "查看完整报告", "Full Report" },
+Services\LanguageManager.cs:243: { "显示第", "Show" },
+Services\LanguageManager.cs:244: { "页 / 共", " of " },
+Services\LanguageManager.cs:245: { "页", "" },
+Services\LanguageManager.cs:246: { "条记录", "records" },
+Services\LanguageManager.cs:247: { "条测试数据", "test records" },
+Services\LanguageManager.cs:248: { "共", "Total" },
+Services\LanguageManager.cs:249: { "暂无数据", "No Data" },
+Services\LanguageManager.cs:250: { "时间范围", "Time Range" },
+Services\LanguageManager.cs:251: { "最近一小时", "Last Hour" },
+Services\LanguageManager.cs:252: { "今日", "Today" },
+Services\LanguageManager.cs:253: { "本周", "This Week" },
+Services\LanguageManager.cs:254: { "本月", "This Month" },
+Services\LanguageManager.cs:255: { "次", " times" },
+Services\LanguageManager.cs:258: { "今日良率", "Pass Rate" },
+Services\LanguageManager.cs:259: { "总测试数", "Total Tests" },
+Services\LanguageManager.cs:260: { "合格总数", "Total Pass" },
+Services\LanguageManager.cs:261: { "不良总数", "Total NG" },
+Services\LanguageManager.cs:262: { "目标良率 98%", "Target Pass Rate 98%" },
+Services\LanguageManager.cs:263: { "良率", "Pass Rate" },
+Services\LanguageManager.cs:264: { "良率趋势及目标对比 (%)", "Pass Rate Trend & Target (%)" },
+Services\LanguageManager.cs:265: { "各阶段不良占比与分布", "NG Ratio & Distribution" },
+Services\LanguageManager.cs:266: { "故障类别 Top 5 排行", "Top 5 Fault Categories" },
+Services\LanguageManager.cs:267: { "小时生产统计 (pcs)", "Hourly Production (pcs)" },
+Services\LanguageManager.cs:268: { "周一", "Mon" },
+Services\LanguageManager.cs:269: { "周二", "Tue" },
+Services\LanguageManager.cs:270: { "周三", "Wed" },
+Services\LanguageManager.cs:271: { "周四", "Thu" },
+Services\LanguageManager.cs:272: { "周五", "Fri" },
+Services\LanguageManager.cs:273: { "周六", "Sat" },
+Services\LanguageManager.cs:274: { "周日", "Sun" },
+Services\LanguageManager.cs:275: { "第一周", "Week 1" },
+Services\LanguageManager.cs:276: { "第二周", "Week 2" },
+Services\LanguageManager.cs:277: { "第三周", "Week 3" },
+Services\LanguageManager.cs:278: { "第四周", "Week 4" },
+Services\LanguageManager.cs:281: { "用户管理与权限", "User Management & Role" },
+Services\LanguageManager.cs:282: { "管理系统访问权限与操作员信息", "Manage Access Control and Operators" },
+Services\LanguageManager.cs:283: { "搜索操作员账号或姓名...", "Search by account or name..." },
+Services\LanguageManager.cs:284: { "新增用户", "Add User" },
+Services\LanguageManager.cs:285: { "编辑", "Edit" },
+Services\LanguageManager.cs:286: { "重置密码", "Reset Pwd" },
+Services\LanguageManager.cs:287: { "启用", "Enable" },
+Services\LanguageManager.cs:288: { "禁用", "Disable" },
+Services\LanguageManager.cs:289: { "用户账号", "Account" },
+Services\LanguageManager.cs:290: { "姓名", "Name" },
+Services\LanguageManager.cs:291: { "所属角色", "Role" },
+Services\LanguageManager.cs:292: { "状态", "Status" },
+Services\LanguageManager.cs:293: { "最后登录时间", "Last Login" },
+Services\LanguageManager.cs:294: { "系统管理员", "Administrator" },
+Services\LanguageManager.cs:295: { "操作员 (Operator)", "Operator" },
+Services\LanguageManager.cs:296: { "管理员 (Admin)", "Admin" },
+Services\LanguageManager.cs:297: { "维护员 (Maintainer)", "Maintainer" },
+Services\LanguageManager.cs:298: { "新增", "Add" },
+Services\LanguageManager.cs:299: { "保存", "Save" },
+Services\LanguageManager.cs:300: { "取消", "Cancel" },
+Services\LanguageManager.cs:303: { "通信与系统配置", "Communication & System Config" },
+Services\LanguageManager.cs:304: { "保存所有配置", "Save All Configurations" },
+Services\LanguageManager.cs:305: { "设备控制", "Device Control" },
+Services\LanguageManager.cs:306: { "设备校准", "Device Calibration" },
+Services\LanguageManager.cs:307: { "协议", "Protocol" },
+Services\LanguageManager.cs:308: { "IP 地址", "IP Address" },
+Services\LanguageManager.cs:309: { "端口", "Port" },
+Services\LanguageManager.cs:310: { "限值", "Limit" },
+Services\LanguageManager.cs:311: { "标准上限", "Upper Limit" },
+Services\LanguageManager.cs:312: { "标准下限", "Lower Limit" },
+Services\LanguageManager.cs:313: { "运行日志", "Run Log" },
+Services\LanguageManager.cs:314: { "操作日志", "Op Log" },
+Services\LanguageManager.cs:315: { "系统警报", "Sys Alarm" },
+Services\LanguageManager.cs:316: { "时间", "Time" },
+Services\LanguageManager.cs:317: { "级别", "Level" },
+Services\LanguageManager.cs:318: { "来源/机台", "Source/Machine" },
+Services\LanguageManager.cs:319: { "消息内容", "Message" },
+Services\LanguageManager.cs:320: { "搜索事件消息...", "Search events..." },
+Services\LanguageManager.cs:321: { "全部", "All" },
+Services\LanguageManager.cs:322: { "系统", "System" },
+Services\LanguageManager.cs:323: { "维护", "Maintain" },
+Services\LanguageManager.cs:324: { "已读", "Read" },
+Services\LanguageManager.cs:325: { "未读", "Unread" },
+Services\LanguageManager.cs:326: { "清除日志", "Clear Logs" },
+Services\LanguageManager.cs:327: { "诊断事件日志", "Diagnostic Event Logs" },
+Services\LanguageManager.cs:328: { "重试连接", "Retry Connection" },
+Services\LanguageManager.cs:331: { "编辑用户信息", "Edit User Info" },
+Services\LanguageManager.cs:332: { "用户账号*", "Account*" },
+Services\LanguageManager.cs:333: { "姓名*", "Name*" },
+Services\LanguageManager.cs:334: { "选择身份角色*", "Select Role*" },
+Services\LanguageManager.cs:335: { "系统警报配置", "System Alarm Config" },
+Services\LanguageManager.cs:336: { "重置密码确认", "Reset Password Confirmation" },
+Services\LanguageManager.cs:337: { "确定要重置用户", "Are you sure you want to reset password for user" },
+Services\LanguageManager.cs:338: { "的密码为初始密码吗？", "'s password to default?" },
+Services\LanguageManager.cs:339: { "提示", "Notification" },
+Services\LanguageManager.cs:340: { "成功", "Success" },
+Services\LanguageManager.cs:341: { "失败", "Failure" },
+Services\LanguageManager.cs:342: { "重置密码成功！初始密码为：123456", "Password reset successfully! Default is: 123456" },
+Services\LanguageManager.cs:343: { "保存成功", "Saved successfully" },
+Services\LanguageManager.cs:344: { "保存失败", "Save failed" },
+Services\LanguageManager.cs:345: { "请输入账号", "Please enter account" },
+Services\LanguageManager.cs:346: { "请输入姓名", "Please enter name" },
+Services\LanguageManager.cs:347: { "密码重置成功", "Password reset successful" },
+Services\LanguageManager.cs:348: { "密码重置确认", "Confirm password reset" },
+Services\LanguageManager.cs:349: { "输入验证", "Input Validation" },
+Services\LanguageManager.cs:350: { "创建失败", "Create Failed" },
+Services\LanguageManager.cs:351: { "更新失败", "Update Failed" },
+Services\LanguageManager.cs:352: { "重置失败", "Reset Failed" },
+Services\LanguageManager.cs:353: { "保存配置成功", "Configuration Saved Successfully" },
+Services\LanguageManager.cs:354: { "所有配置已成功保存至系统数据库中。", "All configurations have been successfully saved to the system database." },
+Services\LanguageManager.cs:355: { "当前没有符合条件的测试数据可供导出！", "There is no matching test data available for export!" },
+Services\LanguageManager.cs:356: { "导出提示", "Export Notification" },
+Services\LanguageManager.cs:357: { "数据导出成功", "Data Export Successful" },
+Services\LanguageManager.cs:358: { "导出错误", "Export Error" },
+Services\LanguageManager.cs:359: { "打印错误", "Print Error" },
+Services\LanguageManager.cs:360: { "报告错误", "Report Error" },
+Services\LanguageManager.cs:361: { "账号不能为空！", "Account cannot be empty!" },
+Services\LanguageManager.cs:362: { "姓名不能为空！", "Name cannot be empty!" },
+Services\LanguageManager.cs:363: { "请输入登录密码！", "Please enter login password!" },
+Services\LanguageManager.cs:364: { "两次输入的密码不一致！", "Passwords do not match!" },
+Services\LanguageManager.cs:365: { "打印超时已取消，请检查打印机连接状态后重试。", "Print timeout. Please check printer connection and try again." },
+Services\LanguageManager.cs:366: { "账号不能为空", "Account cannot be empty" },
+Services\LanguageManager.cs:367: { "姓名不能为空", "Name cannot be empty" },
+Services\LanguageManager.cs:368: { "密码不能为空", "Password cannot be empty" },
+Services\LanguageManager.cs:369: { "新密码不能为空", "New password cannot be empty" },
+Services\LanguageManager.cs:370: { "旧密码不正确", "Old password is incorrect" },
+Services\LanguageManager.cs:371: { "用户不存在", "User does not exist" },
+Services\LanguageManager.cs:372: { "确定", "OK" },
+Services\LanguageManager.cs:373: { "是", "Yes" },
+Services\LanguageManager.cs:374: { "否", "No" },
+Services\LanguageManager.cs:377: { "系统安全登录", "Secure System Login" },
+Services\LanguageManager.cs:378: { "选择身份角色", "Select Role" },
+Services\LanguageManager.cs:379: { "安全密码", "Password" },
+Services\LanguageManager.cs:380: { "登录密码", "Password" },
+Services\LanguageManager.cs:381: { "登 录", "LOGIN" },
+Services\LanguageManager.cs:382: { "记住密码", "Remember Password" },
+Services\LanguageManager.cs:383: { "密码错误！", "Incorrect Password!" },
+Services\LanguageManager.cs:384: { "用户不存在！", "User does not exist!" },
+Services\LanguageManager.cs:385: { "请输入用户名！", "Please enter username!" },
+Services\LanguageManager.cs:386: { "请输入密码！", "Please enter password!" },
+Services\LanguageManager.cs:387: { "该账号已被禁用，请联系管理员！", "This account has been disabled. Contact admin!" },
+Services\LanguageManager.cs:388: { "系统登录", "System Login" },
+Services\LanguageManager.cs:391: { "电机电性能测试报告", "Motor Performance Test Report" },
+Services\LanguageManager.cs:392: { "检测项目", "Test Item" },
+Services\LanguageManager.cs:393: { "实测值", "Measured" },
+Services\LanguageManager.cs:394: { "判定", "Result" },
+Services\LanguageManager.cs:395: { "空载电流(A)", "No-load Current (A)" },
+Services\LanguageManager.cs:396: { "空载转速(r/min)", "No-load Speed (rpm)" },
+Services\LanguageManager.cs:397: { "正转噪音(dB)", "Fwd Noise (dB)" },
+Services\LanguageManager.cs:398: { "反转噪音(dB)", "Rev Noise (dB)" },
+Services\LanguageManager.cs:399: { "负载电流(A)", "Load Current (A)" },
+Services\LanguageManager.cs:400: { "负载转速(r/min)", "Load Speed (rpm)" },
+Services\LanguageManager.cs:401: { "振动值(mm/s)", "Vibration (mm/s)" },
+Services\LanguageManager.cs:402: { "二、空载测试阶段 (A1/A2 工位)", "II. No-load Test Stage (A1/A2)" },
+Services\LanguageManager.cs:403: { "四、噪音测试", "IV. Noise Test" },
+Services\LanguageManager.cs:404: { "四、负载测试阶段 (A5/A6 工位)", "IV. Load Test Stage (A5/A6)" },
+Services\LanguageManager.cs:405: { "五、检验结论", "V. Test Conclusion" },
+Services\LanguageManager.cs:406: { "六、签章确认", "VI. Verification & Signature" },
+Services\LanguageManager.cs:407: { "检验员", "Tester" },
+Services\LanguageManager.cs:408: { "审核员", "Auditor" },
+Services\LanguageManager.cs:409: { "批准人", "Approver" },
+Services\LanguageManager.cs:410: { "报告编号", "Report No." },
+Services\LanguageManager.cs:411: { "报告时间：", "Report Date:" },
+Services\LanguageManager.cs:412: { "产品条码：", "Product Barcode:" },
+Services\LanguageManager.cs:413: { "测试时间：", "Test Date:" },
+Services\LanguageManager.cs:414: { "最终结果：", "Final Result:" },
+Services\LanguageManager.cs:415: { "打印报告", "Print Report" },
+Services\LanguageManager.cs:416: { "导出数据", "Export Data" },
+Services\LanguageManager.cs:417: { "关闭", "Close" },
+Services\LanguageManager.cs:418: { "二、检验结论", "II. Test Conclusion" },
+Services\LanguageManager.cs:419: { "六、阈值判定详情", "VI. Threshold Details" },
+Services\LanguageManager.cs:422: { "空载测试", "No-load Test" },
+Services\LanguageManager.cs:423: { "噪音测试", "Noise Test" },
+Services\LanguageManager.cs:424: { "负载测试", "Load Test" },
+Services\LanguageManager.cs:427: { "到", " to " },
+Services\LanguageManager.cs:428: { "条，共", " of " },
+Services\LanguageManager.cs:429: { " 缺陷件数超警戒", " Defects Exceed Warning" },
+Services\LanguageManager.cs:430: { "< 上一页", "< Prev" },
+Services\LanguageManager.cs:431: { "1 未处理", "1 Unresolved" },
+Services\LanguageManager.cs:432: { "A4: 噪音超标", "A4: Noise Exceeded" },
+Services\LanguageManager.cs:433: { "B线视图连接丢失", "B-Line View Connection Lost" },
+Services\LanguageManager.cs:434: { "CAM-01 主测试工位", "CAM-01 Main Station" },
+Services\LanguageManager.cs:435: { "Cam-2 离线", "Cam-2 Offline" },
+Services\LanguageManager.cs:436: { "MotorTestSystem 电机电性能测试系统", "MotorTestSystem Motor Electrical Performance Test System" },
+Services\LanguageManager.cs:437: { "SN-99480-XA1 测量值 78.9dB (限值 65.0)", "SN-99480-XA1 Measured 78.9dB (Limit 65.0)" },
+Services\LanguageManager.cs:438: { "次", " times" },
+Services\LanguageManager.cs:439: { "● 阶段 1: 空载测试", "● Phase 1: No-load Test" },
+Services\LanguageManager.cs:440: { "● 阶段 2: 噪音测试", "● Phase 2: Noise Test" },
+Services\LanguageManager.cs:441: { "● 阶段 3: 负载测试", "● Phase 3: Load Test" },
+Services\LanguageManager.cs:442: { "⚠ 故障", "⚠ Fault" },
+Services\LanguageManager.cs:443: { "一、产品基本信息", "I. Basic Product Info" },
+Services\LanguageManager.cs:444: { "七、签章", "VII. Signatures" },
+Services\LanguageManager.cs:445: { "三、空载测试", "III. No-load Test" },
+Services\LanguageManager.cs:446: { "上一页", "Previous" },
+Services\LanguageManager.cs:447: { "上限 (2.5A)", "Upper Limit (2.5A)" },
+Services\LanguageManager.cs:448: { "上限 (70dB)", "Upper Limit (70dB)" },
+Services\LanguageManager.cs:449: { "下一页", "Next" },
+Services\LanguageManager.cs:450: { "下一页 >", "Next >" },
+Services\LanguageManager.cs:451: { "五、负载测试", "V. Load Test" },
+Services\LanguageManager.cs:452: { "反转噪音", "Reverse Noise" },
+Services\LanguageManager.cs:453: { "反转综合(dB)", "Reverse Comb (dB)" },
+Services\LanguageManager.cs:454: { "反转综合噪音", "Reverse Comb Noise" },
+Services\LanguageManager.cs:455: { "台", " units" },
+Services\LanguageManager.cs:456: { "噪音差值", "Noise Delta" },
+Services\LanguageManager.cs:457: { "噪音波形", "Noise Waveform" },
+Services\LanguageManager.cs:458: { "噪音频谱波形", "Noise Spectrum Waveform" },
+Services\LanguageManager.cs:459: { "复制条码", "Copy Barcode" },
+Services\LanguageManager.cs:460: { "实时", "Live" },
+Services\LanguageManager.cs:461: { "已完成", "Completed" },
+Services\LanguageManager.cs:462: { "当班", "Current Shift" },
+Services\LanguageManager.cs:463: { "快捷筛选：", "Quick Filter:" },
+Services\LanguageManager.cs:464: { "扭矩: OK - 合格", "Torque: OK - PASS" },
+Services\LanguageManager.cs:465: { "报警", "Alarm" },
+Services\LanguageManager.cs:466: { "提示内容", "Notification Content" },
+Services\LanguageManager.cs:467: { "搜索", "Search" },
+Services\LanguageManager.cs:468: { "操作", "Action" },
+Services\LanguageManager.cs:469: { "数据实时更新 (每5秒)", "Data live updated (every 5s)" },
+Services\LanguageManager.cs:470: { "最终结果", "Final Result" },
+Services\LanguageManager.cs:471: { "最近检测条码", "Recent Barcodes" },
+Services\LanguageManager.cs:472: { "检测时间", "Test Time" },
+Services\LanguageManager.cs:473: { "检测结果: NG - 需人工检视", "Test Result: NG - Manual Inspection Required" },
+Services\LanguageManager.cs:474: { "正在打印追溯单", "Printing trace slip..." },
+Services\LanguageManager.cs:475: { "正转噪音", "Forward Noise" },
+Services\LanguageManager.cs:476: { "正转综合(dB)", "Forward Comb (dB)" },
+Services\LanguageManager.cs:477: { "正转综合噪音", "Forward Comb Noise" },
+Services\LanguageManager.cs:478: { "测试结果", "Test Result" },
+Services\LanguageManager.cs:479: { "海康威视 01号摄像头 - 主测试工位", "Hikvision Camera 01 - Main Station" },
+Services\LanguageManager.cs:480: { "滚花直径", "Knurling Dia" },
+Services\LanguageManager.cs:481: { "生产监控数据看板", "Production Monitoring Dashboard" },
+Services\LanguageManager.cs:482: { "空载电流", "No-load Current" },
+Services\LanguageManager.cs:483: { "空载电流波形", "No-load Current Waveform" },
+Services\LanguageManager.cs:484: { "空载转速", "No-load Speed" },
+Services\LanguageManager.cs:485: { "第", "Page " },
+Services\LanguageManager.cs:486: { "等待中", "Waiting" },
+Services\LanguageManager.cs:487: { "系统提示", "System Message" },
+Services\LanguageManager.cs:488: { "至", "to" },
+Services\LanguageManager.cs:489: { "角色", "Role" },
+Services\LanguageManager.cs:490: { "角色权限配置", "Role Permissions" },
+Services\LanguageManager.cs:491: { "负载电流", "Load Current" },
+Services\LanguageManager.cs:492: { "负载转速", "Load Speed" },
+Services\LanguageManager.cs:493: { "账号", "Account" },
+Services\LanguageManager.cs:494: { "轴长", "Shaft Length" },
+Services\LanguageManager.cs:495: { "需处理", "Pending" },
+Services\LanguageManager.cs:496: { "（启动冲击 → 稳态波动）", " (Start Inrush -> Steady State)" },
+Services\LanguageManager.cs:497: { "（正转 / 反转）", " (Forward / Reverse)" }
+Services\MockPlcClient.cs:15: private readonly int _stableStatus;  // 每个工位的固定稳态
+Services\S7PlcClient.cs:244: _ => CpuType.S71200 // 默认按 S7-1200 处理
+Services\SqlMotorTestRepository.cs:153: IncrementFault(faultCounts, "电机起动电流超限");
+Services\SqlMotorTestRepository.cs:155: IncrementFault(faultCounts, "空载转速异常");
+Services\SqlMotorTestRepository.cs:157: IncrementFault(faultCounts, "空载综合不合格");
+Services\SqlMotorTestRepository.cs:163: IncrementFault(faultCounts, "空载噪声过大");
+Services\SqlMotorTestRepository.cs:165: IncrementFault(faultCounts, "正转噪声超限");
+Services\SqlMotorTestRepository.cs:167: IncrementFault(faultCounts, "噪音综合不合格");
+Services\SqlMotorTestRepository.cs:173: IncrementFault(faultCounts, "负载电流超限");
+Services\SqlMotorTestRepository.cs:175: IncrementFault(faultCounts, "负载转速偏低");
+Services\SqlMotorTestRepository.cs:177: IncrementFault(faultCounts, "负载综合不合格");
+Services\SqlMotorTestRepository.cs:249: filter == "全部" ||
+Services\SqlSugarDbContext.cs:38: IsAutoCloseConnection = true,   // 自动释放连接
+Services\SqlSugarDbContext.cs:39: InitKeyType = InitKeyType.Attribute, // 从特性读取主键
+Services\SqlSugarDbContext.cs:42: IsAutoRemoveDataCache = true  // 自动清理缓存
+Services\SqlSugarDbContext.cs:117: CreateSeedUser("U00001", "admin", "系统管理员", "admin123", AppRole.Admin, UserStatus.Active, now.AddHours(-1), now.AddMonths(-6)),
+Services\SqlSugarDbContext.cs:118: CreateSeedUser("U00002", "ad_liwei", "李威", "admin123", AppRole.Admin, UserStatus.Active, now.AddDays(-3), now.AddMonths(-3)),
+Services\SqlSugarDbContext.cs:119: CreateSeedUser("U00003", "ad_sunyan", "孙燕", "admin123", AppRole.Admin, UserStatus.Disabled, null, now.AddMonths(-8)),
+Services\SqlSugarDbContext.cs:122: CreateSeedUser("U00004", "operator", "默认操作员", "123", AppRole.Operator, UserStatus.Active, now.AddMinutes(-10), now.AddMonths(-5)),
+Services\SqlSugarDbContext.cs:123: CreateSeedUser("U00005", "op_zhangwei", "张伟", "123", AppRole.Operator, UserStatus.Active, now.AddHours(-3), now.AddMonths(-4)),
+Services\SqlSugarDbContext.cs:124: CreateSeedUser("U00006", "op_lina", "李娜", "123", AppRole.Operator, UserStatus.Active, now.AddDays(-1), now.AddMonths(-3)),
+Services\SqlSugarDbContext.cs:125: CreateSeedUser("U00007", "op_zhaolei", "赵雷", "123", AppRole.Operator, UserStatus.Disabled, now.AddDays(-30), now.AddMonths(-2)),
+Services\SqlSugarDbContext.cs:126: CreateSeedUser("U00008", "op_chenjing", "陈静", "123", AppRole.Operator, UserStatus.Active, now.AddMinutes(-45), now.AddMonths(-1)),
+Services\SqlSugarDbContext.cs:127: CreateSeedUser("U00009", "op_zhoumei", "周梅", "123", AppRole.Operator, UserStatus.Active, now.AddHours(-8), now.AddMonths(-2)),
+Services\SqlSugarDbContext.cs:128: CreateSeedUser("U00010", "op_wugang", "吴刚", "123", AppRole.Operator, UserStatus.Active, null, now.AddDays(-14)),
+Services\SqlSugarDbContext.cs:129: CreateSeedUser("U00011", "op_huangli", "黄丽", "123", AppRole.Operator, UserStatus.Disabled, now.AddDays(-7), now.AddDays(-14)),
+Services\SqlSugarDbContext.cs:132: CreateSeedUser("U00012", "maintainer", "默认维护员", "maint123", AppRole.Maintainer, UserStatus.Active, now.AddHours(-2), now.AddMonths(-6)),
+Services\SqlSugarDbContext.cs:133: CreateSeedUser("U00013", "mt_wangqiang", "王强", "maint123", AppRole.Maintainer, UserStatus.Active, now.AddHours(-5), now.AddMonths(-4)),
+Services\SqlSugarDbContext.cs:134: CreateSeedUser("U00014", "mt_liuyang", "刘洋", "maint123", AppRole.Maintainer, UserStatus.Active, now.AddDays(-2), now.AddMonths(-3)),
+Services\SqlSugarDbContext.cs:135: CreateSeedUser("U00015", "mt_zhaomin", "赵敏", "maint123", AppRole.Maintainer, UserStatus.Active, now.AddMinutes(-20), now.AddMonths(-1)),
+Services\SqlSugarDbContext.cs:136: CreateSeedUser("U00016", "mt_chenhao", "陈昊", "maint123", AppRole.Maintainer, UserStatus.Disabled, now.AddDays(-15), now.AddMonths(-2)),
+Services\SqlSugarDbContext.cs:164: new StationConfigEntity { Id = "A1", Name = "A1", PlcModel = "FX5U", IpAddress = "192.168.10.11", Port = 502, Protocol = "ModbusTCP", StationId = 1, IsConnected = true, Status = "在线" },
+Services\SqlSugarDbContext.cs:165: new StationConfigEntity { Id = "A2", Name = "A2", PlcModel = "S7-1200", IpAddress = "192.168.10.12", Port = 102, Protocol = "S7 Protocol (TCP)", StationId = 1, IsConnected = true, Status = "在线" },
+Services\SqlSugarDbContext.cs:166: new StationConfigEntity { Id = "A3", Name = "A3", PlcModel = "AM600", IpAddress = "192.168.10.13", Port = 502, Protocol = "ModbusTCP", StationId = 1, IsConnected = false, Status = "故障" },
+Services\SqlSugarDbContext.cs:167: new StationConfigEntity { Id = "A4", Name = "A4", PlcModel = "FX5U", IpAddress = "192.168.10.14", Port = 502, Protocol = "ModbusTCP", StationId = 1, IsConnected = false, Status = "离线" },
+Services\SqlSugarDbContext.cs:168: new StationConfigEntity { Id = "A5", Name = "A5", PlcModel = "S7-1500", IpAddress = "192.168.10.15", Port = 102, Protocol = "S7 Protocol (TCP)", StationId = 1, IsConnected = true, Status = "在线" },
+Services\SqlSugarDbContext.cs:169: new StationConfigEntity { Id = "A6", Name = "A6", PlcModel = "AM600", IpAddress = "192.168.10.16", Port = 502, Protocol = "ModbusTCP", StationId = 1, IsConnected = true, Status = "在线" },
+Services\SqlSugarUserService.cs:72: return "账号不能为空";
+Services\SqlSugarUserService.cs:75: return "姓名不能为空";
+Services\SqlSugarUserService.cs:78: return "密码不能为空";
+Services\SqlSugarUserService.cs:82: return $"账号 {account} 已存在";
+Services\SqlSugarUserService.cs:97: return null; // 成功
+Services\SqlSugarUserService.cs:104: return "用户不存在";
+Services\SqlSugarUserService.cs:107: return "姓名不能为空";
+Services\SqlSugarUserService.cs:122: return "用户不存在";
+Services\SqlSugarUserService.cs:134: return "用户不存在";
+Services\SqlSugarUserService.cs:137: return "新密码不能为空";
+Services\SqlSugarUserService.cs:149: return "用户不存在";
+Services\SqlSugarUserService.cs:152: return "旧密码不正确";
+Services\SqlSugarUserService.cs:155: return "新密码不能为空";
+ViewModels\ConfigViewModel.cs:27: new() { Timestamp = "14:02:33.105", Level = "[信息]", Message = "系统启动，网络接口已初始化。", LevelBrush = "#10B981" },
+ViewModels\ConfigViewModel.cs:28: new() { Timestamp = "14:02:35.021", Level = "[连接]", Message = "‖ A1 (192.168.10.11:502) ‖‖‖‖", LevelBrush = "#12DDF7" },
+ViewModels\ConfigViewModel.cs:29: new() { Timestamp = "14:02:38.442", Level = "[错误]", Message = "‖ A3 (192.168.10.13:502) ‖‖‖‖‖‖‖‖‖‖‖‖‖‖‖‖‖‖‖‖", LevelBrush = "#FF5A5F" },
+ViewModels\ConfigViewModel.cs:30: new() { Timestamp = "14:03:01.000", Level = "[警告]", Message = "‖ A4 (192.168.10.14) Ping ‖ > 1000ms‖", LevelBrush = "#FFC53D" }
+ViewModels\ConfigViewModel.cs:56: config.Status = isSuccess ? "在线" : "离线";
+ViewModels\ConfigViewModel.cs:65: Level = "[连接]",
+ViewModels\ConfigViewModel.cs:66: Message = $"‖ {config.Name} ({config.IpAddress}:{config.Port}) 连接测试成功 ‖‖‖‖",
+ViewModels\ConfigViewModel.cs:69: ShowMessage($"{config.Name} ({config.IpAddress}:{config.Port}) 连接正常。", "连接测试成功", MessageBoxImage.Information);
+ViewModels\ConfigViewModel.cs:76: Level = "[错误]",
+ViewModels\ConfigViewModel.cs:77: Message = $"‖ {config.Name} ({config.IpAddress}:{config.Port}) 连接测试失败 ‖‖‖‖",
+ViewModels\ConfigViewModel.cs:80: ShowMessage($"{config.Name} ({config.IpAddress}:{config.Port}) 无法建立连接，请检查 IP、端口、协议与网线连接。", "连接测试失败", MessageBoxImage.Warning);
+ViewModels\ConfigViewModel.cs:105: MessageBox.Show("所有配置已成功保存至系统数据库中。", "保存配置成功", MessageBoxButton.OK, MessageBoxImage.Information);
+ViewModels\DashboardViewModel.cs:29: private string _onlineRateText = "● 在线率 0%";
+ViewModels\DashboardViewModel.cs:89: #region 海康视频监控属性
+ViewModels\DashboardViewModel.cs:92: private string _cameraStatus = "未连接";
+ViewModels\DashboardViewModel.cs:129: private string _currentDimension = "今日";
+ViewModels\DashboardViewModel.cs:254: OnlineRateText = $"● 在线率 {rate:F0}%";
+ViewModels\DashboardViewModel.cs:274: ResultFilter = "全部",
+ViewModels\DashboardViewModel.cs:319: Name = "合格",
+ViewModels\DashboardViewModel.cs:328: Name = "不合格",
+ViewModels\DashboardViewModel.cs:353: if (_currentDimension == "今日")
+ViewModels\DashboardViewModel.cs:360: else if (_currentDimension == "本周")
+ViewModels\DashboardViewModel.cs:362: var weekLabels = new[] { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
+ViewModels\DashboardViewModel.cs:367: else if (_currentDimension == "本月")
+ViewModels\DashboardViewModel.cs:369: var monthLabels = new[] { "第一周", "第二周", "第三周", "第四周" };
+ViewModels\DashboardViewModel.cs:425: DefectList.Add(new DefectItem { Name = "空载不合格", Percentage = defectSummary.NoLoadPercentage, Color = "#FFA500" });
+ViewModels\DashboardViewModel.cs:426: DefectList.Add(new DefectItem { Name = "噪音不合格", Percentage = defectSummary.NoisePercentage, Color = "#FF3366" });
+ViewModels\DashboardViewModel.cs:427: DefectList.Add(new DefectItem { Name = "负载不合格", Percentage = defectSummary.LoadPercentage, Color = "#8E9AA7" });
+ViewModels\DashboardViewModel.cs:432: DefectList.Add(new DefectItem { Name = "空载不合格", Percentage = 0, Color = "#FFA500" });
+ViewModels\DashboardViewModel.cs:433: DefectList.Add(new DefectItem { Name = "噪音不合格", Percentage = 0, Color = "#FF3366" });
+ViewModels\DashboardViewModel.cs:434: DefectList.Add(new DefectItem { Name = "负载不合格", Percentage = 0, Color = "#8E9AA7" });
+ViewModels\DashboardViewModel.cs:446: Name = "空载不合格",
+ViewModels\DashboardViewModel.cs:454: Name = "噪音不合格",
+ViewModels\DashboardViewModel.cs:462: Name = "负载不合格",
+ViewModels\DashboardViewModel.cs:500: Name = "暂无数据",
+ViewModels\DashboardViewModel.cs:526: CameraStatus = "正在连接...";
+ViewModels\DashboardViewModel.cs:535: CameraStatus = $"已连接 ({result.DeviceInfo?.ChannelCount ?? 0} 通道)";
+ViewModels\DashboardViewModel.cs:551: MessageBox.Show($"摄像头连接成功！\n设备序列号: {result.DeviceInfo?.SerialNumber}\n通道数: {result.DeviceInfo?.ChannelCount}", "连接成功", MessageBoxButton.OK, MessageBoxImage.Information);
+ViewModels\DashboardViewModel.cs:556: CameraStatus = $"连接失败: {result.ErrorMessage}";
+ViewModels\DashboardViewModel.cs:557: MessageBox.Show($"连接失败: {result.ErrorMessage}", "连接失败", MessageBoxButton.OK, MessageBoxImage.Error);
+ViewModels\DashboardViewModel.cs:563: CameraStatus = $"连接异常: {ex.Message}";
+ViewModels\DashboardViewModel.cs:564: MessageBox.Show($"连接异常: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+ViewModels\DashboardViewModel.cs:578: CameraStatus = "已断开";
+ViewModels\DashboardViewModel.cs:593: MessageBox.Show("请先连接摄像头", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+ViewModels\DashboardViewModel.cs:606: MessageBox.Show($"抓图路径: {filePath}\n\n注意: 实际抓图需要先启动预览窗口", "抓图", MessageBoxButton.OK, MessageBoxImage.Information);
+ViewModels\DashboardViewModel.cs:610: MessageBox.Show($"抓图失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+ViewModels\DashboardViewModel.cs:639: Name = "实际",
+ViewModels\DashboardViewModel.cs:663: Name = $"目标 ({TargetPassRate}%)",
+ViewModels\HistoryViewModel.cs:73: private string _selectedResultFilter = "全部";
+ViewModels\HistoryViewModel.cs:75: public List<string> ResultFilters { get; } = new() { "全部", "OK", "NG" };
+ViewModels\HistoryViewModel.cs:164: #region 波形图属性
+ViewModels\HistoryViewModel.cs:212: double peakCurrent = baseCurrent * 2.8; // 启动冲击峰值
+ViewModels\HistoryViewModel.cs:247: double currentLimit = 2.5; // 空载电流上限一致
+ViewModels\HistoryViewModel.cs:253: Name = "空载电流",
+ViewModels\HistoryViewModel.cs:256: Fill = new SolidColorPaint(SKColor.Parse("#1400DFFF")), // 填充半透明区域
+ViewModels\HistoryViewModel.cs:258: LineSmoothness = 0.1, // 减小平滑度，避免尖峰失真
+ViewModels\HistoryViewModel.cs:263: Name = $"上限 ({currentLimit} A)",
+ViewModels\HistoryViewModel.cs:307: double noiseLimit = 70.0; // 噪音上限一致
+ViewModels\HistoryViewModel.cs:314: Name = "正转噪音",
+ViewModels\HistoryViewModel.cs:317: Fill = new SolidColorPaint(SKColor.Parse("#0AFFA500")), // 填充半透明区域
+ViewModels\HistoryViewModel.cs:323: Name = "反转噪音",
+ViewModels\HistoryViewModel.cs:326: Fill = new SolidColorPaint(SKColor.Parse("#0AA855F7")), // 填充半透明区域
+ViewModels\HistoryViewModel.cs:332: Name = $"上限 ({noiseLimit} dB)",
+ViewModels\HistoryViewModel.cs:559: SelectedResultFilter = "全部";
+ViewModels\HistoryViewModel.cs:577: ModernMessageBox.Show("当前没有符合条件的测试数据可供导出！", "导出提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+ViewModels\HistoryViewModel.cs:581: string exportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "电机电性能测试数据导出.csv");
+ViewModels\HistoryViewModel.cs:620: ModernMessageBox.Show($"成功导出 {allModels.Count} 条记录至桌面:\n{exportPath}", "数据导出成功", MessageBoxButton.OK, (MessageBoxImage)99);
+ViewModels\HistoryViewModel.cs:624: ModernMessageBox.Show($"导出数据失败: {ex.Message}", "导出错误", MessageBoxButton.OK, MessageBoxImage.Error);
+ViewModels\HistoryViewModel.cs:638: PrintStatus = "正在准备追溯单...";
+ViewModels\HistoryViewModel.cs:647: PrintStatus = "正在分页...";
+ViewModels\HistoryViewModel.cs:652: PrintStatus = "正在发送至打印机...";
+ViewModels\HistoryViewModel.cs:669: writer.WriteAsync(paginator, $"电机追溯单 - {SelectedMotor.Barcode}");
+ViewModels\HistoryViewModel.cs:689: $"电机 [{SelectedMotor.Barcode}] 的追溯单已发送至打印机。",
+ViewModels\HistoryViewModel.cs:690: "打印成功", MessageBoxButton.OK, (MessageBoxImage)99);
+ViewModels\HistoryViewModel.cs:694: ModernMessageBox.Show("打印超时已取消，请检查打印机连接状态后重试。",
+ViewModels\HistoryViewModel.cs:695: "打印取消", MessageBoxButton.OK, MessageBoxImage.Warning);
+ViewModels\HistoryViewModel.cs:699: ModernMessageBox.Show($"打印失败: {ex.Message}", "打印错误",
+ViewModels\HistoryViewModel.cs:729: ModernMessageBox.Show($"打开报告失败: {ex.Message}", "报告错误",
+ViewModels\HistoryViewModel.cs:745: ModernMessageBox.Show($"复制条码失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+ViewModels\MainViewModel.cs:27: private string _currentUser = "未登录";
+ViewModels\MainViewModel.cs:30: private string _currentUserName = "未知";
+ViewModels\MainViewModel.cs:33: private string _currentUserRole = "未知";
+ViewModels\MainViewModel.cs:117: CurrentUser = "未登录";
+ViewModels\MainViewModel.cs:118: CurrentUserName = "未知";
+ViewModels\MainViewModel.cs:119: CurrentUserRole = "未知角色";
+ViewModels\MainViewModel.cs:157: else CurrentView = MonitorVM; // 兜底
+ViewModels\MainViewModel.cs:243: if (string.IsNullOrEmpty(value) || value == "未登录")
+ViewModels\MainViewModel.cs:245: CurrentUserRole = "未知角色";
+ViewModels\MainViewModel.cs:246: CurrentUserName = "未知用户";
+ViewModels\MonitorViewModel.cs:97: "A2" => "等待中",
+ViewModels\NotificationCenterViewModel.cs:50: public string BadgeText => IsRead ? "已读" : "未读";
+ViewModels\NotificationCenterViewModel.cs:78: private string _selectedFilter = "全部"; // "全部", "报警", "维护", "系统"
+ViewModels\NotificationCenterViewModel.cs:81: private string _selectedTab = "运行日志"; // "运行日志" | "操作日志"
+ViewModels\NotificationCenterViewModel.cs:87: private string _selectedSource = "全部";
+ViewModels\NotificationCenterViewModel.cs:90: private ObservableCollection<string> _sources = new() { "全部" };
+ViewModels\NotificationCenterViewModel.cs:184: _allNotificationVms.Insert(0, vm); // 最新在前
+ViewModels\NotificationCenterViewModel.cs:287: if (SelectedTab == "运行日志")
+ViewModels\NotificationCenterViewModel.cs:288: filtered = filtered.Where(n => n.TypeDisplay == "报警" || n.TypeDisplay == "系统");
+ViewModels\NotificationCenterViewModel.cs:289: else if (SelectedTab == "操作日志")
+ViewModels\NotificationCenterViewModel.cs:290: filtered = filtered.Where(n => n.TypeDisplay == "维护");
+ViewModels\NotificationCenterViewModel.cs:293: if (SelectedFilter != "全部")
+ViewModels\NotificationCenterViewModel.cs:297: "报警" => "报警",
+ViewModels\NotificationCenterViewModel.cs:298: "维护" => "维护",
+ViewModels\NotificationCenterViewModel.cs:299: "系统" => "系统",
+ViewModels\NotificationCenterViewModel.cs:313: if (!string.IsNullOrEmpty(SelectedSource) && SelectedSource != "全部")
+ViewModels\NotificationCenterViewModel.cs:359: Sources.Add("全部");
+ViewModels\NotificationCenterViewModel.cs:371: SelectedSource = "全部";
+ViewModels\NotificationCenterViewModel.cs:451: foreach (var n in _currentFilteredList) // 导出所有筛选结果，而不仅仅是当前页
+ViewModels\UserEditDialogViewModel.cs:10: private string _title = "新增用户";
+ViewModels\UserEditDialogViewModel.cs:19: private string _selectedRole = "操作员";
+ViewModels\UserEditDialogViewModel.cs:27: public ObservableCollection<string> Roles { get; } = new() { "管理员", "操作员", "维护员" };
+ViewModels\UserViewModel.cs:82: private string _selectedRoleFilter = "所有角色";
+ViewModels\UserViewModel.cs:86: "所有角色",
+ViewModels\UserViewModel.cs:87: "管理员",
+ViewModels\UserViewModel.cs:88: "操作员",
+ViewModels\UserViewModel.cs:89: "维护员"
+ViewModels\UserViewModel.cs:141: Status = user.Status == UserStatus.Disabled ? "禁用" : (user.LastLoginTime.HasValue ? "在线" : "离线"),
+ViewModels\UserViewModel.cs:156: AppRole.Admin => "管理员",
+ViewModels\UserViewModel.cs:157: AppRole.Operator => "操作员",
+ViewModels\UserViewModel.cs:158: AppRole.Maintainer => "维护员",
+ViewModels\UserViewModel.cs:200: if (SelectedRoleFilter != "所有角色")
+ViewModels\UserViewModel.cs:215: Title = "新增用户",
+ViewModels\UserViewModel.cs:239: ModernMessageBox.Show(error, "创建失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+ViewModels\UserViewModel.cs:243: LoadUsers(); // 重新加载
+ViewModels\UserViewModel.cs:254: Title = "编辑用户信息",
+ViewModels\UserViewModel.cs:258: IsEnabled = user.Status != "禁用"
+ViewModels\UserViewModel.cs:276: ModernMessageBox.Show(error, "更新失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+ViewModels\UserViewModel.cs:280: LoadUsers(); // 重新加载
+ViewModels\UserViewModel.cs:290: $"确定要重置用户 {user.Name} ({user.Account}) 的密码为初始密码吗？",
+ViewModels\UserViewModel.cs:291: "密码重置确认",
+ViewModels\UserViewModel.cs:301: ModernMessageBox.Show(error, "重置失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+ViewModels\UserViewModel.cs:306: $"用户 {user.Name} 的密码已重置为：123456",
+ViewModels\UserViewModel.cs:307: "密码重置成功",
+ViewModels\UserViewModel.cs:314: "管理员" => AppRole.Admin,
+ViewModels\UserViewModel.cs:315: "操作员" => AppRole.Operator,
+ViewModels\UserViewModel.cs:316: "维护员" => AppRole.Maintainer,
+Views\ConfigView.xaml:51: <Condition Value="在线" Binding="{Binding Path=Status}" />
+Views\ConfigView.xaml:58: <Condition Value="在线" Binding="{Binding Path=Status}" />
+Views\ConfigView.xaml:65: <Condition Value="在线" Binding="{Binding Path=Status}" />
+Views\ConfigView.xaml:72: <Condition Value="在线" Binding="{Binding Path=Status}" />
+Views\ConfigView.xaml:204: <!-- 任务一：重构卡片的状态边框 (左侧高亮条) -->
+Views\ConfigView.xaml:210: <DataTrigger Value="故障" Binding="{Binding Status}">
+Views\ConfigView.xaml:213: <DataTrigger Value="离线" Binding="{Binding Status}">
+Views\ConfigView.xaml:218: <Condition Value="在线" Binding="{Binding Path=Status}" />
+Views\ConfigView.xaml:225: <Condition Value="在线" Binding="{Binding Path=Status}" />
+Views\ConfigView.xaml:232: <Condition Value="在线" Binding="{Binding Path=Status}" />
+Views\ConfigView.xaml:239: <Condition Value="在线" Binding="{Binding Path=Status}" />
+Views\ConfigView.xaml:249: <!-- 右侧主体内容 (包含 Margins/Paddings 的精细微调) -->
+Views\ConfigView.xaml:279: <DataTrigger Value="在线" Binding="{Binding Status}">
+Views\ConfigView.xaml:282: <DataTrigger Value="故障" Binding="{Binding Status}">
+Views\ConfigView.xaml:285: <DataTrigger Value="离线" Binding="{Binding Status}">
+Views\ConfigView.xaml:302: <DataTrigger Value="在线" Binding="{Binding Status}">
+Views\ConfigView.xaml:305: <DataTrigger Value="故障" Binding="{Binding Status}">
+Views\ConfigView.xaml:308: <DataTrigger Value="离线" Binding="{Binding Status}">
+Views\ConfigView.xaml:319: <!-- 任务三：精修卡片内部布局 (IP/端口两栏 & 协议/站号两栏) -->
+Views\ConfigView.xaml:325: <!-- IP 地址 -->
+Views\ConfigView.xaml:331: <!-- 端口 -->
+Views\ConfigView.xaml:337: <!-- 协议 -->
+Views\ConfigView.xaml:343: <!-- 站号 -->
+Views\ConfigView.xaml:374: <DataTrigger Value="故障" Binding="{Binding Status}">
+Views\ConfigView.xaml:382: <Condition Value="故障" Binding="{Binding Path=Status}" />
+Views\DashboardView.xaml:111: <!-- Card 0: 设备运行状态 -->
+Views\DashboardView.xaml:120: <!-- Card 1: 累计加工总数 -->
+Views\DashboardView.xaml:142: <!-- Card 2: 合格总数 -->
+Views\DashboardView.xaml:162: <!-- Card 3: 不良总数 (Highlight Warn Red) -->
+Views\DashboardView.xaml:185: <!-- Card 4: 今日良率 -->
+Views\DashboardView.xaml:228: <!-- Chart 1: 小时生产统计 -->
+Views\DashboardView.xaml:240: <!-- Chart 2: 良率趋势图 -->
+Views\DashboardView.xaml:263: Command="{Binding SelectTimeDimensionCommand}" CommandParameter="今日"/>
+Views\DashboardView.xaml:265: Command="{Binding SelectTimeDimensionCommand}" CommandParameter="本周"/>
+Views\DashboardView.xaml:267: Command="{Binding SelectTimeDimensionCommand}" CommandParameter="本月"/>
+Views\DashboardView.xaml:284: <!-- Panel 0: 各阶段不良分布 -->
+Views\DashboardView.xaml:345: <!-- Panel 1: 前五项故障原因 -->
+Views\HistoryView.xaml:264: <!-- 任务一：胶囊 RadioButton 样式 -->
+Views\HistoryView.xaml:318: <!-- Card 1: 总测试数 -->
+Views\HistoryView.xaml:321: <!-- Card 2: 合格总数 -->
+Views\HistoryView.xaml:324: <!-- Card 3: 不合格总数 -->
+Views\HistoryView.xaml:327: <!-- Card 4: 良率 -->
+Views\HistoryView.xaml:346: <!-- 快捷时间胶囊按钮组 (Row 0, 跨全列) -->
+Views\HistoryView.xaml:357: <!-- 以下控件移至 Row 1 -->
+Views\HistoryView.xaml:830: <!-- 空载电流波形 -->
+Views\HistoryView.xaml:856: <!-- 噪音波形 -->
+Views\HistoryView.xaml:1099: <!-- 空载电流波形 -->
+Views\HistoryView.xaml:1125: <!-- 噪音波形 -->
+Views\HistoryView.xaml:1264: <!-- 打印进度浮层 -->
+Views\HistoryView.xaml:1274: <!-- 旋转动画圆环 -->
+Views\ModernMessageBox.xaml.cs:18: public static MessageBoxResult Show(string message, string title = "系统提示", MessageBoxButton button = MessageBoxButton.OK, MessageBoxImage icon = MessageBoxImage.Information)
+Views\ModernMessageBox.xaml.cs:74: dialog.BtnOK.Content = LanguageManager.Instance["确定"];
+Views\ModernMessageBox.xaml.cs:78: dialog.BtnOK.Content = LanguageManager.Instance["确定"];
+Views\ModernMessageBox.xaml.cs:79: dialog.BtnCancel.Content = LanguageManager.Instance["取消"];
+Views\ModernMessageBox.xaml.cs:83: dialog.BtnOK.Content = LanguageManager.Instance["是"];
+Views\ModernMessageBox.xaml.cs:84: dialog.BtnCancel.Content = LanguageManager.Instance["否"];
+Views\ModernMessageBox.xaml.cs:88: dialog.BtnOK.Content = LanguageManager.Instance["确定"];
+Views\ModernMessageBox.xaml.cs:119: _result = BtnOK.Content.ToString() == LanguageManager.Instance["是"] ? MessageBoxResult.Yes : MessageBoxResult.OK;
+Views\ModernMessageBox.xaml.cs:125: _result = BtnCancel.Content.ToString() == LanguageManager.Instance["否"] ? MessageBoxResult.No : MessageBoxResult.Cancel;
+Views\MonitorView.xaml:118: <TextBlock Text="最近检测条码"
+Views\MonitorView.xaml:184: <TextBlock Text="系统警报" Style="{StaticResource SectionTitleStyle}" Margin="12,0,0,0"/>
+Views\MonitorView.xaml:187: <TextBlock Text="1 未处理" Foreground="{StaticResource RedBrush}" FontSize="14"/>
+Views\MonitorView.xaml:196: <TextBlock Text="A4: 噪音超标" Foreground="{StaticResource RedBrush}" FontSize="18" FontWeight="Bold"/>
+Views\MonitorView.xaml:197: <TextBlock Text="SN-99480-XA1 测量值 78.9dB (限值 65.0)"
+Views\MonitorView.xaml:208: <TextBlock Text="Cam-2 离线" Foreground="#D59A00" FontSize="18" FontWeight="Bold"/>
+Views\MonitorView.xaml:209: <TextBlock Text="B线视图连接丢失" Foreground="#BFC8D1" FontSize="15" Margin="0,12,0,0"/>
+Views\MonitorView.xaml:227: <!-- 视频监控占位区 -->
+Views\MonitorView.xaml:246: <TextBlock Text="海康威视 01号摄像头 - 主测试工位"
+Views\MonitorView.xaml:259: <TextBlock Text="实时" Foreground="{StaticResource GreenBrush}" FontSize="17" FontWeight="Bold"/>
+Views\MonitorView.xaml:270: <!-- 半透明深蓝色遮罩 -->
+Views\MonitorView.xaml:273: <!-- 悬浮UI层 - 四个角落的折角边框 -->
+Views\MonitorView.xaml:274: <!-- 左上折角 -->
+Views\MonitorView.xaml:276: <!-- 右上折角 -->
+Views\MonitorView.xaml:278: <!-- 左下折角 -->
+Views\MonitorView.xaml:280: <!-- 右下折角 -->
+Views\MonitorView.xaml:283: <!-- 左上角摄像头名称 -->
+Views\MonitorView.xaml:300: <TextBlock Text="CAM-01 主测试工位" Foreground="White" FontSize="13" FontWeight="Bold">
+Views\MonitorView.xaml:307: <!-- 右上角绿色"实时"按钮和参数 -->
+Views\MonitorView.xaml:319: <!-- 中心准星 -->
+Views\MonitorView.xaml:332: <!-- 阶段标题 -->
+Views\MonitorView.xaml:342: <TextBlock Text="● 阶段 1: 空载测试" Foreground="{StaticResource CyanBrush}" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+Views\MonitorView.xaml:345: <TextBlock Text="● 阶段 2: 噪音测试" Foreground="{StaticResource CyanBrush}" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+Views\MonitorView.xaml:348: <TextBlock Text="● 阶段 3: 负载测试" Foreground="{StaticResource CyanBrush}" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+Views\MonitorView.xaml:352: <!-- 2x3 工位矩阵布局 -->
+Views\MonitorView.xaml:367: <!-- A1 (第一行, 阶段 1) -->
+Views\MonitorView.xaml:373: <TextBlock Text="运行中" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
+Views\MonitorView.xaml:387: <TextBlock Text="电压" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:394: <TextBlock Text="电流" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:401: <TextBlock Text="转速" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:417: <!-- A3 (第一行, 阶段 2) -->
+Views\MonitorView.xaml:423: <TextBlock Text="运行中" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
+Views\MonitorView.xaml:437: <TextBlock Text="噪音分贝" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:444: <TextBlock Text="振动值" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:451: <TextBlock Text="温度" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:467: <!-- A5 (第一行, 阶段 3) -->
+Views\MonitorView.xaml:471: <TextBlock Text="已完成" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
+Views\MonitorView.xaml:483: <TextBlock Text="最大扭矩" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:490: <TextBlock Text="最高温度" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:499: <TextBlock Text="扭矩: OK - 合格" Foreground="{StaticResource GreenBrush}" FontFamily="Consolas" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+Views\MonitorView.xaml:505: <!-- A2 (第二行, 阶段 1) -->
+Views\MonitorView.xaml:509: <TextBlock Text="待机" Foreground="#9AA4AE" FontSize="15"/>
+Views\MonitorView.xaml:513: <TextBlock Text="等待中" Foreground="#9EA8B2" FontSize="18" Margin="0,12,0,14"/>
+Views\MonitorView.xaml:522: <TextBlock Text="电压" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:526: <TextBlock Text="电流" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:530: <TextBlock Text="转速" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:537: <TextBlock Text="准备就绪" Foreground="#9EA8B2" FontSize="15" HorizontalAlignment="Right" Margin="0,0,0,-26"/>
+Views\MonitorView.xaml:543: <!-- A4 (第二行, 阶段 2) -->
+Views\MonitorView.xaml:547: <TextBlock Text="⚠ 故障" Foreground="{StaticResource RedBrush}" FontSize="16" FontWeight="Bold"/>
+Views\MonitorView.xaml:559: <TextBlock Text="噪音分贝" Foreground="#C1A0A2" FontSize="14" Margin="0,0,0,8"/>
+Views\MonitorView.xaml:566: <TextBlock Text="限值" Foreground="#C1A0A2" FontSize="14" Margin="0,0,0,8"/>
+Views\MonitorView.xaml:575: <TextBlock Text="检测结果: NG - 需人工检视" Foreground="{StaticResource RedBrush}" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+Views\MonitorView.xaml:581: <!-- A6 (第二行, 阶段 3) -->
+Views\MonitorView.xaml:587: <TextBlock Text="运行中" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
+Views\MonitorView.xaml:600: <TextBlock Text="扭矩" Style="{StaticResource MetricLabelStyle}"/>
+Views\MonitorView.xaml:607: <TextBlock Text="温度" Style="{StaticResource MetricLabelStyle}"/>
+Views\MotorReportWindow.xaml:8: Title="电机电性能测试报告"
+Views\MotorReportWindow.xaml:32: <!-- 报告内使用的样式 -->
+Views\MotorReportWindow.xaml:114: <!-- 标题栏 -->
+Views\MotorReportWindow.xaml:125: <TextBlock Text="电机电性能测试报告" FontSize="15" FontWeight="Bold"
+Views\MotorReportWindow.xaml:131: <!-- 关闭按钮，支持 WindowChrome 点击与悬浮动画 -->
+Views\MotorReportWindow.xaml:160: <!-- 报告内容区 -->
+Views\MotorReportWindow.xaml:164: <RowDefinition Height="Auto"/> <!-- Row 0: 产品基本信息 + 检验结论 -->
+Views\MotorReportWindow.xaml:165: <RowDefinition Height="Auto"/> <!-- Row 1: 三个测试阶段卡片并排 -->
+Views\MotorReportWindow.xaml:166: <RowDefinition Height="Auto"/> <!-- Row 2: 阈值判定详情 -->
+Views\MotorReportWindow.xaml:167: <RowDefinition Height="Auto"/> <!-- Row 3: 两个波形图并排 -->
+Views\MotorReportWindow.xaml:168: <RowDefinition Height="Auto"/> <!-- Row 4: 签章区 -->
+Views\MotorReportWindow.xaml:171: <!-- 1. 产品基本信息 + 检验结论 -->
+Views\MotorReportWindow.xaml:179: <!-- 产品基本信息 -->
+Views\MotorReportWindow.xaml:183: <TextBlock Text="一、产品基本信息" Style="{StaticResource SectionHeaderText}"/>
+Views\MotorReportWindow.xaml:197: <TextBlock Grid.Row="0" Grid.Column="0" Text="产品条码：" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:200: <TextBlock Grid.Row="2" Grid.Column="0" Text="测试时间：" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:203: <TextBlock Grid.Row="4" Grid.Column="0" Text="报告时间：" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:209: <!-- 检验结论与最终判定 -->
+Views\MotorReportWindow.xaml:218: <TextBlock Text="二、检验结论" Style="{StaticResource SectionHeaderText}"/>
+Views\MotorReportWindow.xaml:223: <TextBlock Text="最终判定" Style="{StaticResource DataLabel}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+Views\MotorReportWindow.xaml:232: <!-- 2. 三个测试阶段卡片并排 -->
+Views\MotorReportWindow.xaml:242: <!-- 空载测试 -->
+Views\MotorReportWindow.xaml:251: <TextBlock Grid.Column="0" Text="三、空载测试" Style="{StaticResource SectionHeaderText}" Margin="0"/>
+Views\MotorReportWindow.xaml:271: <TextBlock Grid.Row="0" Grid.Column="0" Text="空载电流" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:274: <TextBlock Grid.Row="2" Grid.Column="0" Text="空载转速" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:277: <TextBlock Grid.Row="4" Grid.Column="0" Text="轴长" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:280: <TextBlock Grid.Row="6" Grid.Column="0" Text="滚花直径" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:286: <!-- 噪音测试 -->
+Views\MotorReportWindow.xaml:295: <TextBlock Grid.Column="0" Text="四、噪音测试" Style="{StaticResource SectionHeaderText}" Margin="0"/>
+Views\MotorReportWindow.xaml:307: <!-- 对齐高度 -->
+Views\MotorReportWindow.xaml:316: <TextBlock Grid.Row="0" Grid.Column="0" Text="正转噪音" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:319: <TextBlock Grid.Row="2" Grid.Column="0" Text="反转噪音" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:322: <TextBlock Grid.Row="4" Grid.Column="0" Text="噪音差值" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:325: <!-- 占位行，用于和空载卡片对齐高度 -->
+Views\MotorReportWindow.xaml:332: <!-- 负载测试 -->
+Views\MotorReportWindow.xaml:341: <TextBlock Grid.Column="0" Text="五、负载测试" Style="{StaticResource SectionHeaderText}" Margin="0"/>
+Views\MotorReportWindow.xaml:351: <!-- 对齐高度 -->
+Views\MotorReportWindow.xaml:362: <TextBlock Grid.Row="0" Grid.Column="0" Text="负载电流" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:365: <TextBlock Grid.Row="2" Grid.Column="0" Text="负载转速" Style="{StaticResource DataLabel}"/>
+Views\MotorReportWindow.xaml:368: <!-- 占位行，用于和空载卡片对齐高度 -->
+Views\MotorReportWindow.xaml:378: <!-- 3. 阈值判定详情 -->
+Views\MotorReportWindow.xaml:384: <TextBlock Grid.Row="0" Text="六、阈值判定详情" Style="{StaticResource SectionHeaderText}"/>
+Views\MotorReportWindow.xaml:431: <DataGridTextColumn Header="检测项目" Binding="{Binding Item}" Width="1.5*"
+Views\MotorReportWindow.xaml:433: <DataGridTextColumn Header="实测值" Binding="{Binding Actual}" Width="*"
+Views\MotorReportWindow.xaml:435: <DataGridTextColumn Header="标准下限" Binding="{Binding Lower}" Width="*"
+Views\MotorReportWindow.xaml:437: <DataGridTextColumn Header="标准上限" Binding="{Binding Upper}" Width="*"
+Views\MotorReportWindow.xaml:439: <DataGridTextColumn Header="判定" Binding="{Binding Judge}" Width="80">
+Views\MotorReportWindow.xaml:461: <!-- 4. 两个波形图并排 -->
+Views\MotorReportWindow.xaml:469: <!-- 空载电流波形 -->
+Views\MotorReportWindow.xaml:477: <TextBlock Grid.Row="0" Text="空载电流波形" FontSize="12" Foreground="#00D2E6"
+Views\MotorReportWindow.xaml:490: <!-- 噪音频谱波形 -->
+Views\MotorReportWindow.xaml:498: <TextBlock Grid.Row="0" Text="噪音频谱波形" FontSize="12" Foreground="#FFA500"
+Views\MotorReportWindow.xaml:512: <!-- 5. 签章区 -->
+Views\MotorReportWindow.xaml:518: <TextBlock Grid.Row="0" Text="七、签章" Style="{StaticResource SectionHeaderText}"/>
+Views\MotorReportWindow.xaml:531: <TextBlock Text="检验员" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
+Views\MotorReportWindow.xaml:535: <TextBlock Text="审核员" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
+Views\MotorReportWindow.xaml:539: <TextBlock Text="批准人" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
+Views\MotorReportWindow.xaml:548: <!-- 底部按钮栏 -->
+Views\MotorReportWindow.xaml:559: <Run Text="MotorTestSystem 电机电性能测试系统"/>
+Views\MotorReportWindow.xaml:562: <Button Grid.Column="1" Content="打印报告" Height="34" MinWidth="100"
+Views\MotorReportWindow.xaml:567: <Button Grid.Column="2" Content="关闭" Height="34" MinWidth="80"
+Views\MotorReportWindow.xaml.cs:108: Item = "空载电流 (A)",
+Views\MotorReportWindow.xaml.cs:119: Item = "空载转速 (r/min)",
+Views\MotorReportWindow.xaml.cs:131: Item = "正转噪音 (dB)",
+Views\MotorReportWindow.xaml.cs:142: Item = "反转噪音 (dB)",
+Views\MotorReportWindow.xaml.cs:153: Item = "负载电流 (A)",
+Views\MotorReportWindow.xaml.cs:164: Item = "负载转速 (r/min)",
+Views\MotorReportWindow.xaml.cs:196: return $"条码 {barcode} 的电机已于 {time} 完成全部电性能测试，" +
+Views\MotorReportWindow.xaml.cs:197: "空载电流、空载转速、正/反转噪音、负载电流、负载转速等各项指标均在标准范围内，" +
+Views\MotorReportWindow.xaml.cs:198: "综合判定：合格（OK）。该产品可进入下一工序。";
+Views\MotorReportWindow.xaml.cs:203: if (motor.IsNoLoadCurrentAbnormal) reasons.Add($"空载电流超限（{motor.NoLoadCurrent:F3}A > 2.500A）");
+Views\MotorReportWindow.xaml.cs:204: if (motor.IsNoLoadSpeedAbnormal) reasons.Add($"空载转速异常（{motor.NoLoadSpeed:F0} r/min）");
+Views\MotorReportWindow.xaml.cs:205: if (motor.IsFwdNoiseAbnormal) reasons.Add($"正转噪音超限（{motor.FwdNoise:F1}dB > 70.0dB）");
+Views\MotorReportWindow.xaml.cs:206: if (motor.IsRevNoiseAbnormal) reasons.Add($"反转噪音超限（{motor.RevNoise:F1}dB > 70.0dB）");
+Views\MotorReportWindow.xaml.cs:207: if (motor.IsLoadCurrentAbnormal) reasons.Add($"负载电流超限（{motor.LoadCurrent:F3}A > 3.000A）");
+Views\MotorReportWindow.xaml.cs:208: if (motor.IsLoadSpeedAbnormal) reasons.Add($"负载转速异常（{motor.LoadSpeed:F0} r/min）");
+Views\MotorReportWindow.xaml.cs:210: string reasonText = reasons.Count > 0 ? "不合格项：" + string.Join("；", reasons) + "。" : "";
+Views\MotorReportWindow.xaml.cs:211: return $"条码 {barcode} 的电机已于 {time} 完成全部电性能测试，" +
+Views\MotorReportWindow.xaml.cs:212: $"{reasonText}综合判定：不合格（NG）。该产品需返修或报废处理。";
+Views\MotorReportWindow.xaml.cs:270: writer.WriteAsync(paginator, $"电机追溯单 - {_motor.Barcode}");
+Views\MotorReportWindow.xaml.cs:282: ModernMessageBox.Show($"电机 [{_motor.Barcode}] 的追溯单已发送至打印机。",
+Views\MotorReportWindow.xaml.cs:283: "打印成功", MessageBoxButton.OK, (MessageBoxImage)99);
+Views\MotorReportWindow.xaml.cs:287: ModernMessageBox.Show("打印超时已取消，请检查打印机连接状态后重试。",
+Views\MotorReportWindow.xaml.cs:288: "打印取消", MessageBoxButton.OK, MessageBoxImage.Warning);
+Views\MotorReportWindow.xaml.cs:292: ModernMessageBox.Show($"打印失败: {ex.Message}",
+Views\MotorReportWindow.xaml.cs:293: "打印错误", MessageBoxButton.OK, MessageBoxImage.Error);
+Views\NotificationCenterView.xaml:277: <!-- 2. Tabs (运行日志 / 操作日志) -->
+Views\NotificationCenterView.xaml:320: <ColumnDefinition Width="Auto"/> <!-- 时间范围 -->
+Views\NotificationCenterView.xaml:322: <ColumnDefinition Width="Auto"/> <!-- 来源/机台 -->
+Views\NotificationCenterView.xaml:324: <ColumnDefinition Width="Auto"/> <!-- 级别筛选 -->
+Views\NotificationCenterView.xaml:326: <ColumnDefinition Width="260"/> <!-- 搜索框 -->
+Views\NotificationCenterView.xaml:329: <!-- 1.1 时间范围 -->
+Views\NotificationCenterView.xaml:351: <!-- 1.2 来源/机台 -->
+Views\NotificationCenterView.xaml:372: <!-- 1.3 级别筛选 -->
+Views\NotificationCenterView.xaml:378: IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=全部, Mode=TwoWay}">
+Views\NotificationCenterView.xaml:394: IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=系统, Mode=TwoWay}">
+Views\NotificationCenterView.xaml:410: IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=维护, Mode=TwoWay}">
+Views\NotificationCenterView.xaml:426: IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=报警, Mode=TwoWay}">
+Views\NotificationCenterView.xaml:441: <!-- 1.4 搜索框 -->
+Views\NotificationCenterView.xaml:470: IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=运行日志, Mode=TwoWay}"/>
+Views\NotificationCenterView.xaml:474: IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=操作日志, Mode=TwoWay}"/>
+Views\NotificationCenterView.xaml:530: <!-- INFO: 标准暗底 -->
+Views\NotificationCenterView.xaml:538: <!-- ERROR 行: 极淡暗红底，约 10% 不透明度 wash -->
+Views\NotificationCenterView.xaml:539: <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
+Views\NotificationCenterView.xaml:543: <!-- WARN 行: 极淡琥珀底 wash -->
+Views\NotificationCenterView.xaml:544: <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
+Views\NotificationCenterView.xaml:548: <!-- 常规 INFO 行 -->
+Views\NotificationCenterView.xaml:549: <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
+Views\NotificationCenterView.xaml:553: <!-- 悬停高亮 -->
+Views\NotificationCenterView.xaml:557: <!-- 选中行 -->
+Views\NotificationCenterView.xaml:567: <!-- 时间戳: Consolas 等宽字体确保垂直对齐 -->
+Views\NotificationCenterView.xaml:581: <!-- 级别 badge -->
+Views\NotificationCenterView.xaml:601: <!-- INFO: 暗灰底 + 亮灰字 -->
+Views\NotificationCenterView.xaml:602: <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
+Views\NotificationCenterView.xaml:607: <!-- WARN: 纯实色琥珀底 + 深色字 -->
+Views\NotificationCenterView.xaml:608: <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
+Views\NotificationCenterView.xaml:613: <!-- ERROR: 纯实色红底 + 白字 -->
+Views\NotificationCenterView.xaml:614: <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
+Views\NotificationCenterView.xaml:624: <!-- 来源/机台 -->
+Views\NotificationCenterView.xaml:638: <!-- 事件消息 -->
+Views\NotificationCenterView.xaml:661: <!-- 左下角统计 -->
+Views\NotificationCenterView.xaml:666: <!-- 右下角分页控制 -->
+Views\NotificationCenterView.xaml:668: <!-- 上一页 -->
+Views\NotificationCenterView.xaml:675: <!-- 页码 -->
+Views\NotificationCenterView.xaml:681: <!-- 下一页 -->
+Views\TraceDocumentBuilder.cs:17: private static readonly Color HeaderBg = Color.FromRgb(41, 128, 185);   // 蓝色标题栏
+Views\TraceDocumentBuilder.cs:18: private static readonly Color StageHeaderBg = Color.FromRgb(52, 73, 94); // 深灰阶段标题
+Views\TraceDocumentBuilder.cs:19: private static readonly Color OkColor = Color.FromRgb(39, 174, 96);     // 绿色 OK
+Views\TraceDocumentBuilder.cs:20: private static readonly Color NgColor = Color.FromRgb(231, 76, 60);     // 红色 NG
+Views\TraceDocumentBuilder.cs:43: var title = new Paragraph(new Run("电机电性能测试追溯单"))
+Views\TraceDocumentBuilder.cs:68: doc.Blocks.Add(CreateSectionHeader("一、产品基本信息"));
+Views\TraceDocumentBuilder.cs:77: infoRG.Rows.Add(CreateInfoRow("产品条码", motor.Barcode, "测试时间", motor.TestTime.ToString("yyyy-MM-dd HH:mm:ss")));
+Views\TraceDocumentBuilder.cs:78: infoRG.Rows.Add(CreateInfoRow("最终判定", motor.FinalResult, "报告编号", $"RPT-{DateTime.Now:yyyyMMdd}-{motor.Barcode.GetHashCode():X8}"));
+Views\TraceDocumentBuilder.cs:85: doc.Blocks.Add(CreateSectionHeader("二、空载测试阶段 (A1/A2 工位)"));
+Views\TraceDocumentBuilder.cs:89: noLoadRG.Rows.Add(CreateTableHeaderRow("检测项目", "实测值", "标准下限", "标准上限", "判定"));
+Views\TraceDocumentBuilder.cs:91: "空载电流 (A)",
+Views\TraceDocumentBuilder.cs:98: "空载转速 (r/min)",
+Views\TraceDocumentBuilder.cs:110: doc.Blocks.Add(CreateSectionHeader("三、噪音测试阶段 (A3/A4 工位)"));
+Views\TraceDocumentBuilder.cs:114: noiseRG.Rows.Add(CreateTableHeaderRow("检测项目", "实测值", "标准下限", "标准上限", "判定"));
+Views\TraceDocumentBuilder.cs:116: "正转噪音 (dB)",
+Views\TraceDocumentBuilder.cs:123: "反转噪音 (dB)",
+Views\TraceDocumentBuilder.cs:135: doc.Blocks.Add(CreateSectionHeader("四、负载测试阶段 (A5/A6 工位)"));
+Views\TraceDocumentBuilder.cs:139: loadRG.Rows.Add(CreateTableHeaderRow("检测项目", "实测值", "标准下限", "标准上限", "判定"));
+Views\TraceDocumentBuilder.cs:141: "负载电流 (A)",
+Views\TraceDocumentBuilder.cs:148: "负载转速 (r/min)",
+Views\TraceDocumentBuilder.cs:160: doc.Blocks.Add(CreateSectionHeader("五、检验结论"));
+Views\TraceDocumentBuilder.cs:163: ? $"产品条码 {motor.Barcode} 经电性能测试，各项指标均符合标准要求，综合判定：合格。"
+Views\TraceDocumentBuilder.cs:164: : $"产品条码 {motor.Barcode} 经电性能测试，存在不合格项，综合判定：不合格。需返修或报废处理。";
+Views\TraceDocumentBuilder.cs:178: doc.Blocks.Add(CreateSectionHeader("六、签章确认"));
+Views\TraceDocumentBuilder.cs:186: signRG.Rows.Add(CreateSignRow("检验员", "审核员", "批准人"));
+Views\TraceDocumentBuilder.cs:201: footer.Inlines.Add(new Run($"MotorTestSystem 电机电性能测试系统  |  打印时间: {DateTime.Now:yyyy-MM-dd HH:mm:ss}  |  第 1 页"));
+Views\TraceDocumentBuilder.cs:207: #region 辅助方法
+Views\UserEditDialogView.xaml:300: <!-- Title binds to VM Title property, fallback to "新增用户" -->
+Views\UserEditDialogView.xaml:308: <Binding Path="Title" FallbackValue="新增用户" />
+Views\UserEditDialogView.xaml.cs:47: ModernMessageBox.Show("账号不能为空！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
+Views\UserEditDialogView.xaml.cs:52: ModernMessageBox.Show("姓名不能为空！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
+Views\UserEditDialogView.xaml.cs:57: if (vm.Title.Contains("新增"))
+Views\UserEditDialogView.xaml.cs:61: ModernMessageBox.Show("请输入登录密码！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
+Views\UserEditDialogView.xaml.cs:66: ModernMessageBox.Show("两次输入的密码不一致！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
+Views\UserEditDialogView.xaml.cs:75: ModernMessageBox.Show("两次输入的密码不一致！", "输入验证", MessageBoxButton.OK, MessageBoxImage.Warning);
+Views\UserView.xaml:382: <DataTrigger Binding="{Binding Status}" Value="在线">
+Views\UserView.xaml:388: <DataTrigger Binding="{Binding Status}" Value="离线">
+Views\UserView.xaml:394: <DataTrigger Binding="{Binding Status}" Value="禁用">
+Views\UserView.xaml:449: <!-- Roles List — 动态绑定 -->

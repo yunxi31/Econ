@@ -7,8 +7,9 @@
         xmlns:views="clr-namespace:MotorTestSystem.Views"
         xmlns:conv="clr-namespace:MotorTestSystem.Converters"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:MotorTestSystem"
         mc:Ignorable="d"
-        Title="电机电性能测试系统"
+        Title="{local:Loc 电机电性能测试系统}"
         Height="920"
         Width="1280"
         MinHeight="760"
@@ -109,6 +110,44 @@
                             <DataTrigger Binding="{Binding DataContext.NotificationVM.UnreadCount, RelativeSource={RelativeSource AncestorType=Window}}" Value="0">
                                 <Setter TargetName="BadgeBorder" Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LanguageToggleButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="64"/>
+            <Setter Property="Height" Value="64"/>
+            <Setter Property="Background" Value="#202936"/>
+            <Setter Property="BorderBrush" Value="#334052"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="BtnBorder" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18">
+                            <TextBlock x:Name="Txt"
+                                       Text="{Binding Source={x:Static local:LanguageManager.Instance}, Path=CurrentLanguage}"
+                                       Foreground="#B8C4CC" 
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center" 
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2A3442"/>
+                                <Setter TargetName="Txt" Property="Foreground" Value="#12DDF7"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#1C222B"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -301,7 +340,7 @@
                                   Width="38"
                                   Height="38"
                                   Stretch="Uniform"/>
-                            <TextBlock Text="生产监控" Style="{StaticResource NavLabelStyle}"/>
+                            <TextBlock Text="{local:Loc 生产监控}" Style="{StaticResource NavLabelStyle}"/>
                         </StackPanel>
                     </RadioButton>
 
@@ -319,7 +358,7 @@
                                   Width="38"
                                   Height="38"
                                   Stretch="Uniform"/>
-                            <TextBlock Text="数据追溯" Style="{StaticResource NavLabelStyle}"/>
+                            <TextBlock Text="{local:Loc 数据追溯}" Style="{StaticResource NavLabelStyle}"/>
                         </StackPanel>
                     </RadioButton>
 
@@ -338,7 +377,7 @@
                                   Width="38"
                                   Height="38"
                                   Stretch="Uniform"/>
-                            <TextBlock Text="生产看板" Style="{StaticResource NavLabelStyle}"/>
+                            <TextBlock Text="{local:Loc 生产看板}" Style="{StaticResource NavLabelStyle}"/>
                         </StackPanel>
                     </RadioButton>
 
@@ -357,7 +396,7 @@
                                   Width="38"
                                   Height="38"
                                   Stretch="Uniform"/>
-                            <TextBlock Text="用户管理" Style="{StaticResource NavLabelStyle}"/>
+                            <TextBlock Text="{local:Loc 用户管理}" Style="{StaticResource NavLabelStyle}"/>
                         </StackPanel>
                     </RadioButton>
 
@@ -375,7 +414,7 @@
                                   Width="34"
                                   Height="34"
                                   Stretch="Uniform"/>
-                            <TextBlock Text="日志中心" Style="{StaticResource NavLabelStyle}"/>
+                            <TextBlock Text="{local:Loc 日志中心}" Style="{StaticResource NavLabelStyle}"/>
                         </StackPanel>
                     </RadioButton>
                 </StackPanel>
@@ -396,7 +435,7 @@
                               Width="38"
                               Height="38"
                               Stretch="Uniform"/>
-                        <TextBlock Text="系统配置" Style="{StaticResource NavLabelStyle}"/>
+                        <TextBlock Text="{local:Loc 系统配置}" Style="{StaticResource NavLabelStyle}"/>
                     </StackPanel>
                 </RadioButton>
             </Grid>
@@ -416,11 +455,13 @@
                     <ColumnDefinition Width="32"/>   <!-- Spacer -->
                     <ColumnDefinition Width="Auto"/> <!-- Notification -->
                     <ColumnDefinition Width="24"/>   <!-- Spacer -->
+                    <ColumnDefinition Width="Auto"/> <!-- Language Toggle -->
+                    <ColumnDefinition Width="24"/>   <!-- Spacer -->
                     <ColumnDefinition Width="Auto"/> <!-- UserAvatar -->
                     <ColumnDefinition Width="16"/>   <!-- Right Spacer -->
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="电机电性能测试系统"
+                <TextBlock Text="{local:Loc 电机电性能测试系统}"
                            Foreground="#12DDF7"
                            FontSize="27"
                            FontWeight="Light"
@@ -435,7 +476,7 @@
                         BorderThickness="1.5"
                         VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="节点状态"
+                        <TextBlock Text="{local:Loc 节点状态}"
                                    Foreground="#B7C2CA"
                                    FontSize="15"
                                    VerticalAlignment="Center"
@@ -470,7 +511,14 @@
                         WindowChrome.IsHitTestVisibleInChrome="True"
                         VerticalAlignment="Center"/>
 
-                <Border x:Name="UserAvatarBorder" Grid.Column="7"
+                <Button Grid.Column="7"
+                        Click="LanguageToggleButton_Click"
+                        Style="{StaticResource LanguageToggleButtonStyle}"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        VerticalAlignment="Center"
+                        ToolTip="ZH/EN"/>
+
+                <Border x:Name="UserAvatarBorder" Grid.Column="9"
                         Width="64"
                         Height="64"
                         CornerRadius="18"
@@ -479,7 +527,7 @@
                         BorderThickness="1.5"
                         VerticalAlignment="Center"
                         WindowChrome.IsHitTestVisibleInChrome="True"
-                        ToolTip="用户主页"
+                        ToolTip="{local:Loc 用户主页}"
                         Cursor="Hand"
                         MouseLeftButtonDown="UserAvatarBorder_MouseLeftButtonDown">
                     <Grid>
@@ -512,7 +560,7 @@
                                 </Border.Effect>
                                 <StackPanel>
                                     <!-- 用户名 -->
-                                    <TextBlock Text="用户名" Foreground="#5F7585" FontSize="12" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{local:Loc 用户名}" Foreground="#5F7585" FontSize="12" Margin="0,0,0,4"/>
                                     <Border Background="#202936"
                                             BorderBrush="#334052"
                                             BorderThickness="1"
@@ -526,7 +574,7 @@
                                     </Border>
 
                                     <!-- 角色 -->
-                                    <TextBlock Text="用户角色" Foreground="#5F7585" FontSize="12" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{local:Loc 用户角色}" Foreground="#5F7585" FontSize="12" Margin="0,0,0,4"/>
                                     <Border Background="#202936"
                                             BorderBrush="#334052"
                                             BorderThickness="1"
@@ -541,7 +589,7 @@
 
                                     <!-- 退出登录按钮 -->
                                     <Button x:Name="LogoutButton"
-                                            Content="退出登录"
+                                            Content="{local:Loc 退出登录}"
                                             Click="LogoutButton_Click"
                                             Height="34"
                                             Foreground="White"

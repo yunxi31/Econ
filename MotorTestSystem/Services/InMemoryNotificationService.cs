@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using MotorTestSystem.Models;
 
 namespace MotorTestSystem.Services
@@ -155,6 +156,14 @@ namespace MotorTestSystem.Services
 
         public void Add(NotificationItem notification)
         {
+            // ObservableCollection 的 CollectionChanged 会触发 WPF UI 更新，必须在 UI 线程执行
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(() => Add(notification));
+                return;
+            }
+
             lock (_lock)
             {
                 _notifications.Insert(0, notification); // 最新的排最前面
@@ -198,6 +207,13 @@ namespace MotorTestSystem.Services
 
         public void Remove(string notificationId)
         {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(() => Remove(notificationId));
+                return;
+            }
+
             lock (_lock)
             {
                 var item = _notifications.FirstOrDefault(n => n.Id == notificationId);
@@ -211,6 +227,13 @@ namespace MotorTestSystem.Services
 
         public void ClearAll()
         {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(() => ClearAll());
+                return;
+            }
+
             lock (_lock)
             {
                 _notifications.Clear();

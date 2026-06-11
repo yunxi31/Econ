@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:root="clr-namespace:MotorTestSystem"
              mc:Ignorable="d"
              d:DesignHeight="980"
              d:DesignWidth="1350"
@@ -115,7 +116,7 @@
                                   Width="24"
                                   Height="24"
                                   Stretch="Uniform"/>
-                            <TextBlock Text="最近检测条码"
+                            <TextBlock Text="{root:Loc 最近检测条码}"
                                        Style="{StaticResource SectionTitleStyle}"
                                        Margin="12,0,0,0"/>
                         </StackPanel>
@@ -181,10 +182,10 @@
                                       Width="24"
                                       Height="24"
                                       Stretch="Uniform"/>
-                                <TextBlock Text="系统警报" Style="{StaticResource SectionTitleStyle}" Margin="12,0,0,0"/>
+                                <TextBlock Text="{root:Loc 系统警报}" Style="{StaticResource SectionTitleStyle}" Margin="12,0,0,0"/>
                             </StackPanel>
                             <Border Background="#7D3C45" CornerRadius="3" Padding="11,6" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <TextBlock Text="1 未处理" Foreground="{StaticResource RedBrush}" FontSize="14"/>
+                                <TextBlock Text="{root:Loc 1 未处理}" Foreground="{StaticResource RedBrush}" FontSize="14"/>
                             </Border>
                         </Grid>
                     </Border>
@@ -193,8 +194,8 @@
                         <Grid Margin="0,0,0,28">
                             <Border Width="3" Background="{StaticResource RedBrush}" HorizontalAlignment="Left"/>
                             <StackPanel Margin="22,0,0,0">
-                                <TextBlock Text="A4: 噪音超标" Foreground="{StaticResource RedBrush}" FontSize="18" FontWeight="Bold"/>
-                                <TextBlock Text="SN-99480-XA1 测量值 78.9dB (限值 65.0)"
+                                <TextBlock Text="{root:Loc A4: 噪音超标}" Foreground="{StaticResource RedBrush}" FontSize="18" FontWeight="Bold"/>
+                                <TextBlock Text="{root:Loc SN-99480-XA1 测量值 78.9dB (限值 65.0)}"
                                            Foreground="#BFC8D1"
                                            FontSize="15"
                                            Margin="0,12,0,0"/>
@@ -205,8 +206,8 @@
                         <Grid>
                             <Border Width="3" Background="#D59A00" HorizontalAlignment="Left"/>
                             <StackPanel Margin="22,0,0,0">
-                                <TextBlock Text="Cam-2 离线" Foreground="#D59A00" FontSize="18" FontWeight="Bold"/>
-                                <TextBlock Text="B线视图连接丢失" Foreground="#BFC8D1" FontSize="15" Margin="0,12,0,0"/>
+                                <TextBlock Text="{root:Loc Cam-2 离线}" Foreground="#D59A00" FontSize="18" FontWeight="Bold"/>
+                                <TextBlock Text="{root:Loc B线视图连接丢失}" Foreground="#BFC8D1" FontSize="15" Margin="0,12,0,0"/>
                                 <TextBlock Text="13:45:00 UTC" Foreground="#7F8B95" FontSize="13" Margin="0,14,0,0"/>
                             </StackPanel>
                         </Grid>
@@ -243,7 +244,7 @@
                         <Grid Margin="20,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Rectangle Width="14" Height="14" Stroke="{StaticResource CyanBrush}" StrokeThickness="2" Margin="0,0,12,0"/>
-                                <TextBlock Text="海康威视 01号摄像头 - 主测试工位"
+                                <TextBlock Text="{root:Loc 海康威视 01号摄像头 - 主测试工位}"
                                            Foreground="#D2D9DF"
                                            FontSize="17"
                                            VerticalAlignment="Center"/>
@@ -256,7 +257,7 @@
                                            FontSize="17"
                                            Margin="0,0,22,0"/>
                                 <Border BorderBrush="#009E6B" BorderThickness="1.3" CornerRadius="2" Padding="17,9" Background="#1E5148">
-                                    <TextBlock Text="实时" Foreground="{StaticResource GreenBrush}" FontSize="17" FontWeight="Bold"/>
+                                    <TextBlock Text="{root:Loc 实时}" Foreground="{StaticResource GreenBrush}" FontSize="17" FontWeight="Bold"/>
                                 </Border>
                             </StackPanel>
                         </Grid>
@@ -297,7 +298,7 @@
                                     </Style>
                                 </Ellipse.Style>
                             </Ellipse>
-                            <TextBlock Text="CAM-01 主测试工位" Foreground="White" FontSize="13" FontWeight="Bold">
+                            <TextBlock Text="{root:Loc CAM-01 主测试工位}" Foreground="White" FontSize="13" FontWeight="Bold">
                                 <TextBlock.Effect>
                                     <DropShadowEffect BlurRadius="4" ShadowDepth="1" Color="Black" Opacity="0.8"/>
                                 </TextBlock.Effect>
@@ -339,13 +340,13 @@
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Style="{StaticResource PanelBorderStyle}" Background="#242C36">
-                    <TextBlock Text="● 阶段 1: 空载测试" Foreground="{StaticResource CyanBrush}" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Text="{root:Loc ● 阶段 1: 空载测试}" Foreground="{StaticResource CyanBrush}" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <Border Grid.Column="2" Style="{StaticResource PanelBorderStyle}" Background="#242C36">
-                    <TextBlock Text="● 阶段 2: 噪音测试" Foreground="{StaticResource CyanBrush}" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Text="{root:Loc ● 阶段 2: 噪音测试}" Foreground="{StaticResource CyanBrush}" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <Border Grid.Column="4" Style="{StaticResource PanelBorderStyle}" Background="#242C36">
-                    <TextBlock Text="● 阶段 3: 负载测试" Foreground="{StaticResource CyanBrush}" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Text="{root:Loc ● 阶段 3: 负载测试}" Foreground="{StaticResource CyanBrush}" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
             </Grid>
 
@@ -370,7 +371,7 @@
                         <Border Style="{StaticResource StatusPillStyle}" BorderBrush="{StaticResource GreenBrush}">
                             <StackPanel Orientation="Horizontal">
                                 <Ellipse Width="9" Height="9" Fill="{StaticResource GreenBrush}" Margin="0,0,7,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="运行中" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
+                                <TextBlock Text="{root:Loc 运行中}" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
                             </StackPanel>
                         </Border>
                         <StackPanel>
@@ -384,21 +385,21 @@
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="电压" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 电压}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="220.1" Style="{StaticResource MetricValueStyle}"/>
                                         <TextBlock Text=" V" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="14,0,0,0">
-                                    <TextBlock Text="电流" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 电流}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding NoLoadStations[0].NoLoadCurrent, StringFormat={}{0:F1}}" Style="{StaticResource MetricValueStyle}"/>
                                         <TextBlock Text=" A" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Margin="14,0,0,0">
-                                    <TextBlock Text="转速" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 转速}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding NoLoadStations[0].NoLoadSpeed}" Style="{StaticResource MetricValueStyle}"/>
                                         <TextBlock Text=" RPM" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
@@ -420,7 +421,7 @@
                         <Border Style="{StaticResource StatusPillStyle}" BorderBrush="{StaticResource GreenBrush}">
                             <StackPanel Orientation="Horizontal">
                                 <Ellipse Width="9" Height="9" Fill="{StaticResource GreenBrush}" Margin="0,0,7,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="运行中" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
+                                <TextBlock Text="{root:Loc 运行中}" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
                             </StackPanel>
                         </Border>
                         <StackPanel>
@@ -434,21 +435,21 @@
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="噪音分贝" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 噪音分贝}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding NoiseStations[0].FwdNoise, StringFormat={}{0:F1}}" Style="{StaticResource MetricValueStyle}"/>
                                         <TextBlock Text=" dB" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="14,0,0,0">
-                                    <TextBlock Text="振动值" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 振动值}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding NoiseStations[0].RevNoise, StringFormat={}{0:F1}}" Style="{StaticResource MetricValueStyle}"/>
                                         <TextBlock Text=" mm/s" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Margin="14,0,0,0">
-                                    <TextBlock Text="温度" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 温度}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding NoiseStations[0].NoiseDiff, StringFormat={}{0:F1}}" Style="{StaticResource MetricValueStyle}"/>
                                         <TextBlock Text=" °C" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
@@ -468,7 +469,7 @@
                 <Border Grid.Row="0" Grid.Column="4" Style="{StaticResource PanelBorderStyle}" Background="#243040" BorderBrush="#00A66C" Padding="20">
                     <Grid>
                         <Border Style="{StaticResource StatusPillStyle}" BorderBrush="{StaticResource GreenBrush}">
-                            <TextBlock Text="已完成" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
+                            <TextBlock Text="{root:Loc 已完成}" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
                         </Border>
                         <StackPanel>
                             <TextBlock Text="A5: LD-Max" Foreground="#D9E1EA" FontSize="27" FontWeight="Bold"/>
@@ -480,14 +481,14 @@
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="最大扭矩" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 最大扭矩}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding LoadStations[0].LoadCurrent, StringFormat={}{0:F1}}" Foreground="#D8DFE7" FontFamily="Consolas" FontSize="28"/>
                                         <TextBlock Text=" Nm" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="18,0,0,0">
-                                    <TextBlock Text="最高温度" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 最高温度}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding LoadStations[0].LoadSpeed, StringFormat={}{0:F1}}" Foreground="#D8DFE7" FontFamily="Consolas" FontSize="28"/>
                                         <TextBlock Text=" °C" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
@@ -496,7 +497,7 @@
                             </Grid>
                             <Border Height="1" Background="#2F3A47" Margin="0,18,0,18"/>
                             <Border Background="#174840" Height="40" CornerRadius="2">
-                                <TextBlock Text="扭矩: OK - 合格" Foreground="{StaticResource GreenBrush}" FontFamily="Consolas" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="{root:Loc 扭矩: OK - 合格}" Foreground="{StaticResource GreenBrush}" FontFamily="Consolas" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </StackPanel>
                     </Grid>
@@ -506,11 +507,11 @@
                 <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource PanelBorderStyle}" Background="#11171D" BorderBrush="#222C36" Padding="20" Opacity="0.82">
                     <Grid>
                         <Border Background="#232A32" CornerRadius="2" Padding="13,8" HorizontalAlignment="Right" VerticalAlignment="Top">
-                            <TextBlock Text="待机" Foreground="#9AA4AE" FontSize="15"/>
+                            <TextBlock Text="{root:Loc 待机}" Foreground="#9AA4AE" FontSize="15"/>
                         </Border>
                         <StackPanel>
                             <TextBlock Text="A2: FX5U" Foreground="#9EA8B2" FontSize="27" FontWeight="Bold"/>
-                            <TextBlock Text="等待中" Foreground="#9EA8B2" FontSize="18" Margin="0,12,0,14"/>
+                            <TextBlock Text="{root:Loc 等待中}" Foreground="#9EA8B2" FontSize="18" Margin="0,12,0,14"/>
                             <Border Height="1" Background="#26313A" Margin="0,0,0,18"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -519,22 +520,22 @@
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="电压" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 电压}" Style="{StaticResource MetricLabelStyle}"/>
                                     <TextBlock Text="-- V" Foreground="#8B969F" FontFamily="Consolas" FontSize="22"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="14,0,0,0">
-                                    <TextBlock Text="电流" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 电流}" Style="{StaticResource MetricLabelStyle}"/>
                                     <TextBlock Text="-- A" Foreground="#8B969F" FontFamily="Consolas" FontSize="22"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Margin="14,0,0,0">
-                                    <TextBlock Text="转速" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 转速}" Style="{StaticResource MetricLabelStyle}"/>
                                     <TextBlock Text="-- RPM" Foreground="#8B969F" FontFamily="Consolas" FontSize="22"/>
                                 </StackPanel>
                             </Grid>
                             <Border Height="1" Background="#26313A" Margin="0,18,0,26"/>
                             <Grid>
                                 <ProgressBar Value="0" Style="{StaticResource ThinProgressBarStyle}" Foreground="#2A323B" VerticalAlignment="Center"/>
-                                <TextBlock Text="准备就绪" Foreground="#9EA8B2" FontSize="15" HorizontalAlignment="Right" Margin="0,0,0,-26"/>
+                                <TextBlock Text="{root:Loc 准备就绪}" Foreground="#9EA8B2" FontSize="15" HorizontalAlignment="Right" Margin="0,0,0,-26"/>
                             </Grid>
                         </StackPanel>
                     </Grid>
@@ -544,7 +545,7 @@
                 <Border Grid.Row="2" Grid.Column="2" Background="#1F0E10" BorderBrush="{StaticResource RedBrush}" BorderThickness="2.2" CornerRadius="4" Padding="20">
                     <Grid>
                         <Border Style="{StaticResource StatusPillStyle}" BorderBrush="{StaticResource RedBrush}">
-                            <TextBlock Text="⚠ 故障" Foreground="{StaticResource RedBrush}" FontSize="16" FontWeight="Bold"/>
+                            <TextBlock Text="{root:Loc ⚠ 故障}" Foreground="{StaticResource RedBrush}" FontSize="16" FontWeight="Bold"/>
                         </Border>
                         <StackPanel>
                             <TextBlock Text="A4: NV-X" Foreground="#D9E1EA" FontSize="27" FontWeight="Bold"/>
@@ -556,14 +557,14 @@
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="噪音分贝" Foreground="#C1A0A2" FontSize="14" Margin="0,0,0,8"/>
+                                    <TextBlock Text="{root:Loc 噪音分贝}" Foreground="#C1A0A2" FontSize="14" Margin="0,0,0,8"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding NoiseStations[1].FwdNoise, StringFormat={}{0:F1}}" Foreground="{StaticResource RedBrush}" FontFamily="Consolas" FontSize="28" FontWeight="Bold"/>
                                         <TextBlock Text=" dB" Foreground="{StaticResource RedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="16,0,0,0">
-                                    <TextBlock Text="限值" Foreground="#C1A0A2" FontSize="14" Margin="0,0,0,8"/>
+                                    <TextBlock Text="{root:Loc 限值}" Foreground="#C1A0A2" FontSize="14" Margin="0,0,0,8"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding NoiseStations[1].NoiseDiff, StringFormat={}{0:F1}}" Foreground="#D8DFE7" FontFamily="Consolas" FontSize="28"/>
                                         <TextBlock Text=" dB" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
@@ -572,7 +573,7 @@
                             </Grid>
                             <Border Height="1" Background="#743035" Margin="0,18,0,18"/>
                             <Border Background="#431819" Height="40" CornerRadius="2">
-                                <TextBlock Text="检测结果: NG - 需人工检视" Foreground="{StaticResource RedBrush}" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Text="{root:Loc 检测结果: NG - 需人工检视}" Foreground="{StaticResource RedBrush}" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </StackPanel>
                     </Grid>
@@ -584,7 +585,7 @@
                         <Border Style="{StaticResource StatusPillStyle}" BorderBrush="{StaticResource GreenBrush}">
                             <StackPanel Orientation="Horizontal">
                                 <Ellipse Width="9" Height="9" Fill="{StaticResource GreenBrush}" Margin="0,0,7,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="运行中" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
+                                <TextBlock Text="{root:Loc 运行中}" Foreground="{StaticResource GreenBrush}" FontSize="15" FontWeight="Bold"/>
                             </StackPanel>
                         </Border>
                         <StackPanel>
@@ -597,14 +598,14 @@
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="扭矩" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 扭矩}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding LoadStations[1].LoadCurrent, StringFormat={}{0:F1}}" Style="{StaticResource MetricValueStyle}"/>
                                         <TextBlock Text=" Nm" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="18,0,0,0">
-                                    <TextBlock Text="温度" Style="{StaticResource MetricLabelStyle}"/>
+                                    <TextBlock Text="{root:Loc 温度}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding LoadStations[1].LoadSpeed, StringFormat={}{0:F1}}" Style="{StaticResource MetricValueStyle}"/>
                                         <TextBlock Text=" °C" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>

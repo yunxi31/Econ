@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        xmlns:root="clr-namespace:MotorTestSystem"
         mc:Ignorable="d"
-        Title="电机电性能测试报告"
+        Title="{root:Loc 电机电性能测试报告}"
         Width="960" Height="720"
         MinWidth="800" MinHeight="600"
         WindowStartupLocation="CenterOwner"
@@ -122,7 +123,7 @@
                             <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,11V17H13V11H11M9,13V17H11V13H9M13,13V17H15V13H13Z"
                                   Fill="#00D2E6" Width="20" Height="20" Margin="0,0,10,0"
                                   Stretch="Uniform" VerticalAlignment="Center"/>
-                            <TextBlock Text="电机电性能测试报告" FontSize="15" FontWeight="Bold"
+                            <TextBlock Text="{root:Loc 电机电性能测试报告}" FontSize="15" FontWeight="Bold"
                                        Foreground="#E8ECF1" VerticalAlignment="Center"/>
                             <TextBlock x:Name="ReportBarcode" Text="" FontSize="13" Foreground="#8A8D99"
                                        VerticalAlignment="Center" Margin="12,0,0,0"/>
@@ -180,7 +181,7 @@
                     <Border Grid.Column="0" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
                             BorderThickness="1" CornerRadius="8" Padding="16,12">
                         <StackPanel>
-                            <TextBlock Text="一、产品基本信息" Style="{StaticResource SectionHeaderText}"/>
+                            <TextBlock Text="{root:Loc 一、产品基本信息}" Style="{StaticResource SectionHeaderText}"/>
                             <Grid Margin="0,4,0,0">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -194,13 +195,13 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="产品条码：" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{root:Loc 产品条码：}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtBarcode" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left" Foreground="{StaticResource ReportAccentCyan}"/>
 
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="测试时间：" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{root:Loc 测试时间：}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtTestTime" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left"/>
 
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="报告时间：" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{root:Loc 报告时间：}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtReportTime" Text="-" Style="{StaticResource DataValue}" HorizontalAlignment="Left"/>
                             </Grid>
                         </StackPanel>
@@ -215,12 +216,12 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,16,0" VerticalAlignment="Center">
-                                <TextBlock Text="二、检验结论" Style="{StaticResource SectionHeaderText}"/>
+                                <TextBlock Text="{root:Loc 二、检验结论}" Style="{StaticResource SectionHeaderText}"/>
                                 <TextBlock x:Name="TxtConclusion" TextWrapping="Wrap" FontSize="12.5"
                                            Foreground="{StaticResource ReportTextPrimary}" LineHeight="19"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0,0,0">
-                                <TextBlock Text="最终判定" Style="{StaticResource DataLabel}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                <TextBlock Text="{root:Loc 最终判定}" Style="{StaticResource DataLabel}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
                                 <Border x:Name="FinalResultBadge" Style="{StaticResource ResultBadgeOK}" Width="80" Height="46" VerticalAlignment="Center">
                                     <TextBlock x:Name="TxtFinalResult" Text="OK" FontWeight="Black" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
@@ -248,7 +249,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="三、空载测试" Style="{StaticResource SectionHeaderText}" Margin="0"/>
+                                <TextBlock Grid.Column="0" Text="{root:Loc 三、空载测试}" Style="{StaticResource SectionHeaderText}" Margin="0"/>
                                 <Border Grid.Column="1" x:Name="NoLoadResultBadge" Style="{StaticResource ResultBadgeOK}" Padding="8,2" CornerRadius="4">
                                     <TextBlock x:Name="TxtNoLoadResult" Text="-" FontWeight="Bold" FontSize="11"/>
                                 </Border>
@@ -268,16 +269,16 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="空载电流" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{root:Loc 空载电流}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtNoLoadCurrent" Text="-" Style="{StaticResource DataValue}"/>
 
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="空载转速" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{root:Loc 空载转速}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtNoLoadSpeed" Text="-" Style="{StaticResource DataValue}"/>
 
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="轴长" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{root:Loc 轴长}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtShaftLength" Text="-" Style="{StaticResource DataValue}"/>
 
-                                <TextBlock Grid.Row="6" Grid.Column="0" Text="滚花直径" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text="{root:Loc 滚花直径}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="6" Grid.Column="1" x:Name="TxtKnurlDiameter" Text="-" Style="{StaticResource DataValue}"/>
                             </Grid>
                         </StackPanel>
@@ -292,7 +293,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="四、噪音测试" Style="{StaticResource SectionHeaderText}" Margin="0"/>
+                                <TextBlock Grid.Column="0" Text="{root:Loc 四、噪音测试}" Style="{StaticResource SectionHeaderText}" Margin="0"/>
                                 <Border Grid.Column="1" x:Name="NoiseResultBadge" Style="{StaticResource ResultBadgeOK}" Padding="8,2" CornerRadius="4">
                                     <TextBlock x:Name="TxtNoiseResult" Text="-" FontWeight="Bold" FontSize="11"/>
                                 </Border>
@@ -313,13 +314,13 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="正转噪音" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{root:Loc 正转噪音}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtFwdNoise" Text="-" Style="{StaticResource DataValue}"/>
 
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="反转噪音" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{root:Loc 反转噪音}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtRevNoise" Text="-" Style="{StaticResource DataValue}"/>
 
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="噪音差值" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{root:Loc 噪音差值}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtNoiseDiff" Text="-" Style="{StaticResource DataValue}"/>
 
                                 <!-- 占位行，用于和空载卡片对齐高度 -->
@@ -338,7 +339,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="五、负载测试" Style="{StaticResource SectionHeaderText}" Margin="0"/>
+                                <TextBlock Grid.Column="0" Text="{root:Loc 五、负载测试}" Style="{StaticResource SectionHeaderText}" Margin="0"/>
                                 <Border Grid.Column="1" x:Name="LoadResultBadge" Style="{StaticResource ResultBadgeOK}" Padding="8,2" CornerRadius="4">
                                     <TextBlock x:Name="TxtLoadResult" Text="-" FontWeight="Bold" FontSize="11"/>
                                 </Border>
@@ -359,10 +360,10 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="负载电流" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{root:Loc 负载电流}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtLoadCurrent" Text="-" Style="{StaticResource DataValue}"/>
 
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="负载转速" Style="{StaticResource DataLabel}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{root:Loc 负载转速}" Style="{StaticResource DataLabel}"/>
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtLoadSpeed" Text="-" Style="{StaticResource DataValue}"/>
 
                                 <!-- 占位行，用于和空载卡片对齐高度 -->
@@ -381,7 +382,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="六、阈值判定详情" Style="{StaticResource SectionHeaderText}"/>
+                    <TextBlock Grid.Row="0" Text="{root:Loc 六、阈值判定详情}" Style="{StaticResource SectionHeaderText}"/>
                     <Border Grid.Row="1" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
                             BorderThickness="1" CornerRadius="8" Padding="1">
                         <DataGrid x:Name="ThresholdGrid" AutoGenerateColumns="False"
@@ -428,15 +429,15 @@
                                 </Style>
                             </DataGrid.RowStyle>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="检测项目" Binding="{Binding Item}" Width="1.5*"
+                                <DataGridTextColumn Header="{root:Loc 检测项目}" Binding="{Binding Item}" Width="1.5*"
                                                     ElementStyle="{StaticResource GridDataLabelLeft}"/>
-                                <DataGridTextColumn Header="实测值" Binding="{Binding Actual}" Width="*"
+                                <DataGridTextColumn Header="{root:Loc 实测值}" Binding="{Binding Actual}" Width="*"
                                                     ElementStyle="{StaticResource GridDataValueCenter}"/>
-                                <DataGridTextColumn Header="标准下限" Binding="{Binding Lower}" Width="*"
+                                <DataGridTextColumn Header="{root:Loc 标准下限}" Binding="{Binding Lower}" Width="*"
                                                     ElementStyle="{StaticResource GridDataLabelCenter}"/>
-                                <DataGridTextColumn Header="标准上限" Binding="{Binding Upper}" Width="*"
+                                <DataGridTextColumn Header="{root:Loc 标准上限}" Binding="{Binding Upper}" Width="*"
                                                     ElementStyle="{StaticResource GridDataLabelCenter}"/>
-                                <DataGridTextColumn Header="判定" Binding="{Binding Judge}" Width="80">
+                                <DataGridTextColumn Header="{root:Loc 判定}" Binding="{Binding Judge}" Width="80">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -474,7 +475,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="160"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="空载电流波形" FontSize="12" Foreground="#00D2E6"
+                            <TextBlock Grid.Row="0" Text="{root:Loc 空载电流波形}" FontSize="12" Foreground="#00D2E6"
                                        FontWeight="SemiBold" Margin="4,0,0,6"/>
                             <lvc:CartesianChart Grid.Row="1" x:Name="NoLoadChart"
                                                 Series="{Binding NoLoadWaveformSeries}"
@@ -495,7 +496,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="160"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="噪音频谱波形" FontSize="12" Foreground="#FFA500"
+                            <TextBlock Grid.Row="0" Text="{root:Loc 噪音频谱波形}" FontSize="12" Foreground="#FFA500"
                                        FontWeight="SemiBold" Margin="4,0,0,6"/>
                             <lvc:CartesianChart Grid.Row="1" x:Name="NoiseChart"
                                                 Series="{Binding NoiseWaveformSeries}"
@@ -515,7 +516,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="七、签章" Style="{StaticResource SectionHeaderText}"/>
+                    <TextBlock Grid.Row="0" Text="{root:Loc 七、签章}" Style="{StaticResource SectionHeaderText}"/>
                     <Border Grid.Row="1" Background="{StaticResource ReportCardBg}" BorderBrush="{StaticResource ReportBorder}"
                             BorderThickness="1" CornerRadius="8" Padding="20,16">
                         <Grid>
@@ -528,15 +529,15 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="检验员" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
+                                <TextBlock Text="{root:Loc 检验员}" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
                                 <Border BorderBrush="#333645" BorderThickness="0,0,0,1" MinHeight="26"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="审核员" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
+                                <TextBlock Text="{root:Loc 审核员}" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
                                 <Border BorderBrush="#333645" BorderThickness="0,0,0,1" MinHeight="26"/>
                             </StackPanel>
                             <StackPanel Grid.Column="4">
-                                <TextBlock Text="批准人" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
+                                <TextBlock Text="{root:Loc 批准人}" FontSize="12" Foreground="#8A8D99" Margin="0,0,0,4"/>
                                 <Border BorderBrush="#333645" BorderThickness="0,0,0,1" MinHeight="26"/>
                             </StackPanel>
                         </Grid>
@@ -556,15 +557,15 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="11" Foreground="#8A8D99">
-                    <Run Text="MotorTestSystem 电机电性能测试系统"/>
+                    <Run Text="{root:Loc MotorTestSystem 电机电性能测试系统}"/>
                 </TextBlock>
 
-                <Button Grid.Column="1" Content="打印报告" Height="34" MinWidth="100"
+                <Button Grid.Column="1" Content="{root:Loc 打印报告}" Height="34" MinWidth="100"
                         Background="#2B303C" Foreground="#E8ECF1" BorderBrush="#3B4254"
                         BorderThickness="1" Margin="0,0,10,0" Cursor="Hand"
                         Click="PrintButton_Click"
                         FontSize="13" FontWeight="SemiBold"/>
-                <Button Grid.Column="2" Content="关闭" Height="34" MinWidth="80"
+                <Button Grid.Column="2" Content="{root:Loc 关闭}" Height="34" MinWidth="80"
                         Background="#00D2E6" Foreground="#090E12" BorderThickness="0"
                         Cursor="Hand" Click="CloseButton_Click"
                         FontSize="13" FontWeight="Bold"/>

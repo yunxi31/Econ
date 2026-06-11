@@ -7,6 +7,7 @@
              xmlns:vm="clr-namespace:MotorTestSystem.ViewModels"
              xmlns:conv="clr-namespace:MotorTestSystem.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:root="clr-namespace:MotorTestSystem"
              mc:Ignorable="d" 
              d:DesignHeight="760" d:DesignWidth="1080"
              Background="#13141E">
@@ -296,7 +297,7 @@
                                          Height="28"
                                          Foreground="#FFFFFF"
                                          VerticalAlignment="Center"/>
-                <TextBlock Text="日志中心"
+                <TextBlock Text="{root:Loc 日志中心}"
                             Foreground="#FFFFFF"
                             FontSize="24"
                             FontWeight="Bold"
@@ -309,7 +310,7 @@
                     Style="{StaticResource HeaderButtonStyle}" Padding="16,0" Height="40">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="DownloadOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#00D2E6"/>
-                    <TextBlock Text="导出 CSV" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                    <TextBlock Text="{root:Loc 导出 CSV}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
         </Grid>
@@ -328,7 +329,7 @@
 
             <!-- 1.1 时间范围 -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="时间范围" Foreground="#B0B8CC" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                <TextBlock Text="{root:Loc 时间范围}" Foreground="#B0B8CC" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <Border Background="#1B1C28" BorderBrush="#333645" BorderThickness="1" CornerRadius="4" Padding="8,0" Height="36">
                     <DatePicker x:Name="StartDatePicker"
                                 SelectedDate="{Binding StartDate}"
@@ -337,7 +338,7 @@
                                 VerticalAlignment="Center" BorderThickness="0" Background="Transparent" Width="110"
                                 Focusable="False"/>
                 </Border>
-                <TextBlock Text="至" Foreground="#B0B8CC" FontSize="14" Margin="8,0" VerticalAlignment="Center"/>
+                <TextBlock Text="{root:Loc 至}" Foreground="#B0B8CC" FontSize="14" Margin="8,0" VerticalAlignment="Center"/>
                 <Border Background="#1B1C28" BorderBrush="#333645" BorderThickness="1" CornerRadius="4" Padding="8,0" Height="36">
                     <DatePicker x:Name="EndDatePicker"
                                 SelectedDate="{Binding EndDate}"
@@ -350,7 +351,7 @@
 
             <!-- 1.2 来源/机台 -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="来源/机台" Foreground="#B0B8CC" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                <TextBlock Text="{root:Loc 来源/机台}" Foreground="#B0B8CC" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <ComboBox Width="130" Height="36"
                           ItemsSource="{Binding Sources}"
                           SelectedItem="{Binding SelectedSource, Mode=TwoWay}"
@@ -371,7 +372,7 @@
 
             <!-- 1.3 级别筛选 -->
             <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="级别" Foreground="#B0B8CC" FontSize="14" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                <TextBlock Text="{root:Loc 级别}" Foreground="#B0B8CC" FontSize="14" Margin="0,0,12,0" VerticalAlignment="Center"/>
                 
                 <RadioButton Content="ALL"
                              Style="{StaticResource LevelFilterButtonStyle}"
@@ -449,7 +450,7 @@
                          FontSize="14"
                          Padding="30,0,10,0"
                          VerticalContentAlignment="Center"
-                         materialDesign:HintAssist.Hint="搜索事件消息..."
+                         materialDesign:HintAssist.Hint="{root:Loc 搜索事件消息...}"
                          materialDesign:HintAssist.Foreground="#5C6070"
                          materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
                 <materialDesign:PackIcon Kind="Magnify"
@@ -464,11 +465,11 @@
 
         <!-- 2. Tabs -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
-            <RadioButton Content="运行日志"
+            <RadioButton Content="{root:Loc 运行日志}"
                          Style="{StaticResource LogTabButtonStyle}"
                          FontSize="15"
                          IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=运行日志, Mode=TwoWay}"/>
-            <RadioButton Content="操作日志"
+            <RadioButton Content="{root:Loc 操作日志}"
                          Style="{StaticResource LogTabButtonStyle}"
                          FontSize="15"
                          IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=操作日志, Mode=TwoWay}"/>
@@ -565,7 +566,7 @@
 
             <DataGrid.Columns>
                 <!-- 时间戳: Consolas 等宽字体确保垂直对齐 -->
-                <DataGridTemplateColumn Header="时间" Width="210">
+                <DataGridTemplateColumn Header="{root:Loc 时间}" Width="210">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Timestamp}"
@@ -579,7 +580,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- 级别 badge -->
-                <DataGridTemplateColumn Header="级别" Width="90">
+                <DataGridTemplateColumn Header="{root:Loc 级别}" Width="90">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border x:Name="LevelBadge"
@@ -622,7 +623,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- 来源/机台 -->
-                <DataGridTemplateColumn Header="来源/机台" Width="150">
+                <DataGridTemplateColumn Header="{root:Loc 来源/机台}" Width="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Source}"
@@ -636,7 +637,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- 事件消息 -->
-                <DataGridTemplateColumn Header="消息内容" Width="*">
+                <DataGridTemplateColumn Header="{root:Loc 消息内容}" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Content}"
@@ -659,15 +660,9 @@
             </Grid.ColumnDefinitions>
 
             <!-- 左下角统计 -->
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="显示第 " Foreground="#5C6070" FontSize="12"/>
-                <TextBlock Text="{Binding CurrentPageStart}" Foreground="#8A8D99" FontSize="12"/>
-                <TextBlock Text=" 到 " Foreground="#5C6070" FontSize="12"/>
-                <TextBlock Text="{Binding CurrentPageEnd}" Foreground="#8A8D99" FontSize="12"/>
-                <TextBlock Text=" 条，共 " Foreground="#5C6070" FontSize="12"/>
-                <TextBlock Text="{Binding TotalRecords}" Foreground="#8A8D99" FontSize="12"/>
-                <TextBlock Text=" 条记录" Foreground="#5C6070" FontSize="12"/>
-            </StackPanel>
+            <TextBlock Foreground="#5C6070" FontSize="12" xml:space="preserve" VerticalAlignment="Center">
+                <Run Text="{root:Loc 显示第}"/> <Run Text="{Binding CurrentPageStart, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 到}"/> <Run Text="{Binding CurrentPageEnd, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 条，共}"/> <Run Text="{Binding TotalRecords, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 条记录}"/>
+            </TextBlock>
             
             <!-- 右下角分页控制 -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
@@ -675,23 +670,19 @@
                 <Button Command="{Binding PreviousPageCommand}" Style="{StaticResource PaginationButtonStyle}" Width="64" Height="28">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="ChevronLeft" Width="14" Height="14" VerticalAlignment="Center"/>
-                        <TextBlock Text="上一页" FontSize="11" Margin="2,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{root:Loc 上一页}" FontSize="11" Margin="2,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
                 <!-- 页码 -->
                 <Border BorderBrush="#333645" BorderThickness="1" Background="#1B1C28" CornerRadius="4" Padding="10,4" Margin="8,0">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="第 " Foreground="#8A8D99" FontSize="11" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding CurrentPage}" Foreground="#8A8D99" FontSize="11" VerticalAlignment="Center"/>
-                        <TextBlock Text=" / " Foreground="#8A8D99" FontSize="11" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding TotalPages}" Foreground="#8A8D99" FontSize="11" VerticalAlignment="Center"/>
-                        <TextBlock Text=" 页" Foreground="#8A8D99" FontSize="11" VerticalAlignment="Center"/>
-                    </StackPanel>
+                    <TextBlock Foreground="#8A8D99" FontSize="11" xml:space="preserve" VerticalAlignment="Center">
+                        <Run Text="{root:Loc 第}"/> <Run Text="{Binding CurrentPage, Mode=OneWay}"/> / <Run Text="{Binding TotalPages, Mode=OneWay}"/> <Run Text="{root:Loc 页}"/>
+                    </TextBlock>
                 </Border>
                 <!-- 下一页 -->
                 <Button Command="{Binding NextPageCommand}" Style="{StaticResource PaginationButtonStyle}" Width="64" Height="28">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="下一页" FontSize="11" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{root:Loc 下一页}" FontSize="11" Margin="0,0,2,0" VerticalAlignment="Center"/>
                         <materialDesign:PackIcon Kind="ChevronRight" Width="14" Height="14" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>

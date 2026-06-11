@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:root="clr-namespace:MotorTestSystem"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
         Width="440"
@@ -41,7 +42,7 @@
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid Margin="16,0,8,0">
                     <TextBlock x:Name="TitleText" 
-                               Text="系统提示" 
+                               Text="{root:Loc 系统提示}" 
                                Foreground="#12DDF7" 
                                FontSize="14" 
                                FontWeight="Bold" 
@@ -79,7 +80,7 @@
                 <!-- Message Text -->
                 <TextBlock Grid.Column="1" 
                            x:Name="MessageText" 
-                           Text="提示内容" 
+                           Text="{root:Loc 提示内容}" 
                            Foreground="#D7DEE7" 
                            FontSize="14" 
                            LineHeight="20"
@@ -99,7 +100,7 @@
                             HorizontalAlignment="Right">
                     
                     <Button x:Name="BtnCancel" 
-                            Content="取消" 
+                            Content="{root:Loc 取消}" 
                             Width="90" 
                             Height="32" 
                             Margin="0,0,12,0"
@@ -110,7 +111,7 @@
                             Visibility="Collapsed"/>
 
                     <Button x:Name="BtnOK" 
-                            Content="确定" 
+                            Content="{root:Loc 确定}" 
                             Width="90" 
                             Height="32" 
                             Style="{StaticResource MaterialDesignFlatMidBgButton}"
