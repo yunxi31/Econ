@@ -167,7 +167,7 @@
                                 <Setter TargetName="Bg" Property="BorderThickness" Value="1"/>
                             </Trigger>
                             <Trigger Property="IsInactive" Value="True">
-                                <Setter Property="Foreground" Value="#4E5366"/>
+                                <Setter Property="Visibility" Value="Hidden"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

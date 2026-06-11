@@ -78,6 +78,9 @@ namespace MotorTestSystem.ViewModels
         private string _selectedFilter = "全部"; // "全部", "报警", "维护", "系统"
 
         [ObservableProperty]
+        private string _selectedTab = "运行日志"; // "运行日志" | "操作日志"
+
+        [ObservableProperty]
         private string _searchText = string.Empty;
 
         [ObservableProperty]
@@ -85,6 +88,35 @@ namespace MotorTestSystem.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<string> _sources = new() { "全部" };
+
+        [ObservableProperty]
+        private DateTime _startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+        [ObservableProperty]
+        private DateTime _endDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month,
+            DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(TotalPages))]
+        [NotifyPropertyChangedFor(nameof(CurrentPageStart))]
+        [NotifyPropertyChangedFor(nameof(CurrentPageEnd))]
+        private int _currentPage = 1;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(TotalPages))]
+        [NotifyPropertyChangedFor(nameof(CurrentPageStart))]
+        [NotifyPropertyChangedFor(nameof(CurrentPageEnd))]
+        private int _pageSize = 10;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(TotalPages))]
+        [NotifyPropertyChangedFor(nameof(CurrentPageStart))]
+        [NotifyPropertyChangedFor(nameof(CurrentPageEnd))]
+        private int _totalRecords = 0;
+
+        public int TotalPages => Math.Max(1, (int)Math.Ceiling(TotalRecords / (double)PageSize));
+        public int CurrentPageStart => TotalRecords == 0 ? 0 : (CurrentPage - 1) * PageSize + 1;
+        public int CurrentPageEnd => Math.Min(CurrentPage * PageSize, TotalRecords);
 
         [ObservableProperty]
         private int _allCount;
@@ -111,7 +143,7 @@ namespace MotorTestSystem.ViewModels
         /// </summary>
         public NotificationCenterViewModel(INotificationService? notificationService)
         {
-            _notificationService = notificationService;
+            _notificationService = notificationService ?? new InMemoryNotificationService();
 
             if (_notificationService != null)
             {
@@ -204,11 +236,60 @@ namespace MotorTestSystem.ViewModels
         partial void OnSelectedFilterChanged(string value) => FilterNotifications();
         partial void OnSearchTextChanged(string value) => FilterNotifications();
         partial void OnSelectedSourceChanged(string value) => FilterNotifications();
+        partial void OnSelectedTabChanged(string value) => FilterNotifications();
+        
+        partial void OnStartDateChanged(DateTime value)
+        {
+            OnPropertyChanged(nameof(MinEndDate));
+            OnPropertyChanged(nameof(MaxEndDate));
+            OnPropertyChanged(nameof(StartCalendarDisplayStart));
+            OnPropertyChanged(nameof(StartCalendarDisplayEnd));
+            if (EndDate < value) EndDate = value;
+            else if (EndDate > value.AddDays(31)) EndDate = value.AddDays(31);
+            FilterNotifications();
+        }
+
+        partial void OnEndDateChanged(DateTime value)
+        {
+            OnPropertyChanged(nameof(MinStartDate));
+            OnPropertyChanged(nameof(MaxStartDate));
+            OnPropertyChanged(nameof(EndCalendarDisplayStart));
+            OnPropertyChanged(nameof(EndCalendarDisplayEnd));
+            if (StartDate > value) StartDate = value;
+            else if (StartDate < value.AddDays(-31)) StartDate = value.AddDays(-31);
+            FilterNotifications();
+        }
+
+        // 用于 DatePicker 的 DisplayDateStart/End —— 始终是 StartDate 所在月份的头尾
+        public DateTime StartCalendarDisplayStart => new DateTime(StartDate.Year, StartDate.Month, 1);
+        public DateTime StartCalendarDisplayEnd   => new DateTime(StartDate.Year, StartDate.Month,
+            DateTime.DaysInMonth(StartDate.Year, StartDate.Month));
+
+        // 用于 EndDate DatePicker 的 DisplayDateStart/End —— 始终是 EndDate 所在月份的头尾
+        public DateTime EndCalendarDisplayStart => new DateTime(EndDate.Year, EndDate.Month, 1);
+        public DateTime EndCalendarDisplayEnd   => new DateTime(EndDate.Year, EndDate.Month,
+            DateTime.DaysInMonth(EndDate.Year, EndDate.Month));
+
+        // 业务约束：End 不能早于 Start，Start 不能超前 End 超过31天
+        public DateTime MinEndDate => StartDate;
+        public DateTime MaxEndDate => StartDate.AddDays(31);
+
+        public DateTime MinStartDate => EndDate.AddDays(-31);
+        public DateTime MaxStartDate => EndDate;
+
+        private System.Collections.Generic.IEnumerable<NotificationItemViewModel> _currentFilteredList = Enumerable.Empty<NotificationItemViewModel>();
 
         private void FilterNotifications()
         {
             var filtered = _allNotificationVms.AsEnumerable();
 
+            // Tab 第一优先：运行日志 = 报警+系统，操作日志 = 维护
+            if (SelectedTab == "运行日志")
+                filtered = filtered.Where(n => n.TypeDisplay == "报警" || n.TypeDisplay == "系统");
+            else if (SelectedTab == "操作日志")
+                filtered = filtered.Where(n => n.TypeDisplay == "维护");
+
+            // 在 Tab 范围内再按 Level 筛选
             if (SelectedFilter != "全部")
             {
                 string targetType = SelectedFilter switch
@@ -234,9 +315,24 @@ namespace MotorTestSystem.ViewModels
                 filtered = filtered.Where(n => n.Source == SelectedSource);
             }
 
+            filtered = filtered.Where(n => n.Model.CreatedAt >= StartDate && n.Model.CreatedAt <= EndDate);
+
             // 按时间倒序
-            Notifications = new ObservableCollection<NotificationItemViewModel>(
-                filtered.OrderByDescending(n => n.Timestamp));
+            _currentFilteredList = filtered.OrderByDescending(n => n.Model.CreatedAt).ToList();
+            TotalRecords = _currentFilteredList.Count();
+            CurrentPage = 1;
+            UpdatePagedNotifications();
+        }
+
+        private void UpdatePagedNotifications()
+        {
+            var paged = _currentFilteredList.Skip((CurrentPage - 1) * PageSize).Take(PageSize);
+            Notifications = new ObservableCollection<NotificationItemViewModel>(paged);
+            
+            // 手动触发通知以确保UI更新
+            OnPropertyChanged(nameof(CurrentPageStart));
+            OnPropertyChanged(nameof(CurrentPageEnd));
+            OnPropertyChanged(nameof(TotalPages));
         }
 
         private void UpdateCounts()
@@ -263,7 +359,7 @@ namespace MotorTestSystem.ViewModels
             Sources.Add("全部");
             foreach (var src in uniqueSources)
             {
-                Sources.Add(src);
+                Sources.Add(src!);
             }
             
             if (Sources.Contains(currentSelected))
@@ -313,6 +409,51 @@ namespace MotorTestSystem.ViewModels
             _notificationService?.MarkAsRead(item.Id);
             UpdateCounts();
             FilterNotifications();
+        }
+
+        [RelayCommand]
+        private void NextPage()
+        {
+            if (CurrentPage < TotalPages)
+            {
+                CurrentPage++;
+                UpdatePagedNotifications();
+            }
+        }
+
+        [RelayCommand]
+        private void PreviousPage()
+        {
+            if (CurrentPage > 1)
+            {
+                CurrentPage--;
+                UpdatePagedNotifications();
+            }
+        }
+
+        [RelayCommand]
+        private void ExportCsv()
+        {
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "CSV Files (*.csv)|*.csv",
+                DefaultExt = ".csv",
+                FileName = $"LogExport_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                var sb = new System.Text.StringBuilder();
+                // 写入 UTF-8 BOM，防止 Excel 打开乱码
+                sb.Append('\uFEFF');
+                sb.AppendLine("Timestamp,Level,Source,Message");
+                
+                foreach (var n in _currentFilteredList) // 导出所有筛选结果，而不仅仅是当前页
+                {
+                    sb.AppendLine($"\"{n.Timestamp}\",\"{n.TypeDisplay}\",\"{n.Source}\",\"{n.Content?.Replace("\"", "\"\"")}\"");
+                }
+                System.IO.File.WriteAllText(dialog.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
+            }
         }
     }
 }
