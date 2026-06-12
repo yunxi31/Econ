@@ -1234,13 +1234,7 @@
                 </Button>
 
                 <!-- Total Count Info using Run for rich styling -->
-                <TextBlock VerticalAlignment="Center" xml:space="preserve">
-                    <Run Text="{root:Loc 共}" Foreground="{DynamicResource TextSecondary}"/>
-                    <Run Text=" "/>
-                    <Run Text="{Binding TotalTestsCount, Mode=OneWay}" Foreground="{DynamicResource AccentCyan}" FontWeight="Bold"/>
-                    <Run Text=" "/>
-                    <Run Text="{root:Loc 条测试数据}" Foreground="{DynamicResource TextSecondary}"/>
-                </TextBlock>
+                <TextBlock VerticalAlignment="Center" xml:space="preserve"><Run Text="{root:Loc 共}" Foreground="{DynamicResource TextSecondary}"/> <Run Text="{Binding TotalTestsCount, Mode=OneWay}" Foreground="{DynamicResource AccentCyan}" FontWeight="Bold"/> <Run Text="{root:Loc 条测试数据}" Foreground="{DynamicResource TextSecondary}"/></TextBlock>
             </StackPanel>
 
             <!-- Export Button (Right) -->
