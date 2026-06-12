@@ -660,9 +660,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- 左下角统计 -->
-            <TextBlock Foreground="#5C6070" FontSize="12" xml:space="preserve" VerticalAlignment="Center">
-                <Run Text="{root:Loc 显示第}"/> <Run Text="{Binding CurrentPageStart, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 到}"/> <Run Text="{Binding CurrentPageEnd, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 条，共}"/> <Run Text="{Binding TotalRecords, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 条记录}"/>
-            </TextBlock>
+            <TextBlock Foreground="#5C6070" FontSize="12" xml:space="preserve" VerticalAlignment="Center"><Run Text="{root:Loc 显示第}"/> <Run Text="{Binding CurrentPageStart, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 到}"/> <Run Text="{Binding CurrentPageEnd, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 条，共}"/> <Run Text="{Binding TotalRecords, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 条记录}"/></TextBlock>
             
             <!-- 右下角分页控制 -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
@@ -674,10 +672,8 @@
                     </StackPanel>
                 </Button>
                 <!-- 页码 -->
-                <Border BorderBrush="#333645" BorderThickness="1" Background="#1B1C28" CornerRadius="4" Padding="10,4" Margin="8,0">
-                    <TextBlock Foreground="#8A8D99" FontSize="11" xml:space="preserve" VerticalAlignment="Center">
-                        <Run Text="{root:Loc 第}"/> <Run Text="{Binding CurrentPage, Mode=OneWay}"/> / <Run Text="{Binding TotalPages, Mode=OneWay}"/> <Run Text="{root:Loc 页}"/>
-                    </TextBlock>
+                <Border BorderBrush="#333645" BorderThickness="1" Background="#1B1C28" CornerRadius="4" Padding="10,0" Margin="8,0" Height="28">
+                    <TextBlock Foreground="#8A8D99" FontSize="11" xml:space="preserve" VerticalAlignment="Center" HorizontalAlignment="Center"><Run Text="{root:Loc 第}"/> <Run Text="{Binding CurrentPage, Mode=OneWay}"/> / <Run Text="{Binding TotalPages, Mode=OneWay}"/> <Run Text="{root:Loc 页}"/></TextBlock>
                 </Border>
                 <!-- 下一页 -->
                 <Button Command="{Binding NextPageCommand}" Style="{StaticResource PaginationButtonStyle}" Width="64" Height="28">
