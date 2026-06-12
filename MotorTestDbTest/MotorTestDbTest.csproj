@@ -14,22 +14,28 @@
 
   <!-- 直接包含主项目需要的源文件，排除WPF相关 -->
   <ItemGroup>
-    <Compile Include="..\MotorTestSystem\Models\Entities\*.cs" LinkBase="Models\Entities" />
-    <Compile Include="..\MotorTestSystem\Models\AppUser.cs" LinkBase="Models" />
-    <Compile Include="..\MotorTestSystem\Models\StageTestData.cs" LinkBase="Models" />
-    <Compile Include="..\MotorTestSystem\Models\MotorTestResult.cs" LinkBase="Models" />
-    <Compile Include="..\MotorTestSystem\Models\MotorTestQuery.cs" LinkBase="Models" />
-    <Compile Include="..\MotorTestSystem\Models\ProductionSummary.cs" LinkBase="Models" />
-    <Compile Include="..\MotorTestSystem\Models\DefectSummary.cs" LinkBase="Models" />
-    <Compile Include="..\MotorTestSystem\Models\FaultRankItem.cs" LinkBase="Models" />
-    <Compile Include="..\MotorTestSystem\Models\TestStage.cs" LinkBase="Models" />
-    <Compile Include="..\MotorTestSystem\Services\SqlSugarDbContext.cs" LinkBase="Services" />
-    <Compile Include="..\MotorTestSystem\Services\SqlMotorTestRepository.cs" LinkBase="Services" />
-    <Compile Include="..\MotorTestSystem\Services\SqlSugarUserService.cs" LinkBase="Services" />
-    <Compile Include="..\MotorTestSystem\Services\IMotorTestRepository.cs" LinkBase="Services" />
-    <Compile Include="..\MotorTestSystem\Services\IUserService.cs" LinkBase="Services" />
-    <Compile Include="..\MotorTestSystem\Services\InMemoryUserService.cs" LinkBase="Services" />
-    <Compile Include="..\MotorTestSystem\Models\NotificationItem.cs" LinkBase="Models" />
+    <!-- Data Layer -->
+    <Compile Include="..\MotorTestSystem\Data\Entities\*.cs" LinkBase="Data\Entities" />
+    <Compile Include="..\MotorTestSystem\Data\DbContext\SqlSugarDbContext.cs" LinkBase="Data" />
+    <Compile Include="..\MotorTestSystem\Data\Repositories\SqlMotorTestRepository.cs" LinkBase="Data" />
+    <Compile Include="..\MotorTestSystem\Data\Repositories\InMemoryMotorTestRepository.cs" LinkBase="Data" />
+    <Compile Include="..\MotorTestSystem\Data\Services\SqlSugarUserService.cs" LinkBase="Data" />
+    <Compile Include="..\MotorTestSystem\Data\Services\InMemoryUserService.cs" LinkBase="Data" />
+
+    <!-- Business Interfaces -->
+    <Compile Include="..\MotorTestSystem\Business\Interfaces\IMotorTestRepository.cs" LinkBase="Business" />
+    <Compile Include="..\MotorTestSystem\Business\Interfaces\IUserService.cs" LinkBase="Business" />
+
+    <!-- Domain Models -->
+    <Compile Include="..\MotorTestSystem\Domain\Models\AppUser.cs" LinkBase="Domain" />
+    <Compile Include="..\MotorTestSystem\Domain\Models\StageTestData.cs" LinkBase="Domain" />
+    <Compile Include="..\MotorTestSystem\Domain\Models\MotorTestResult.cs" LinkBase="Domain" />
+    <Compile Include="..\MotorTestSystem\Domain\Models\MotorTestQuery.cs" LinkBase="Domain" />
+    <Compile Include="..\MotorTestSystem\Domain\Models\ProductionSummary.cs" LinkBase="Domain" />
+    <Compile Include="..\MotorTestSystem\Domain\Models\DefectSummary.cs" LinkBase="Domain" />
+    <Compile Include="..\MotorTestSystem\Domain\Models\FaultRankItem.cs" LinkBase="Domain" />
+    <Compile Include="..\MotorTestSystem\Domain\Models\TestStage.cs" LinkBase="Domain" />
+    <Compile Include="..\MotorTestSystem\Domain\Models\NotificationItem.cs" LinkBase="Domain" />
   </ItemGroup>
 
 </Project>

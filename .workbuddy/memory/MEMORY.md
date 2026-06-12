@@ -1,4 +1,12 @@
-# 项目记忆 - MotorTestSystem
+## 项目架构 (2026-06-12 重构为多层架构)
+- 四层架构，命名空间保持不变（仅为文件夹重组）
+- **Presentation/** — 表现层 (Windows/Views/ViewModels/Converters)
+- **Business/** — 业务逻辑层 (Services/Interfaces/PLC)
+- **Data/** — 数据层 (DbContext/Repositories/Services/Entities)
+- **Domain/** — 领域层 (Models/Enums)
+- **Infrastructure/** — 基础设施 (AssemblyInfo)
+- **Resources/** — 图片/样式资源
+- **docs/** — 项目文档
 
 ## 角色体系 & RBAC
 - 3 个角色：管理员 (Admin)、操作员 (Operator)、维护员 (Maintainer)

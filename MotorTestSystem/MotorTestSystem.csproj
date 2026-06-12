@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ApplicationDefinition Include="Presentation\Windows\App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.4" />
     <PackageReference Include="MaterialDesignThemes" Version="5.3.2" />
@@ -18,7 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Images\**\*" />
+    <Resource Include="Resources\Images\**\*" />
+    <Resource Include="Resources\Styles\**\*" />
   </ItemGroup>
 
   <ItemGroup>

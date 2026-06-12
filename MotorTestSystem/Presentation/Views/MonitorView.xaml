@@ -265,7 +265,7 @@
 
                     <Grid Grid.Row="1">
                         <Grid.Background>
-                            <ImageBrush ImageSource="pack://application:,,,/Images/mock_video.jpg" Stretch="UniformToFill"/>
+                            <ImageBrush ImageSource="pack://application:,,,/Resources/Images/mock_video.jpg" Stretch="UniformToFill"/>
                         </Grid.Background>
 
                         <!-- 半透明深蓝色遮罩 -->
