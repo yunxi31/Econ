@@ -186,7 +186,19 @@ public partial class MainWindow : Window
         {
             if (child == parent)
                 return true;
-            child = VisualTreeHelper.GetParent(child);
+
+            if (child is FrameworkContentElement fce)
+            {
+                child = fce.Parent ?? fce.TemplatedParent;
+            }
+            else if (child is Visual || child is System.Windows.Media.Media3D.Visual3D)
+            {
+                child = VisualTreeHelper.GetParent(child);
+            }
+            else
+            {
+                child = LogicalTreeHelper.GetParent(child);
+            }
         }
         return false;
     }
