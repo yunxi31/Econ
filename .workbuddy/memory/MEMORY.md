@@ -62,11 +62,12 @@
 - 工位 A2 (S7-1200) 和 A5 (S7-1500) 使用 S7 协议
 
 ## 通知中心
-- INotificationService 接口 + InMemoryNotificationService 内存实现
+- INotificationService 接口 + SqlSugarNotificationService 数据库实现
 - NotificationItem 模型（NotificationType枚举：Alarm/Maintenance/System，NotificationSeverity枚举：Info/Warning/Critical）
 - NotificationItemViewModel UI包装类（XAML绑定用）
 - BackendRuntime 订阅 PlcPollingService 事件自动生成通知：工位离线→报警，NG结果→报警（5min冷却），PLC错误日志→报警
 - XAML DataTrigger 绑定 TypeDisplay（中文），非 Type（枚举）
-- 种子数据12条（3报警+4维护+5系统）
+- 种子数据12条（3报警+4维护+5系统），通过 SqlSugarDbContext.SeedNotifications() 首次建表时播种
+- SqlSugarNotificationService：内存 ObservableCollection + 数据库双向同步，Add/Remove/MarkAsRead/MarkAllAsRead/ClearAll 均同步写入 DB
 - DashEffect 用法：`new DashEffect(new float[] { 6, 4 }, 0)`，需 using `LiveChartsCore.SkiaSharpView.Painting.Effects`
 - 不要用 `SKPathEffect.CreateDash()`——那是 SkiaSharp 原生类型，与 LiveCharts 的 PathEffect 不兼容

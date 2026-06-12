@@ -29,6 +29,7 @@
     <Compile Include="..\MotorTestSystem\Services\IMotorTestRepository.cs" LinkBase="Services" />
     <Compile Include="..\MotorTestSystem\Services\IUserService.cs" LinkBase="Services" />
     <Compile Include="..\MotorTestSystem\Services\InMemoryUserService.cs" LinkBase="Services" />
+    <Compile Include="..\MotorTestSystem\Models\NotificationItem.cs" LinkBase="Models" />
   </ItemGroup>
 
 </Project>

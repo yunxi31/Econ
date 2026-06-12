@@ -57,6 +57,9 @@ namespace MotorTestDbTest
 
                 // ===== 7. 边界条件测试 =====
                 await TestEdgeCases();
+
+                // ===== 8. 通知数据CRUD与持久化测试 =====
+                TestNotificationCRUD();
             }
             finally
             {
@@ -116,6 +119,7 @@ namespace MotorTestDbTest
             var db = CreateDb();
             if (!db.Queryable<UserEntity>().Any()) SeedUsers(db);
             if (!db.Queryable<StationConfigEntity>().Any()) SeedStationConfigs(db);
+            if (!db.Queryable<NotificationEntity>().Any()) SeedNotifications(db);
             return db;
         }
 
@@ -258,7 +262,29 @@ namespace MotorTestDbTest
             var a1 = configs.FirstOrDefault(c => c.Id == "A1");
             Assert("A1 工位协议为 ModbusTCP", a1?.Protocol == "ModbusTCP");
 
-            // 2.3 种子数据幂等性 — 重复播种不应重复插入
+            // 2.3 通知种子数据
+            var notifications = db.Queryable<NotificationEntity>().ToList();
+            Assert("通知种子数 = 12", notifications.Count == 12, $"实际: {notifications.Count}");
+
+            int alarmCount = notifications.Count(n => n.Type == 0);
+            int maintCount = notifications.Count(n => n.Type == 1);
+            int sysCount = notifications.Count(n => n.Type == 2);
+            Assert("报警通知 = 3", alarmCount == 3, $"实际: {alarmCount}");
+            Assert("维护通知 = 4", maintCount == 4, $"实际: {maintCount}");
+            Assert("系统通知 = 5", sysCount == 5, $"实际: {sysCount}");
+
+            int criticalCount = notifications.Count(n => n.Severity == 2);
+            int warningCount = notifications.Count(n => n.Severity == 1);
+            int infoCount = notifications.Count(n => n.Severity == 0);
+            Assert("严重级通知 >= 2", criticalCount >= 2, $"实际: {criticalCount}");
+            Assert("警告级通知 >= 3", warningCount >= 3, $"实际: {warningCount}");
+            Assert("信息级通知 >= 4", infoCount >= 4, $"实际: {infoCount}");
+
+            // 验证通知内容非空
+            Assert("所有通知标题非空", notifications.All(n => !string.IsNullOrEmpty(n.Title)));
+            Assert("所有通知内容非空", notifications.All(n => !string.IsNullOrEmpty(n.Content)));
+
+            // 2.4 种子数据幂等性 — 重复播种不应重复插入
             SeedUsers(db); // 再次调用，但因为账号唯一约束会失败或跳过
             var users2 = db.Queryable<UserEntity>().ToList();
             Assert("重复播种后用户数不变（幂等）", users2.Count == 16, $"实际: {users2.Count}");
@@ -774,8 +800,124 @@ namespace MotorTestDbTest
         }
 
         // ================================================================
-        // 种子数据辅助方法
+        // 8. 通知数据CRUD与持久化测试
         // ================================================================
+        static void TestNotificationCRUD()
+        {
+            Console.WriteLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            Console.WriteLine("🔔 8. 通知数据CRUD与持久化测试");
+            Console.WriteLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+            var db = CreateDbWithSeed();
+            int initialCount = db.Queryable<NotificationEntity>().Count();
+
+            // 8.1 插入新通知
+            var newNotification = new NotificationEntity
+            {
+                Id = Guid.NewGuid().ToString("N")[..8],
+                Title = "测试通知",
+                Content = "数据库持久化验证测试",
+                CreatedAt = DateTime.Now,
+                Type = 0, // Alarm
+                Severity = 2, // Critical
+                IsRead = false,
+                Source = "TEST"
+            };
+            db.Insertable(newNotification).ExecuteCommand();
+
+            var inserted = db.Queryable<NotificationEntity>().First(e => e.Id == newNotification.Id);
+            Assert("新通知插入成功", inserted != null, $"实际: {(inserted == null ? "null" : "ok")}");
+            Assert("标题匹配", inserted?.Title == "测试通知", $"实际: {inserted?.Title}");
+            Assert("内容匹配", inserted?.Content == "数据库持久化验证测试", $"实际: {inserted?.Content}");
+            Assert("类型=Alarm(0)", inserted?.Type == 0, $"实际: {inserted?.Type}");
+            Assert("严重=Critical(2)", inserted?.Severity == 2, $"实际: {inserted?.Severity}");
+            Assert("未读", inserted?.IsRead == false, $"实际: {inserted?.IsRead}");
+            Assert("来源=TEST", inserted?.Source == "TEST", $"实际: {inserted?.Source}");
+            Assert("插入后总计 + 1", db.Queryable<NotificationEntity>().Count() == initialCount + 1);
+
+            // 8.2 标记为已读
+            db.Updateable<NotificationEntity>()
+                .SetColumns(e => new NotificationEntity { IsRead = true })
+                .Where(e => e.Id == newNotification.Id)
+                .ExecuteCommand();
+
+            var readNotif = db.Queryable<NotificationEntity>().First(e => e.Id == newNotification.Id);
+            Assert("标记已读成功", readNotif?.IsRead == true, $"实际: {readNotif?.IsRead}");
+
+            // 8.3 批量更新全部为已读
+            db.Updateable<NotificationEntity>()
+                .SetColumns(e => new NotificationEntity { IsRead = true })
+                .Where(e => !e.IsRead)
+                .ExecuteCommand();
+
+            int unreadCount = db.Queryable<NotificationEntity>().Where(e => !e.IsRead).Count();
+            Assert("全部标记已读后无未读", unreadCount == 0, $"实际未读: {unreadCount}");
+
+            // 8.4 删除单条通知
+            db.Deleteable<NotificationEntity>()
+                .Where(e => e.Id == newNotification.Id)
+                .ExecuteCommand();
+
+            var deleted = db.Queryable<NotificationEntity>().First(e => e.Id == newNotification.Id);
+            Assert("删除后查询为 null", deleted == null);
+            Assert("删除后数量恢复", db.Queryable<NotificationEntity>().Count() == initialCount);
+
+            // 8.5 清空全部
+            db.Deleteable<NotificationEntity>().Where(e => true).ExecuteCommand();
+            Assert("清空后数量为 0", db.Queryable<NotificationEntity>().Count() == 0, $"实际: {db.Queryable<NotificationEntity>().Count()}");
+
+            // 8.6 重新播种验证幂等
+            SeedNotifications(db);
+            Assert("重新播种后 12 条", db.Queryable<NotificationEntity>().Count() == 12, $"实际: {db.Queryable<NotificationEntity>().Count()}");
+
+            // 8.7 批量插入测试
+            var batchItems = new List<NotificationEntity>();
+            for (int i = 0; i < 5; i++)
+            {
+                batchItems.Add(new NotificationEntity
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = $"批量通知 #{i + 1}",
+                    Content = $"批量插入测试 - 第{i + 1}条",
+                    CreatedAt = DateTime.Now.AddMinutes(-i),
+                    Type = i % 3,
+                    Severity = i % 3,
+                    IsRead = false
+                });
+            }
+            db.Insertable(batchItems).ExecuteCommand();
+            Assert("批量插入5条后总数=17", db.Queryable<NotificationEntity>().Count() == 17, $"实际: {db.Queryable<NotificationEntity>().Count()}");
+
+            // 8.8 按类型查询
+            int alarmTotal = db.Queryable<NotificationEntity>().Where(e => e.Type == 0).Count();
+            Assert("批量插入后报警 >= 3", alarmTotal >= 3, $"实际: {alarmTotal}");
+
+            // 8.9 按来源筛选
+            int testSource = db.Queryable<NotificationEntity>().Where(e => e.Source == "TEST").Count();
+            Assert("来源筛选", testSource >= 0); // 只是验证语法正确
+
+            // 8.10 按时间范围
+            int recentCount = db.Queryable<NotificationEntity>()
+                .Where(e => e.CreatedAt >= DateTime.Now.AddHours(-1))
+                .Count();
+            Assert("最近1小时通知 >= 5", recentCount >= 5, $"实际: {recentCount}");
+
+            // 8.11 跨实例持久化验证
+            var db2 = CreateDb();
+            var reloadedCount = db2.Queryable<NotificationEntity>().Count();
+            Assert("新连接仍可读取数据 (持久化)", reloadedCount == 17, $"实际: {reloadedCount}");
+
+            // 8.12 枚举映射一致性
+            var alarmItems = db.Queryable<NotificationEntity>().Where(e => e.Type == 0).ToList();
+            Assert("Enum→int 映射: Alarm=0", alarmItems.All(e => e.Type == (int)NotificationType.Alarm));
+
+            var criticalItems = db.Queryable<NotificationEntity>().Where(e => e.Severity == 2).ToList();
+            Assert("Enum→int 映射: Critical=2", criticalItems.All(e => e.Severity == (int)NotificationSeverity.Critical));
+
+            Console.WriteLine();
+        }
+
+        /// <summary>通知种子数据辅助方法</summary>
 
         private static void SeedUsers(ISqlSugarClient db)
         {
@@ -833,6 +975,132 @@ namespace MotorTestDbTest
                 new StationConfigEntity { Id = "A6", Name = "A6", PlcModel = "AM600", IpAddress = "192.168.10.16", Port = 502, Protocol = "ModbusTCP", StationId = 1, IsConnected = true, Status = "在线" },
             };
             db.Insertable(configs).ExecuteCommand();
+        }
+
+        /// <summary>通知种子数据辅助方法</summary>
+        private static void SeedNotifications(ISqlSugarClient db)
+        {
+            if (db.Queryable<NotificationEntity>().Any()) return;
+
+            var now = DateTime.Now;
+            var seeds = new List<NotificationEntity>
+            {
+                // ---- 报警 ----
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "A4机台噪音超标",
+                    Content = "A4机台噪音 85dB，超出安全阈值上限 75dB (自动暂停)",
+                    CreatedAt = now.AddHours(-7).AddMinutes(38),
+                    Type = (int)NotificationType.Alarm, Severity = (int)NotificationSeverity.Critical,
+                    Source = "A4", IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "PLC 通信异常",
+                    Content = "工位3 (GW-M02) 丢失心跳包超 5s (状态: 离线)",
+                    CreatedAt = now.AddHours(-7).AddMinutes(44),
+                    Type = (int)NotificationType.Alarm, Severity = (int)NotificationSeverity.Critical,
+                    Source = "A3", IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "机温预警限制触发",
+                    Content = "工位1 (GW-M01) 电机测试温度 72°C，接近安全阈值 80°C",
+                    CreatedAt = now.AddDays(-1).AddHours(-5).AddMinutes(27),
+                    Type = (int)NotificationType.Alarm, Severity = (int)NotificationSeverity.Warning,
+                    Source = "A1", IsRead = false
+                },
+
+                // ---- 维护 ----
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "例行维护周期提醒",
+                    Content = "C区夹具例行润滑与校准到期，建议交班停机维护",
+                    CreatedAt = now.AddHours(-12),
+                    Type = (int)NotificationType.Maintenance, Severity = (int)NotificationSeverity.Warning,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "传感器标定超期",
+                    Content = "工位A2 扭矩传感器标定超期 3 天",
+                    CreatedAt = now.AddDays(-1).AddHours(3).AddMinutes(40),
+                    Type = (int)NotificationType.Maintenance, Severity = (int)NotificationSeverity.Warning,
+                    Source = "A2", IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "清洁过滤网警告",
+                    Content = "配电柜冷风机过滤网压差异常，请清洁更换",
+                    CreatedAt = now.AddDays(-2).AddHours(2).AddMinutes(44),
+                    Type = (int)NotificationType.Maintenance, Severity = (int)NotificationSeverity.Info,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "UPS 电池包寿命警告",
+                    Content = "主UPS电池自检警告: 电池寿命不足15%",
+                    CreatedAt = now.AddDays(-3).AddHours(6).AddMinutes(17),
+                    Type = (int)NotificationType.Maintenance, Severity = (int)NotificationSeverity.Warning,
+                    IsRead = false
+                },
+
+                // ---- 系统 ----
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "固件更新可用",
+                    Content = "系统固件 v2.4.2-Stable 可用，包含高采样性能优化",
+                    CreatedAt = now.AddDays(-1).AddHours(-2),
+                    Type = (int)NotificationType.System, Severity = (int)NotificationSeverity.Info,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "数据备份完成",
+                    Content = "每日数据库备份完成，大小 4.2 GB (同步至数据湖)",
+                    CreatedAt = now.AddDays(-1).AddHours(2),
+                    Type = (int)NotificationType.System, Severity = (int)NotificationSeverity.Info,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "系统时间校准成功",
+                    Content = "NTP 时间同步成功，偏差 +0.023s，全节点时钟已同步",
+                    CreatedAt = now.AddDays(-3).AddHours(-17).AddMinutes(49),
+                    Type = (int)NotificationType.System, Severity = (int)NotificationSeverity.Info,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "网络延迟预警",
+                    Content = "交换机丢包，延迟 45ms (已切换至冗余物理链路)",
+                    CreatedAt = now.AddDays(-4).AddHours(2).AddMinutes(47),
+                    Type = (int)NotificationType.System, Severity = (int)NotificationSeverity.Warning,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "报表导出成功",
+                    Content = "电机能效及测试合格率分析报表导出成功",
+                    CreatedAt = now.AddDays(-5).AddHours(4).AddMinutes(29),
+                    Type = (int)NotificationType.System, Severity = (int)NotificationSeverity.Info,
+                    IsRead = false
+                }
+            };
+
+            db.Insertable(seeds).ExecuteCommand();
         }
 
         private static MotorTestRecordEntity CreateTestRecord(

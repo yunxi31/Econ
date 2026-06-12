@@ -158,7 +158,7 @@ namespace MotorTestSystem.Services
             var repository = new SqlMotorTestRepository(dbContext);
             var userService = new SqlSugarUserService(dbContext);
             var authService = new AuthService(userService);
-            var notificationService = new InMemoryNotificationService();
+            var notificationService = new SqlSugarNotificationService(dbContext);
             var hikvisionService = new HikvisionSdkService();
 
             // 4. 首次运行时播种测试数据（表为空时）

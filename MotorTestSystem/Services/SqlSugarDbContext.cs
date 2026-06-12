@@ -106,6 +106,12 @@ namespace MotorTestSystem.Services
             {
                 SeedStationConfigs();
             }
+
+            // ---- 通知种子 ----
+            if (!Db.Queryable<NotificationEntity>().Any())
+            {
+                SeedNotifications();
+            }
         }
 
         private void SeedUsers()
@@ -170,6 +176,132 @@ namespace MotorTestSystem.Services
             };
 
             Db.Insertable(configs).ExecuteCommand();
+        }
+
+        // ========================================
+        // 通知种子数据（从 InMemoryNotificationService 迁移而来）
+        // ========================================
+        private void SeedNotifications()
+        {
+            var now = DateTime.Now;
+            var seeds = new List<NotificationEntity>
+            {
+                // ---- 报警 ----
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "A4机台噪音超标",
+                    Content = "A4机台噪音 85dB，超出安全阈值上限 75dB (自动暂停)",
+                    CreatedAt = now.AddHours(-7).AddMinutes(38),
+                    Type = (int)NotificationType.Alarm, Severity = (int)NotificationSeverity.Critical,
+                    Source = "A4", IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "PLC 通信异常",
+                    Content = "工位3 (GW-M02) 丢失心跳包超 5s (状态: 离线)",
+                    CreatedAt = now.AddHours(-7).AddMinutes(44),
+                    Type = (int)NotificationType.Alarm, Severity = (int)NotificationSeverity.Critical,
+                    Source = "A3", IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "机温预警限制触发",
+                    Content = "工位1 (GW-M01) 电机测试温度 72°C，接近安全阈值 80°C",
+                    CreatedAt = now.AddDays(-1).AddHours(-5).AddMinutes(27),
+                    Type = (int)NotificationType.Alarm, Severity = (int)NotificationSeverity.Warning,
+                    Source = "A1", IsRead = false
+                },
+
+                // ---- 维护 ----
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "例行维护周期提醒",
+                    Content = "C区夹具例行润滑与校准到期，建议交班停机维护",
+                    CreatedAt = now.AddHours(-12),
+                    Type = (int)NotificationType.Maintenance, Severity = (int)NotificationSeverity.Warning,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "传感器标定超期",
+                    Content = "工位A2 扭矩传感器标定超期 3 天",
+                    CreatedAt = now.AddDays(-1).AddHours(3).AddMinutes(40),
+                    Type = (int)NotificationType.Maintenance, Severity = (int)NotificationSeverity.Warning,
+                    Source = "A2", IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "清洁过滤网警告",
+                    Content = "配电柜冷风机过滤网压差异常，请清洁更换",
+                    CreatedAt = now.AddDays(-2).AddHours(2).AddMinutes(44),
+                    Type = (int)NotificationType.Maintenance, Severity = (int)NotificationSeverity.Info,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "UPS 电池包寿命警告",
+                    Content = "主UPS电池自检警告: 电池寿命不足15%",
+                    CreatedAt = now.AddDays(-3).AddHours(6).AddMinutes(17),
+                    Type = (int)NotificationType.Maintenance, Severity = (int)NotificationSeverity.Warning,
+                    IsRead = false
+                },
+
+                // ---- 系统 ----
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "固件更新可用",
+                    Content = "系统固件 v2.4.2-Stable 可用，包含高采样性能优化",
+                    CreatedAt = now.AddDays(-1).AddHours(-2),
+                    Type = (int)NotificationType.System, Severity = (int)NotificationSeverity.Info,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "数据备份完成",
+                    Content = "每日数据库备份完成，大小 4.2 GB (同步至数据湖)",
+                    CreatedAt = now.AddDays(-1).AddHours(2),
+                    Type = (int)NotificationType.System, Severity = (int)NotificationSeverity.Info,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "系统时间校准成功",
+                    Content = "NTP 时间同步成功，偏差 +0.023s，全节点时钟已同步",
+                    CreatedAt = now.AddDays(-3).AddHours(-17).AddMinutes(49),
+                    Type = (int)NotificationType.System, Severity = (int)NotificationSeverity.Info,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "网络延迟预警",
+                    Content = "交换机丢包，延迟 45ms (已切换至冗余物理链路)",
+                    CreatedAt = now.AddDays(-4).AddHours(2).AddMinutes(47),
+                    Type = (int)NotificationType.System, Severity = (int)NotificationSeverity.Warning,
+                    IsRead = false
+                },
+                new()
+                {
+                    Id = Guid.NewGuid().ToString("N")[..8],
+                    Title = "报表导出成功",
+                    Content = "电机能效及测试合格率分析报表导出成功",
+                    CreatedAt = now.AddDays(-5).AddHours(4).AddMinutes(29),
+                    Type = (int)NotificationType.System, Severity = (int)NotificationSeverity.Info,
+                    IsRead = false
+                }
+            };
+
+            Db.Insertable(seeds).ExecuteCommand();
         }
     }
 }
