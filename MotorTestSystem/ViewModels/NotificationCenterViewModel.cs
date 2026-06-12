@@ -65,12 +65,19 @@ namespace MotorTestSystem.ViewModels
     public partial class NotificationCenterViewModel : ViewModelBase
     {
         private readonly INotificationService? _notificationService;
+        private bool _isUpdatingDates = false; // 防止 StartDate/EndDate 互改死循环
 
         /// <summary>全量通知 ViewModel（私有，用于筛选）</summary>
         private readonly ObservableCollection<NotificationItemViewModel> _allNotificationVms = new();
 
         /// <summary>模型ID → ViewModel 映射（快速查找）</summary>
         private readonly System.Collections.Generic.Dictionary<string, NotificationItemViewModel> _vmMap = new();
+
+        [ObservableProperty]
+        private string _pageTitle = "日志中心";
+
+        [ObservableProperty]
+        private string _pageIcon = "FolderOpenOutline";
 
         [ObservableProperty]
         private ObservableCollection<NotificationItemViewModel> _notifications = new();
@@ -255,23 +262,41 @@ namespace MotorTestSystem.ViewModels
         
         partial void OnStartDateChanged(DateTime value)
         {
-            OnPropertyChanged(nameof(MinEndDate));
-            OnPropertyChanged(nameof(MaxEndDate));
-            OnPropertyChanged(nameof(StartCalendarDisplayStart));
-            OnPropertyChanged(nameof(StartCalendarDisplayEnd));
-            if (EndDate < value) EndDate = value;
-            else if (EndDate > value.AddDays(31)) EndDate = value.AddDays(31);
+            if (_isUpdatingDates) return;
+            _isUpdatingDates = true;
+            try
+            {
+                OnPropertyChanged(nameof(MinEndDate));
+                OnPropertyChanged(nameof(MaxEndDate));
+                OnPropertyChanged(nameof(StartCalendarDisplayStart));
+                OnPropertyChanged(nameof(StartCalendarDisplayEnd));
+                if (EndDate < value) EndDate = value;
+                else if (EndDate > value.AddDays(31)) EndDate = value.AddDays(31);
+            }
+            finally
+            {
+                _isUpdatingDates = false;
+            }
             FilterNotifications();
         }
 
         partial void OnEndDateChanged(DateTime value)
         {
-            OnPropertyChanged(nameof(MinStartDate));
-            OnPropertyChanged(nameof(MaxStartDate));
-            OnPropertyChanged(nameof(EndCalendarDisplayStart));
-            OnPropertyChanged(nameof(EndCalendarDisplayEnd));
-            if (StartDate > value) StartDate = value;
-            else if (StartDate < value.AddDays(-31)) StartDate = value.AddDays(-31);
+            if (_isUpdatingDates) return;
+            _isUpdatingDates = true;
+            try
+            {
+                OnPropertyChanged(nameof(MinStartDate));
+                OnPropertyChanged(nameof(MaxStartDate));
+                OnPropertyChanged(nameof(EndCalendarDisplayStart));
+                OnPropertyChanged(nameof(EndCalendarDisplayEnd));
+                if (StartDate > value) StartDate = value;
+                else if (StartDate < value.AddDays(-31)) StartDate = value.AddDays(-31);
+            }
+            finally
+            {
+                _isUpdatingDates = false;
+            }
             FilterNotifications();
         }
 

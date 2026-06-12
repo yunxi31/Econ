@@ -467,11 +467,22 @@ namespace MotorTestSystem.ViewModels
         {
         }
 
+        private bool _isInitialized;
+
+        /// <summary>
+        /// 当 View 第一次显示时调用，异步加载初始数据。
+        /// 不在构造函数中触发，避免 XAML 模板加载时的 Stack overflow。
+        /// </summary>
+        public void EnsureInitialized()
+        {
+            if (_isInitialized) return;
+            _isInitialized = true;
+            SearchCommand.Execute(null);
+        }
+
         public HistoryViewModel(IMotorTestRepository repository)
         {
             _repository = repository;
-            // Initialize with an initial search to populate UI
-            SearchCommand.Execute(null);
         }
 
         partial void OnCurrentPageChanged(int value)

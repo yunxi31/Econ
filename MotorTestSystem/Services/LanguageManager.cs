@@ -179,6 +179,7 @@ namespace MotorTestSystem
             { "生产看板", "Dashboard" },
             { "用户管理", "User" },
             { "日志中心", "Log Center" },
+            { "通知中心", "Notification Center" },
             { "系统配置", "Config" },
             { "节点状态", "Node Status" },
             { "用户名", "Username" },

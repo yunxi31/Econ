@@ -402,7 +402,7 @@
 
                     <RadioButton Command="{Binding NavigateCommand}"
                                  CommandParameter="LogCenter"
-                                 IsChecked="{Binding CurrentView, Mode=OneWay, Converter={StaticResource ViewTypeToBoolConverter}, ConverterParameter=Notification}"
+                                 IsChecked="{Binding CurrentView, Mode=OneWay, Converter={StaticResource ViewTypeToBoolConverter}, ConverterParameter=LogCenter}"
                                  Style="{StaticResource SidebarTabStyle}">
                         <StackPanel>
                             <Path Data="M8,4 L32,4 L40,12 L40,44 L8,44 Z M8,12 L32,12 L32,4 M14,20 L34,20 M14,28 L34,28 M14,36 L26,36"

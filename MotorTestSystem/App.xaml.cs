@@ -1,4 +1,6 @@
+using System;
 using System.Windows;
+using System.Windows.Threading;
 using MotorTestSystem.Models;
 using MotorTestSystem.Services;
 
@@ -9,6 +11,25 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // 全局未处理异常捕获（调试用）
+        this.DispatcherUnhandledException += (s, ex) =>
+        {
+            MessageBox.Show(
+                $"[DispatcherException]\n{ex.Exception.GetType().Name}: {ex.Exception.Message}\n\nStackTrace:\n{ex.Exception.StackTrace}",
+                "未处理异常", MessageBoxButton.OK, MessageBoxImage.Error);
+            ex.Handled = true; // 阻止进程退出，方便查看
+        };
+
+        AppDomain.CurrentDomain.UnhandledException += (s, ex) =>
+        {
+            if (ex.ExceptionObject is Exception exception)
+            {
+                MessageBox.Show(
+                    $"[AppDomainException]\n{exception.GetType().Name}: {exception.Message}\n\nStackTrace:\n{exception.StackTrace}",
+                    "致命异常", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        };
 
         // 临时修改关机模式，防止关闭登录窗口导致整个进程直接退出
         ShutdownMode = ShutdownMode.OnExplicitShutdown;

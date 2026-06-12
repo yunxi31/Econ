@@ -12,6 +12,7 @@
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:LocMultiConverter x:Key="LocMultiConverter"/>
+            <converters:LanguageToXmlLanguageConverter x:Key="LanguageToXmlLanguageConverter"/>
 
             <!-- Global Auto-Hiding ScrollBar Style -->
             <Style TargetType="ScrollBar">

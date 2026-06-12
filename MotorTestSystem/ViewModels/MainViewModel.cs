@@ -165,19 +165,26 @@ namespace MotorTestSystem.ViewModels
             if (destination == "LogCenter")
             {
                 _previousViewBeforeNotification = null;
+                NotificationVM.PageTitle = "日志中心";
+                NotificationVM.PageIcon = "FolderOpenOutline";
                 CurrentView = NotificationVM;
                 return;
             }
 
             if (destination == "Notification")
             {
-                if (CurrentView == NotificationVM)
+                if (CurrentView == NotificationVM && NotificationVM.PageTitle == "通知中心")
                 {
+                    // 已经在通知中心模式，toggle 回上一页
                     CurrentView = _previousViewBeforeNotification ?? MonitorVM;
                 }
                 else
                 {
-                    _previousViewBeforeNotification = CurrentView;
+                    _previousViewBeforeNotification = CurrentView == NotificationVM ? null : CurrentView;
+                    NotificationVM.PageTitle = "通知中心";
+                    NotificationVM.PageIcon = "BellOutline";
+                    // 先设为 null 再设回，强制触发 PropertyChanged（同一实例引用时不会自动触发）
+                    CurrentView = null!;
                     CurrentView = NotificationVM;
                 }
                 return;
@@ -191,6 +198,13 @@ namespace MotorTestSystem.ViewModels
             }
 
             _previousViewBeforeNotification = null;
+
+            if (destination == "History")
+            {
+                HistoryVM.EnsureInitialized();
+                CurrentView = HistoryVM;
+                return;
+            }
 
             CurrentView = destination switch
             {

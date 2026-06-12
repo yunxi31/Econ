@@ -143,266 +143,13 @@
         </Style>
 
         <!-- Custom Calendar Button Styles -->
-        <Style x:Key="DarkCalendarDayButtonStyle" TargetType="CalendarDayButton">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="MinWidth" Value="24"/>
-            <Setter Property="MinHeight" Value="24"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="CalendarDayButton">
-                        <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="4" Margin="1">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#2A2E3D"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#00D2E6"/>
-                                <Setter Property="Foreground" Value="#13141E"/>
-                            </Trigger>
-                            <Trigger Property="IsToday" Value="True">
-                                <Setter TargetName="Bg" Property="BorderBrush" Value="#00D2E6"/>
-                                <Setter TargetName="Bg" Property="BorderThickness" Value="1"/>
-                            </Trigger>
-                            <Trigger Property="IsInactive" Value="True">
-                                <Setter Property="Foreground" Value="#4E5266"/>
-                                <Setter Property="Opacity" Value="0.4"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="DarkCalendarButtonStyle" TargetType="CalendarButton">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="CalendarButton">
-                        <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="4" Margin="1">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#2A2E3D"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Custom Dark CalendarItem Style -->
-        <Style x:Key="DarkCalendarItemStyle" TargetType="{x:Type primitives:CalendarItem}">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type primitives:CalendarItem}">
-                        <ControlTemplate.Resources>
-                            <!-- Day title template (e.g. Sun, Mon) -->
-                            <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type primitives:CalendarItem}, ResourceId=DayTitleTemplate}">
-                                <TextBlock Text="{Binding}" 
-                                           FontFamily="Segoe UI" 
-                                           FontWeight="SemiBold" 
-                                           FontSize="11" 
-                                           Foreground="#8A8D99" 
-                                           Margin="0,8,0,8" 
-                                           HorizontalAlignment="Center" 
-                                           VerticalAlignment="Center" />
-                            </DataTemplate>
-                        </ControlTemplate.Resources>
-                        
-                        <Grid Name="PART_Root">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup Name="CommonStates"/>
-                            </VisualStateManager.VisualStateGroups>
-                            
-                            <Border BorderThickness="{TemplateBinding BorderBrush}" 
-                                    BorderBrush="{TemplateBinding BorderBrush}" 
-                                    Background="{TemplateBinding Background}" 
-                                    CornerRadius="6">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="40" />
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-
-                                    <!-- Prev Button -->
-                                    <Button Name="PART_PreviousButton" Width="28" Height="28" 
-                                            Style="{x:Null}"
-                                            HorizontalAlignment="Left" VerticalAlignment="Center"
-                                            Margin="8,0,0,0" Focusable="False" Grid.Column="0" Grid.Row="0">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="4" Cursor="Hand">
-                                                    <Path x:Name="arrow" Data="M288.75,232.25L288.75,240.625 283,236.625z" 
-                                                          Stretch="Fill" Fill="#FFFFFF" Width="6" Height="10" 
-                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="BtnBorder" Property="Background" Value="#2A2E3D"/>
-                                                        <Setter TargetName="arrow" Property="Fill" Value="#00D2E6"/>
-                                                    </Trigger>
-                                                    <Trigger Property="IsEnabled" Value="False">
-                                                        <Setter TargetName="arrow" Property="Fill" Value="#55586A"/>
-                                                        <Setter TargetName="BtnBorder" Property="Opacity" Value="0.35"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-
-                                    <!-- Header Button (Month/Year) -->
-                                    <Button Name="PART_HeaderButton" 
-                                            Style="{x:Null}"
-                                            Foreground="#FFFFFF"
-                                            HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                            FontSize="13" FontWeight="SemiBold"
-                                            Focusable="False" Grid.Column="1" Grid.Row="0">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="4" Padding="8,4,8,4" Cursor="Hand">
-                                                    <TextBlock Text="{TemplateBinding Content}" 
-                                                               Foreground="{TemplateBinding Foreground}"
-                                                               HorizontalAlignment="Center" 
-                                                               VerticalAlignment="Center" />
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Foreground" Value="#00D2E6"/>
-                                                    </Trigger>
-                                                    <Trigger Property="IsEnabled" Value="False">
-                                                        <Setter Property="Foreground" Value="#55586A"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-
-                                    <!-- Next Button -->
-                                    <Button Name="PART_NextButton" Width="28" Height="28" 
-                                            Style="{x:Null}"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Margin="0,0,8,0" Focusable="False" Grid.Column="2" Grid.Row="0">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="4" Cursor="Hand">
-                                                    <Path x:Name="arrow" Data="M282.875,231.875L282.875,240.375 288.625,236z" 
-                                                          Stretch="Fill" Fill="#FFFFFF" Width="6" Height="10" 
-                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="BtnBorder" Property="Background" Value="#2A2E3D"/>
-                                                        <Setter TargetName="arrow" Property="Fill" Value="#00D2E6"/>
-                                                    </Trigger>
-                                                    <Trigger Property="IsEnabled" Value="False">
-                                                        <Setter TargetName="arrow" Property="Fill" Value="#55586A"/>
-                                                        <Setter TargetName="BtnBorder" Property="Opacity" Value="0.35"/>
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-
-                                    <!-- Grid views -->
-                                    <Grid Name="PART_MonthView" Margin="8,0,8,8" 
-                                          HorizontalAlignment="Center" Visibility="Visible" 
-                                          Grid.Row="1" Grid.ColumnSpan="3">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
-                                    </Grid>
-                                    
-                                    <Grid Name="PART_YearView" Margin="8,0,8,8" 
-                                          HorizontalAlignment="Center" Visibility="Hidden" 
-                                          Grid.Row="1" Grid.ColumnSpan="3">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-                            
-                            <Rectangle RadiusX="2" RadiusY="2" Stretch="Fill" Fill="#A5FFFFFF" 
-                                       Stroke="#A5FFFFFF" StrokeThickness="1" 
-                                       Name="PART_DisabledVisual" Opacity="0" Visibility="Collapsed" />
-                        </Grid>
-                        
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Visibility" TargetName="PART_DisabledVisual" Value="Visible" />
-                                <Setter Property="Opacity" TargetName="PART_DisabledVisual" Value="0.5" />
-                            </Trigger>
-                            <DataTrigger Binding="{Binding Path=DisplayMode, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Calendar}}" Value="Year">
-                                <Setter Property="Visibility" TargetName="PART_MonthView" Value="Hidden" />
-                                <Setter Property="Visibility" TargetName="PART_YearView" Value="Visible" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=DisplayMode, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Calendar}}" Value="Decade">
-                                <Setter Property="Visibility" TargetName="PART_MonthView" Value="Hidden" />
-                                <Setter Property="Visibility" TargetName="PART_YearView" Value="Visible" />
-                            </DataTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Custom Dark Calendar Style -->
-        <Style x:Key="DarkCalendarStyle" TargetType="Calendar">
-            <Setter Property="Background" Value="#181924"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="BorderBrush" Value="#333645"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CalendarDayButtonStyle" Value="{StaticResource DarkCalendarDayButtonStyle}"/>
-            <Setter Property="CalendarButtonStyle" Value="{StaticResource DarkCalendarButtonStyle}"/>
-            <Setter Property="CalendarItemStyle" Value="{StaticResource DarkCalendarItemStyle}"/>
-        </Style>
-
-        <!-- Custom Dark DatePicker Style -->
+        <!-- Simplified Dark DatePicker Style (no custom Calendar/CalendarItem templates to avoid Stack overflow) -->
         <Style x:Key="DarkDatePickerStyle" TargetType="DatePicker">
             <Setter Property="Background" Value="#181924"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="BorderBrush" Value="#333645"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Height" Value="32"/>
-            <Setter Property="CalendarStyle" Value="{StaticResource DarkCalendarStyle}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="DatePicker">
@@ -411,9 +158,9 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            
+
                             <Border Grid.ColumnSpan="2" x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4"/>
-                            
+
                             <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0" 
                                                Background="Transparent" 
                                                Foreground="{TemplateBinding Foreground}" 
@@ -422,7 +169,7 @@
                                                VerticalContentAlignment="Center" 
                                                CaretBrush="White"
                                                Focusable="{TemplateBinding Focusable}"/>
-                            
+
                             <Button x:Name="PART_Button" Grid.Column="1" Width="28" Height="28" Background="Transparent" BorderThickness="0" Margin="0,0,2,0" Focusable="False">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
@@ -438,7 +185,7 @@
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
-                            
+
                             <Popup x:Name="PART_Popup" AllowsTransparency="True" Placement="Bottom" PlacementTarget="{Binding ElementName=PART_Root}" StaysOpen="False"/>
                         </Grid>
                         <ControlTemplate.Triggers>

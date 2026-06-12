@@ -182,23 +182,37 @@ public partial class MainWindow : Window
 
     private bool IsVisualDescendant(DependencyObject child, DependencyObject parent)
     {
-        while (child != null)
-        {
-            if (child == parent)
-                return true;
+        if (child == null || parent == null)
+            return false;
 
-            if (child is FrameworkContentElement fce)
+        try
+        {
+            while (child != null)
             {
-                child = fce.Parent ?? fce.TemplatedParent;
+                if (child == parent)
+                    return true;
+
+                if (child is FrameworkContentElement fce)
+                {
+                    child = fce.Parent ?? fce.TemplatedParent ?? LogicalTreeHelper.GetParent(fce);
+                }
+                else if (child is ContentElement ce)
+                {
+                    child = ContentOperations.GetParent(ce) ?? LogicalTreeHelper.GetParent(ce);
+                }
+                else if (child is Visual || child is System.Windows.Media.Media3D.Visual3D)
+                {
+                    child = VisualTreeHelper.GetParent(child);
+                }
+                else
+                {
+                    child = LogicalTreeHelper.GetParent(child);
+                }
             }
-            else if (child is Visual || child is System.Windows.Media.Media3D.Visual3D)
-            {
-                child = VisualTreeHelper.GetParent(child);
-            }
-            else
-            {
-                child = LogicalTreeHelper.GetParent(child);
-            }
+        }
+        catch
+        {
+            // Fail-safe to prevent application crash on tree traversal
         }
         return false;
     }

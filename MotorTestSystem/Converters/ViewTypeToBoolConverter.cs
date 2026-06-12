@@ -19,6 +19,23 @@ namespace MotorTestSystem.Converters
                 return false;
             }
 
+            if (currentViewName.Equals("NotificationCenterViewModel", StringComparison.OrdinalIgnoreCase))
+            {
+                var pageTitleProp = value.GetType().GetProperty("PageTitle");
+                if (pageTitleProp != null)
+                {
+                    string? pageTitle = pageTitleProp.GetValue(value) as string;
+                    if (targetView.Equals("LogCenter", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return pageTitle == "日志中心";
+                    }
+                    if (targetView.Equals("Notification", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return pageTitle == "通知中心";
+                    }
+                }
+            }
+
             return currentViewName.StartsWith(targetView, StringComparison.OrdinalIgnoreCase);
         }
 
