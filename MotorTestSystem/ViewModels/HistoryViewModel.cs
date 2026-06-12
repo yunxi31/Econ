@@ -77,7 +77,7 @@ namespace MotorTestSystem.ViewModels
         private bool _isApplyingQuickFilter;
         private bool _isResetting;
 
-        private DateTime _startDate = DateTime.Today.AddDays(-7);
+        private DateTime _startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
         public DateTime StartDate
         {
             get => _startDate;
@@ -94,11 +94,13 @@ namespace MotorTestSystem.ViewModels
                     {
                         SelectedQuickFilter = null;
                     }
+                    OnPropertyChanged(nameof(StartCalendarDisplayStart));
+                    OnPropertyChanged(nameof(StartCalendarDisplayEnd));
                 }
             }
         }
 
-        private DateTime _endDate = DateTime.Today;
+        private DateTime _endDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
         public DateTime EndDate
         {
             get => _endDate;
@@ -115,9 +117,21 @@ namespace MotorTestSystem.ViewModels
                     {
                         SelectedQuickFilter = null;
                     }
+                    OnPropertyChanged(nameof(EndCalendarDisplayStart));
+                    OnPropertyChanged(nameof(EndCalendarDisplayEnd));
                 }
             }
         }
+
+        // 用于 DatePicker 的 DisplayDateStart/End —— 始终是 StartDate 所在月份的头尾
+        public DateTime StartCalendarDisplayStart => new DateTime(StartDate.Year, StartDate.Month, 1);
+        public DateTime StartCalendarDisplayEnd   => new DateTime(StartDate.Year, StartDate.Month,
+            DateTime.DaysInMonth(StartDate.Year, StartDate.Month));
+
+        // 用于 EndDate DatePicker 的 DisplayDateStart/End —— 始终是 EndDate 所在月份的头尾
+        public DateTime EndCalendarDisplayStart => new DateTime(EndDate.Year, EndDate.Month, 1);
+        public DateTime EndCalendarDisplayEnd   => new DateTime(EndDate.Year, EndDate.Month,
+            DateTime.DaysInMonth(EndDate.Year, EndDate.Month));
 
         [ObservableProperty]
         private int _totalTestsCount = 30;
@@ -558,8 +572,8 @@ namespace MotorTestSystem.ViewModels
                 SearchBarcode = string.Empty;
                 SelectedResultFilter = "全部";
                 SelectedQuickFilter = null;
-                StartDate = DateTime.Today.AddDays(-7);
-                EndDate = DateTime.Today;
+                StartDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                EndDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
                 SelectedMotor = null;
             }
             finally
