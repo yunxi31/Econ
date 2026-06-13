@@ -14,15 +14,114 @@
             <converters:LocMultiConverter x:Key="LocMultiConverter"/>
             <converters:LanguageToXmlLanguageConverter x:Key="LanguageToXmlLanguageConverter"/>
 
-            <!-- Global Auto-Hiding ScrollBar Style (simplified, removed custom template to fix Border stack overflow) -->
-            <Style TargetType="ScrollBar">
-                <Setter Property="Opacity" Value="1.0"/>
+            <!-- Modern Auto-Hiding ScrollBar Style (Overrides default OS Chrome) -->
+            <Style x:Key="ModernScrollBarThumb" TargetType="Thumb">
+                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                <Setter Property="IsTabStop" Value="False"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Thumb">
+                            <!-- Rounded thumb matching dark themes -->
+                            <Border x:Name="rectangle" 
+                                    CornerRadius="4" 
+                                    Background="#4A5568" 
+                                    Opacity="0.6"
+                                    SnapsToDevicePixels="True"/>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="rectangle" Property="Background" Value="#718096"/>
+                                    <Setter TargetName="rectangle" Property="Opacity" Value="0.9"/>
+                                </Trigger>
+                                <Trigger Property="IsDragging" Value="True">
+                                    <Setter TargetName="rectangle" Property="Background" Value="#A0AEC0"/>
+                                    <Setter TargetName="rectangle" Property="Opacity" Value="1.0"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Vertical ScrollBar Template -->
+            <ControlTemplate x:Key="VerticalScrollBarTemplate" TargetType="ScrollBar">
+                <Grid x:Name="Bg" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                    <Track x:Name="PART_Track" IsDirectionReversed="true" IsEnabled="{TemplateBinding IsEnabled}">
+                        <Track.DecreaseRepeatButton>
+                            <RepeatButton Command="{x:Static ScrollBar.PageUpCommand}" Focusable="false">
+                                <RepeatButton.Template>
+                                    <ControlTemplate TargetType="RepeatButton">
+                                        <Border Background="Transparent" />
+                                    </ControlTemplate>
+                                </RepeatButton.Template>
+                            </RepeatButton>
+                        </Track.DecreaseRepeatButton>
+                        <Track.Thumb>
+                            <Thumb Style="{StaticResource ModernScrollBarThumb}" Margin="2,0,2,0"/>
+                        </Track.Thumb>
+                        <Track.IncreaseRepeatButton>
+                            <RepeatButton Command="{x:Static ScrollBar.PageDownCommand}" Focusable="false">
+                                <RepeatButton.Template>
+                                    <ControlTemplate TargetType="RepeatButton">
+                                        <Border Background="Transparent" />
+                                    </ControlTemplate>
+                                </RepeatButton.Template>
+                            </RepeatButton>
+                        </Track.IncreaseRepeatButton>
+                    </Track>
+                </Grid>
+            </ControlTemplate>
+
+            <!-- Horizontal ScrollBar Template -->
+            <ControlTemplate x:Key="HorizontalScrollBarTemplate" TargetType="ScrollBar">
+                <Grid x:Name="Bg" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                    <Track x:Name="PART_Track" IsDirectionReversed="false" IsEnabled="{TemplateBinding IsEnabled}">
+                        <Track.DecreaseRepeatButton>
+                            <RepeatButton Command="{x:Static ScrollBar.PageLeftCommand}" Focusable="false">
+                                <RepeatButton.Template>
+                                    <ControlTemplate TargetType="RepeatButton">
+                                        <Border Background="Transparent" />
+                                    </ControlTemplate>
+                                </RepeatButton.Template>
+                            </RepeatButton>
+                        </Track.DecreaseRepeatButton>
+                        <Track.Thumb>
+                            <Thumb Style="{StaticResource ModernScrollBarThumb}" Margin="0,2,0,2"/>
+                        </Track.Thumb>
+                        <Track.IncreaseRepeatButton>
+                            <RepeatButton Command="{x:Static ScrollBar.PageRightCommand}" Focusable="false">
+                                <RepeatButton.Template>
+                                    <ControlTemplate TargetType="RepeatButton">
+                                        <Border Background="Transparent" />
+                                    </ControlTemplate>
+                                </RepeatButton.Template>
+                            </RepeatButton>
+                        </Track.IncreaseRepeatButton>
+                    </Track>
+                </Grid>
+            </ControlTemplate>
+
+            <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="Opacity" Value="0"/>
+                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                <Setter Property="Template" Value="{StaticResource VerticalScrollBarTemplate}"/>
                 <Style.Triggers>
                     <Trigger Property="Orientation" Value="Vertical">
-                        <Setter Property="Width" Value="14"/>
+                        <Setter Property="Width" Value="10"/>
+                        <Setter Property="Template" Value="{StaticResource VerticalScrollBarTemplate}"/>
                     </Trigger>
                     <Trigger Property="Orientation" Value="Horizontal">
-                        <Setter Property="Height" Value="14"/>
+                        <Setter Property="Height" Value="10"/>
+                        <Setter Property="Template" Value="{StaticResource HorizontalScrollBarTemplate}"/>
+                    </Trigger>
+                    <!-- Show subtle scrollbar when hovering over the parent ScrollViewer -->
+                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Value="True">
+                        <Setter Property="Opacity" Value="1.0"/>
+                    </DataTrigger>
+                    <!-- Highlight scrollbar when hovering directly over it -->
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Opacity" Value="1.0"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>
