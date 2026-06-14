@@ -46,6 +46,9 @@
         <DataTemplate DataType="{x:Type vm:NotificationCenterViewModel}">
             <views:NotificationCenterView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:LogCenterViewModel}">
+            <views:NotificationCenterView/>
+        </DataTemplate>
 
         <conv:ViewTypeToBoolConverter x:Key="ViewTypeToBoolConverter"/>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>

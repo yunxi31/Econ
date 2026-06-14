@@ -66,6 +66,7 @@ namespace MotorTestSystem.ViewModels
         public ConfigViewModel ConfigVM { get; }
         public UserViewModel UserVM { get; }
         public NotificationCenterViewModel NotificationVM { get; }
+        public LogCenterViewModel LogCenterVM { get; }
         public ObservableCollection<StationState> HeaderStations { get; } = new();
 
         public MainViewModel()
@@ -85,6 +86,7 @@ namespace MotorTestSystem.ViewModels
             ConfigVM = new ConfigViewModel(_runtime);
             UserVM = new UserViewModel(_runtime.UserService, _runtime.AuthService);
             NotificationVM = new NotificationCenterViewModel(_runtime.NotificationService);
+            LogCenterVM = new LogCenterViewModel(_runtime.NotificationService);
 
             var allStations = MonitorVM.NoLoadStations
                 .Concat(MonitorVM.NoiseStations)
@@ -95,8 +97,6 @@ namespace MotorTestSystem.ViewModels
                 HeaderStations.Add(station);
             }
 
-            NotificationVM.PageTitle = "通知中心";
-            NotificationVM.PageIcon = "BellOutline";
             CurrentView = MonitorVM;
 
             _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
@@ -159,7 +159,7 @@ namespace MotorTestSystem.ViewModels
             else CurrentView = MonitorVM; // 兜底
         }
 
-        public bool IsNotificationCenterActive => CurrentView == NotificationVM && NotificationVM?.PageTitle == "通知中心";
+        public bool IsNotificationCenterActive => CurrentView == NotificationVM;
 
         partial void OnCurrentViewChanged(ViewModelBase value)
         {
@@ -174,27 +174,21 @@ namespace MotorTestSystem.ViewModels
             if (destination == "LogCenter")
             {
                 _previousViewBeforeNotification = null;
-                NotificationVM.PageTitle = "日志中心";
-                NotificationVM.PageIcon = "FolderOpenOutline";
-                CurrentView = NotificationVM;
+                CurrentView = LogCenterVM;
                 OnPropertyChanged(nameof(IsNotificationCenterActive));
                 return;
             }
 
             if (destination == "Notification")
             {
-                if (CurrentView == NotificationVM && NotificationVM.PageTitle == "通知中心")
+                if (CurrentView == NotificationVM)
                 {
                     // 已经在通知中心模式，toggle 回上一页
                     CurrentView = _previousViewBeforeNotification ?? MonitorVM;
                 }
                 else
                 {
-                    _previousViewBeforeNotification = CurrentView == NotificationVM ? null : CurrentView;
-                    NotificationVM.PageTitle = "通知中心";
-                    NotificationVM.PageIcon = "BellOutline";
-                    // 先设为 null 再设回，强制触发 PropertyChanged（同一实例引用时不会自动触发）
-                    CurrentView = null!;
+                    _previousViewBeforeNotification = CurrentView == LogCenterVM ? null : CurrentView;
                     CurrentView = NotificationVM;
                 }
                 OnPropertyChanged(nameof(IsNotificationCenterActive));
@@ -224,7 +218,7 @@ namespace MotorTestSystem.ViewModels
                 "History" => HistoryVM,
                 "Config" => ConfigVM,
                 "User" => UserVM,
-                "LogCenter" => NotificationVM,
+                "LogCenter" => LogCenterVM,
                 _ => DashboardVM
             };
         }
