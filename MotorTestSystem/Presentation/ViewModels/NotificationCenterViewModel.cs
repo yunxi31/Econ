@@ -114,7 +114,7 @@ namespace MotorTestSystem.ViewModels
         [NotifyPropertyChangedFor(nameof(TotalPages))]
         [NotifyPropertyChangedFor(nameof(CurrentPageStart))]
         [NotifyPropertyChangedFor(nameof(CurrentPageEnd))]
-        private int _pageSize = 10;
+        private int _pageSize = 100;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(TotalPages))]
@@ -323,13 +323,7 @@ namespace MotorTestSystem.ViewModels
         {
             var filtered = _allNotificationVms.AsEnumerable();
 
-            // Tab 第一优先：运行日志 = 报警+系统，操作日志 = 维护
-            if (SelectedTab == "运行日志")
-                filtered = filtered.Where(n => n.TypeDisplay == "报警" || n.TypeDisplay == "系统");
-            else if (SelectedTab == "操作日志")
-                filtered = filtered.Where(n => n.TypeDisplay == "维护");
-
-            // 在 Tab 范围内再按 Level 筛选
+            // 在所有通知范围内按 Level 筛选
             if (SelectedFilter != "全部")
             {
                 string targetType = SelectedFilter switch
@@ -354,8 +348,6 @@ namespace MotorTestSystem.ViewModels
             {
                 filtered = filtered.Where(n => n.Source == SelectedSource);
             }
-
-            filtered = filtered.Where(n => n.Model.CreatedAt >= StartDate && n.Model.CreatedAt <= EndDate);
 
             // 按时间倒序
             _currentFilteredList = filtered.OrderByDescending(n => n.Model.CreatedAt).ToList();
@@ -449,6 +441,22 @@ namespace MotorTestSystem.ViewModels
             _notificationService?.MarkAsRead(item.Id);
             UpdateCounts();
             FilterNotifications();
+        }
+
+        [RelayCommand]
+        private void ViewDetails(NotificationItemViewModel? item)
+        {
+            if (item == null) return;
+            MessageBox.Show($"查看详情:\n{item.Title}\n\n{item.Content}", "通知详情", MessageBoxButton.OK, MessageBoxImage.Information);
+            ToggleReadStatus(item);
+        }
+
+        [RelayCommand]
+        private void DiagnoseConnection(NotificationItemViewModel? item)
+        {
+            if (item == null) return;
+            MessageBox.Show($"正在诊断连接:\n工位: {item.Source ?? "未知工位"}\n网关: GW-N02\n\n设备状态: 正在尝试连接重试...\n诊断结果: 物理链路正常，心跳包已恢复同步。", "PLC 连接诊断", MessageBoxButton.OK, MessageBoxImage.Warning);
+            ToggleReadStatus(item);
         }
 
         [RelayCommand]

@@ -288,29 +288,36 @@
             <Style TargetType="Grid">
                 <Setter Property="Margin" Value="0"/>
                 <Style.Triggers>
-                    <MultiDataTrigger>
-                        <MultiDataTrigger.Conditions>
-                            <Condition Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized"/>
-                            <Condition Binding="{Binding WindowStyle, RelativeSource={RelativeSource AncestorType=Window}}" Value="SingleBorderWindow"/>
-                        </MultiDataTrigger.Conditions>
+                    <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
                         <Setter Property="Margin" Value="8"/>
-                    </MultiDataTrigger>
+                    </DataTrigger>
                 </Style.Triggers>
             </Style>
         </Grid.Style>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="102"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="102"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <Border Grid.RowSpan="2"
+                Width="102"
                 Background="#151C22"
                 BorderBrush="#36424B"
                 BorderThickness="0,0,1,0">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsNotificationCenterActive}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="102"/>
@@ -443,9 +450,20 @@
 
         <Border Grid.Column="1"
                 Grid.Row="0"
+                Height="102"
                 Background="#10161B"
                 BorderBrush="#34414A"
                 BorderThickness="0,0,0,1">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsNotificationCenterActive}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <Grid Margin="38,0,20,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -625,8 +643,25 @@
             </Grid>
         </Border>
 
-        <ContentControl Grid.Column="1"
-                        Grid.Row="1"
-                        Content="{Binding CurrentView}"/>
+        <ContentControl Content="{Binding CurrentView}">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <!-- Default state: sits in column 1, row 1 -->
+                    <Setter Property="Grid.Column" Value="1"/>
+                    <Setter Property="Grid.Row" Value="1"/>
+                    <Setter Property="Grid.ColumnSpan" Value="1"/>
+                    <Setter Property="Grid.RowSpan" Value="1"/>
+                    <Style.Triggers>
+                        <!-- Full screen mode: spans all rows and columns -->
+                        <DataTrigger Binding="{Binding IsNotificationCenterActive}" Value="True">
+                            <Setter Property="Grid.Column" Value="0"/>
+                            <Setter Property="Grid.Row" Value="0"/>
+                            <Setter Property="Grid.ColumnSpan" Value="2"/>
+                            <Setter Property="Grid.RowSpan" Value="2"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
     </Grid>
 </Window>

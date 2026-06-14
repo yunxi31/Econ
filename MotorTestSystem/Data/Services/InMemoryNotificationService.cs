@@ -38,109 +38,127 @@ namespace MotorTestSystem.Services
         // ========================================
         private void SeedNotifications()
         {
-            var now = DateTime.Now;
             var seeds = new List<NotificationItem>
             {
-                // ---- 报警 ----
+                // 1. A4机台噪音超标
                 new()
                 {
-                    Title = "A4机台噪音超标",
-                    Content = "A4机台噪音 85dB，超出安全阈值上限 75dB (自动暂停)",
-                    CreatedAt = now.AddHours(-7).AddMinutes(38),
-                    Type = NotificationType.Alarm, Severity = NotificationSeverity.Critical,
-                    Source = "A4", IsRead = false
+                    Title = "A4 机台噪音超标",
+                    Content = "检测到 A4 测试工位 (FX5U-04) 负载测试阶段异常。噪音传感器读取值为 85dB，超过阈值上限 75dB。测试序列已自动暂停，等待操作员介入确认。",
+                    CreatedAt = DateTime.Parse("2024-10-24 14:21:10"),
+                    Type = NotificationType.Alarm,
+                    Severity = NotificationSeverity.Critical,
+                    Source = "A4",
+                    IsRead = false
                 },
+                // 2. PLC 通信异常
                 new()
                 {
                     Title = "PLC 通信异常",
-                    Content = "工位3 (GW-M02) 丢失心跳包超 5s (状态: 离线)",
-                    CreatedAt = now.AddHours(-7).AddMinutes(44),
-                    Type = NotificationType.Alarm, Severity = NotificationSeverity.Critical,
-                    Source = "A3", IsRead = false
+                    Content = "工控机与网关 [GW-N02] 丢失心跳包超过 5 秒。当前状态：离线。受影响的工位：B1, B2。请检查以太网连接或重启网关设备。",
+                    CreatedAt = DateTime.Parse("2024-10-24 14:15:33"),
+                    Type = NotificationType.Alarm,
+                    Severity = NotificationSeverity.Critical,
+                    Source = "A3",
+                    IsRead = false
                 },
+                // 3. 系统维护提醒
+                new()
+                {
+                    Title = "系统维护提醒",
+                    Content = "例行维护周期即将到来。C区夹具需要进行润滑和校准。建议在下一班次交接期间 ( 18:00 - 18:30 ) 安排停机维护。",
+                    CreatedAt = DateTime.Parse("2024-10-24 10:00:00"),
+                    Type = NotificationType.Maintenance,
+                    Severity = NotificationSeverity.Warning,
+                    IsRead = true
+                },
+                // 4. 固件更新可用
+                new()
+                {
+                    Title = "固件更新可用",
+                    Content = "测试控制台核心组件 v2.4.2-Stable 已准备就绪。此次更新包含针对高速数据采集模块的性能优化和一些 bug 修复。可在系统设置中手动触发更新。",
+                    CreatedAt = DateTime.Parse("2024-10-23 23:45:12"),
+                    Type = NotificationType.System,
+                    Severity = NotificationSeverity.Info,
+                    IsRead = true
+                },
+                // 5. 数据备份完成
+                new()
+                {
+                    Title = "数据备份完成",
+                    Content = "每日自动化数据库备份已成功完成。存档大小：4.2 GB。已同步至中央数据湖。",
+                    CreatedAt = DateTime.Parse("2024-10-23 02:00:00"),
+                    Type = NotificationType.System,
+                    Severity = NotificationSeverity.Info,
+                    IsRead = true
+                },
+                // 6. 其他报警（为了凑齐 3 个报警）
                 new()
                 {
                     Title = "机温预警限制触发",
                     Content = "工位1 (GW-M01) 电机测试温度 72°C，接近安全阈值 80°C",
-                    CreatedAt = now.AddDays(-1).AddHours(-5).AddMinutes(27),
-                    Type = NotificationType.Alarm, Severity = NotificationSeverity.Warning,
-                    Source = "A1", IsRead = false
+                    CreatedAt = DateTime.Parse("2024-10-22 11:30:15"),
+                    Type = NotificationType.Alarm,
+                    Severity = NotificationSeverity.Warning,
+                    Source = "A1",
+                    IsRead = true
                 },
-
-                // ---- 维护 ----
-                new()
-                {
-                    Title = "例行维护周期提醒",
-                    Content = "C区夹具例行润滑与校准到期，建议交班停机维护",
-                    CreatedAt = now.AddHours(-12),
-                    Type = NotificationType.Maintenance, Severity = NotificationSeverity.Warning,
-                    IsRead = false
-                },
+                // 7. 其他维护（为了凑齐 4 个维护）
                 new()
                 {
                     Title = "传感器标定超期",
-                    Content = "工位A2 扭矩传感器标定超期 3 天",
-                    CreatedAt = now.AddDays(-1).AddHours(3).AddMinutes(40),
-                    Type = NotificationType.Maintenance, Severity = NotificationSeverity.Warning,
-                    Source = "A2", IsRead = false
+                    Content = "工位A2 扭矩传感器标定超期 3 天，请尽快安排标定以确保测试精度。",
+                    CreatedAt = DateTime.Parse("2024-10-22 09:15:00"),
+                    Type = NotificationType.Maintenance,
+                    Severity = NotificationSeverity.Warning,
+                    Source = "A2",
+                    IsRead = true
                 },
                 new()
                 {
                     Title = "清洁过滤网警告",
-                    Content = "配电柜冷风机过滤网压差异常，请清洁更换",
-                    CreatedAt = now.AddDays(-2).AddHours(2).AddMinutes(44),
-                    Type = NotificationType.Maintenance, Severity = NotificationSeverity.Info,
-                    IsRead = false
+                    Content = "配电柜冷风机过滤网压差异常，请及时清洁或更换滤网。",
+                    CreatedAt = DateTime.Parse("2024-10-22 08:30:00"),
+                    Type = NotificationType.Maintenance,
+                    Severity = NotificationSeverity.Info,
+                    IsRead = true
                 },
                 new()
                 {
                     Title = "UPS 电池包寿命警告",
-                    Content = "主UPS电池自检警告: 电池寿命不足15%",
-                    CreatedAt = now.AddDays(-3).AddHours(6).AddMinutes(17),
-                    Type = NotificationType.Maintenance, Severity = NotificationSeverity.Warning,
-                    IsRead = false
+                    Content = "主UPS电池自检警告: 电池寿命不足15%，请联系维护人员更换。",
+                    CreatedAt = DateTime.Parse("2024-10-21 16:45:00"),
+                    Type = NotificationType.Maintenance,
+                    Severity = NotificationSeverity.Warning,
+                    IsRead = true
                 },
-
-                // ---- 系统 ----
-                new()
-                {
-                    Title = "固件更新可用",
-                    Content = "系统固件 v2.4.2-Stable 可用，包含高采样性能优化",
-                    CreatedAt = now.AddDays(-1).AddHours(-2),
-                    Type = NotificationType.System, Severity = NotificationSeverity.Info,
-                    IsRead = false
-                },
-                new()
-                {
-                    Title = "数据备份完成",
-                    Content = "每日数据库备份完成，大小 4.2 GB (同步至数据湖)",
-                    CreatedAt = now.AddDays(-1).AddHours(2),
-                    Type = NotificationType.System, Severity = NotificationSeverity.Info,
-                    IsRead = false
-                },
+                // 8. 其他系统（为了凑齐 5 个系统）
                 new()
                 {
                     Title = "系统时间校准成功",
-                    Content = "NTP 时间同步成功，偏差 +0.023s，全节点时钟已同步",
-                    CreatedAt = now.AddDays(-3).AddHours(-17).AddMinutes(49),
-                    Type = NotificationType.System, Severity = NotificationSeverity.Info,
-                    IsRead = false
+                    Content = "NTP 时间同步成功，偏差 +0.023s，全节点时钟已同步。",
+                    CreatedAt = DateTime.Parse("2024-10-22 10:30:00"),
+                    Type = NotificationType.System,
+                    Severity = NotificationSeverity.Info,
+                    IsRead = true
                 },
                 new()
                 {
                     Title = "网络延迟预警",
-                    Content = "交换机丢包，延迟 45ms (已切换至冗余物理链路)",
-                    CreatedAt = now.AddDays(-4).AddHours(2).AddMinutes(47),
-                    Type = NotificationType.System, Severity = NotificationSeverity.Warning,
-                    IsRead = false
+                    Content = "交换机丢包，延迟 45ms (已切换至冗余物理链路)。",
+                    CreatedAt = DateTime.Parse("2024-10-21 11:20:00"),
+                    Type = NotificationType.System,
+                    Severity = NotificationSeverity.Warning,
+                    IsRead = true
                 },
                 new()
                 {
                     Title = "报表导出成功",
-                    Content = "电机能效及测试合格率分析报表导出成功",
-                    CreatedAt = now.AddDays(-5).AddHours(4).AddMinutes(29),
-                    Type = NotificationType.System, Severity = NotificationSeverity.Info,
-                    IsRead = false
+                    Content = "电机能效及测试合格率分析报表导出成功，已保存至默认导出路径。",
+                    CreatedAt = DateTime.Parse("2024-10-20 14:55:00"),
+                    Type = NotificationType.System,
+                    Severity = NotificationSeverity.Info,
+                    IsRead = true
                 }
             };
 

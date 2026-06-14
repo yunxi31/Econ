@@ -216,7 +216,7 @@ public class MainViewModel : ViewModelBase
 		HistoryVM = new HistoryViewModel(_runtime.Repository);
 		ConfigVM = new ConfigViewModel(_runtime);
 		UserVM = new UserViewModel();
-		_currentView = MonitorVM;
+		_currentView = DashboardVM;
 		_runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
 		_clockTimer = new DispatcherTimer
 		{

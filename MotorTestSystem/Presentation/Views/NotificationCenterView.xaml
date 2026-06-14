@@ -12,6 +12,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="760" d:DesignWidth="1080"
              Background="#13141E"
+             WindowChrome.IsHitTestVisibleInChrome="True"
              Language="{Binding Source={x:Static root:LanguageManager.Instance}, Path=CurrentLanguage, Converter={StaticResource LanguageToXmlLanguageConverter}, ConverterCulture=en-US}">
 
     <UserControl.Resources>
@@ -272,90 +273,44 @@
         </Style>
 
 
-        <SolidColorBrush x:Key="BackgroundDark" Color="#13141E"/>
-        <SolidColorBrush x:Key="PanelBackground" Color="#212431"/>
-        <SolidColorBrush x:Key="AccentCyan" Color="#00D2E6"/>
-        <SolidColorBrush x:Key="AccentRed" Color="#F74C5B"/>
-        <SolidColorBrush x:Key="AccentWarning" Color="#F39C12"/>
-        <SolidColorBrush x:Key="AccentSystem" Color="#5C6070"/>
+
+        <SolidColorBrush x:Key="BackgroundDark" Color="#0b1019"/>
+        <SolidColorBrush x:Key="PanelBackground" Color="#151c27"/>
+        <SolidColorBrush x:Key="AccentCyan" Color="#00d2fc"/>
+        <SolidColorBrush x:Key="AccentRed" Color="#ff4d4f"/>
+        <SolidColorBrush x:Key="AccentWarning" Color="#e2b13c"/>
+        <SolidColorBrush x:Key="AccentSystem" Color="#5c7080"/>
         <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#8A8D99"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#a3b1cc"/>
 
         <!-- Header Button Style -->
         <Style x:Key="HeaderButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="38"/>
-            <Setter Property="Background" Value="#1B1C28"/>
-            <Setter Property="BorderBrush" Value="#333645"/>
+            <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Background" Value="#111622"/>
+            <Setter Property="BorderBrush" Value="#222f3e"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="#8A8D99"/>
+            <Setter Property="Foreground" Value="#a3b1cc"/>
             <Setter Property="Padding" Value="16,0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Margin" Value="12,0,0,0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
+                        <Border x:Name="BtnBorder" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="6"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#252736"/>
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                    <Setter Property="BorderBrush" Value="#45495E"/>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#151620"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- Base Pill RadioButton Style -->
-        <Style x:Key="PillRadioButtonStyle" TargetType="RadioButton">
-            <Setter Property="Height" Value="36"/>
-            <Setter Property="Background" Value="#1B1C28"/>
-            <Setter Property="BorderBrush" Value="#333645"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="#8A8D99"/>
-            <Setter Property="GroupName" Value="FilterPills"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Margin" Value="0,0,12,0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="PillBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="18"
-                                Padding="16,0">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <!-- Icon (if Tag is set) -->
-                                <materialDesign:PackIcon x:Name="PillIcon"
-                                                         Kind="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
-                                                         Width="16"
-                                                         Height="16"
-                                                         Margin="0,0,8,0"
-                                                         VerticalAlignment="Center"/>
-                                <!-- Text / Badge content -->
-                                <ContentPresenter x:Name="PillText"
-                                                  VerticalAlignment="Center"
-                                                  RecognizesAccessKey="False"/>
-                            </StackPanel>
-                        </Border>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="Tag" Value="{x:Null}">
-                                <Setter TargetName="PillIcon" Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="PillBorder" Property="Background" Value="#252736"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter TargetName="BtnBorder" Property="Background" Value="#1c2535"/>
+                                <Setter TargetName="BtnBorder" Property="BorderBrush" Value="#00d2fc"/>
+                                <Setter Property="Foreground" Value="#ffffff"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="BtnBorder" Property="Background" Value="#090e12"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -363,57 +318,195 @@
             </Setter>
         </Style>
 
-        <!-- Pill colors on selection -->
-        <Style x:Key="AllPillStyle" TargetType="RadioButton" BasedOn="{StaticResource PillRadioButtonStyle}">
-            <Style.Triggers>
-                <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="#00D2E6"/>
-                    <Setter Property="BorderBrush" Value="#00D2E6"/>
-                    <Setter Property="Foreground" Value="#090E12"/>
-                </Trigger>
-            </Style.Triggers>
+        <!-- Capsule Tab Button Styles -->
+        <Style x:Key="AllCapsuleTabStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="#111622"/>
+            <Setter Property="BorderBrush" Value="#222f3e"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#a3b1cc"/>
+            <Setter Property="GroupName" Value="FilterPills"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="PillBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                Padding="12,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock x:Name="PillText" Text="{root:Loc 全部}" FontSize="13" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Border x:Name="BadgeBorder" Background="#1E242D" CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="BadgeText" Text="{Binding AllCount}" Foreground="#a3b1cc" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#00d2fc"/>
+                                <Setter TargetName="PillBorder" Property="BorderBrush" Value="#00d2fc"/>
+                                <Setter Property="Foreground" Value="#090e12"/>
+                                <Setter TargetName="BadgeBorder" Property="Background" Value="#090e12"/>
+                                <Setter TargetName="BadgeText" Property="Foreground" Value="#00d2fc"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#1c2535"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <Style x:Key="AlarmPillStyle" TargetType="RadioButton" BasedOn="{StaticResource PillRadioButtonStyle}">
-            <Style.Triggers>
-                <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="#F74C5B"/>
-                    <Setter Property="BorderBrush" Value="#F74C5B"/>
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                </Trigger>
-            </Style.Triggers>
+        <Style x:Key="AlarmCapsuleTabStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="#111622"/>
+            <Setter Property="BorderBrush" Value="#222f3e"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#a3b1cc"/>
+            <Setter Property="GroupName" Value="FilterPills"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="PillBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                Padding="12,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <materialDesign:PackIcon x:Name="PillIcon" Kind="AlertCircleOutline" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="#ff4d4f"/>
+                                <TextBlock x:Name="PillText" Text="{root:Loc 报警}" FontSize="13" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Border x:Name="BadgeBorder" Background="#1E242D" CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="BadgeText" Text="{Binding AlarmCount}" Foreground="#a3b1cc" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#ff4d4f"/>
+                                <Setter TargetName="PillBorder" Property="BorderBrush" Value="#ff4d4f"/>
+                                <Setter TargetName="PillIcon" Property="Foreground" Value="#ffffff"/>
+                                <Setter Property="Foreground" Value="#ffffff"/>
+                                <Setter TargetName="BadgeBorder" Property="Background" Value="#2a1215"/>
+                                <Setter TargetName="BadgeText" Property="Foreground" Value="#ff4d4f"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#1c2535"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <Style x:Key="MaintenancePillStyle" TargetType="RadioButton" BasedOn="{StaticResource PillRadioButtonStyle}">
-            <Style.Triggers>
-                <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="#F39C12"/>
-                    <Setter Property="BorderBrush" Value="#F39C12"/>
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                </Trigger>
-            </Style.Triggers>
+        <Style x:Key="MaintenanceCapsuleTabStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="#111622"/>
+            <Setter Property="BorderBrush" Value="#222f3e"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#a3b1cc"/>
+            <Setter Property="GroupName" Value="FilterPills"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="PillBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                Padding="12,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <materialDesign:PackIcon x:Name="PillIcon" Kind="WrenchOutline" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="#e2b13c"/>
+                                <TextBlock x:Name="PillText" Text="{root:Loc 维护}" FontSize="13" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Border x:Name="BadgeBorder" Background="#1E242D" CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="BadgeText" Text="{Binding MaintenanceCount}" Foreground="#a3b1cc" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#e2b13c"/>
+                                <Setter TargetName="PillBorder" Property="BorderBrush" Value="#e2b13c"/>
+                                <Setter TargetName="PillIcon" Property="Foreground" Value="#1a1200"/>
+                                <Setter Property="Foreground" Value="#1a1200"/>
+                                <Setter TargetName="BadgeBorder" Property="Background" Value="#282318"/>
+                                <Setter TargetName="BadgeText" Property="Foreground" Value="#e2b13c"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#1c2535"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <Style x:Key="SystemPillStyle" TargetType="RadioButton" BasedOn="{StaticResource PillRadioButtonStyle}">
-            <Style.Triggers>
-                <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="#5C6070"/>
-                    <Setter Property="BorderBrush" Value="#5C6070"/>
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                </Trigger>
-            </Style.Triggers>
+        <Style x:Key="SystemCapsuleTabStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="#111622"/>
+            <Setter Property="BorderBrush" Value="#222f3e"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#a3b1cc"/>
+            <Setter Property="GroupName" Value="FilterPills"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="PillBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                Padding="12,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <materialDesign:PackIcon x:Name="PillIcon" Kind="InformationOutline" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="#5c7080"/>
+                                <TextBlock x:Name="PillText" Text="{root:Loc 系统}" FontSize="13" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Border x:Name="BadgeBorder" Background="#1E242D" CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="BadgeText" Text="{Binding SystemCount}" Foreground="#a3b1cc" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#5c7080"/>
+                                <Setter TargetName="PillBorder" Property="BorderBrush" Value="#5c7080"/>
+                                <Setter TargetName="PillIcon" Property="Foreground" Value="#ffffff"/>
+                                <Setter Property="Foreground" Value="#ffffff"/>
+                                <Setter TargetName="BadgeBorder" Property="Background" Value="#1e242d"/>
+                                <Setter TargetName="BadgeText" Property="Foreground" Value="#ffffff"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#1c2535"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- ListBoxItem Style to strip selection styles -->
-        <Style x:Key="NotificationListBoxItemStyle" TargetType="ListBoxItem">
+        <Style x:Key="CardListBoxItemStyle" TargetType="ListBoxItem">
             <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="0,0,0,12"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Padding" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
                         <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter />
@@ -421,33 +514,6 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>
-
-        <!-- Pagination Button Style -->
-        <Style x:Key="PaginationButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#1B1C28"/>
-            <Setter Property="BorderBrush" Value="#333645"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="#8A8D99"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#252736"/>
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                </Trigger>
-            </Style.Triggers>
         </Style>
 
         <!-- Log Tab Button Style -->
@@ -469,7 +535,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#00D2E6"/>
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#00d2fc"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -477,7 +543,7 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Foreground" Value="#00D2E6"/>
+                    <Setter Property="Foreground" Value="#00d2fc"/>
                     <Setter Property="FontWeight" Value="SemiBold"/>
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
@@ -486,40 +552,189 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Level Filter Button Style -->
-        <Style x:Key="LevelFilterButtonStyle" TargetType="RadioButton">
-            <Setter Property="Height" Value="36"/>
-            <Setter Property="Background" Value="#1B1C28"/>
-            <Setter Property="BorderBrush" Value="#333645"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="#B0B8CC"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="16,0"/>
-            <Setter Property="Margin" Value="0,0,12,0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="ButtonBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <!-- Notification Card Template -->
+        <DataTemplate x:Key="NotificationCardTemplate">
+            <Border Background="#1E293B" BorderBrush="#334052" BorderThickness="1" CornerRadius="12" Padding="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Rectangle x:Name="StatusStrip" Grid.Column="0" Fill="#5c7080"/>
+
+                    <Grid Grid.Column="1" Margin="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border x:Name="IconBg" Grid.Column="0" Width="38" Height="38" CornerRadius="19" Background="#1e242d" VerticalAlignment="Top" Margin="0,2,16,0">
+                            <materialDesign:PackIcon x:Name="CardIcon" Kind="Cog" Width="20" Height="20" Foreground="#5c7080" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#252736"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                                <Border x:Name="StatusBadge" Margin="8,0,0,0" Padding="6,2" CornerRadius="4" Background="#ff4d4f" VerticalAlignment="Center">
+                                    <TextBlock x:Name="StatusBadgeText" Text="{root:Loc 未读}" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                                </Border>
+                            </StackPanel>
+
+                            <TextBlock x:Name="ContentText" Text="{Binding Content}" FontSize="14" Foreground="#a3b1cc" TextWrapping="Wrap" Margin="0,0,0,12" LineHeight="20"/>
+
+                            <StackPanel x:Name="ActionsRow" Orientation="Horizontal">
+                                <!-- 查看详情 按钮 -->
+                                <Button x:Name="BtnViewDetails"
+                                        Content="{root:Loc 查看详情}"
+                                        Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{x:Null}"
+                                        Height="28" Padding="12,0"
+                                        Margin="0,0,8,0"
+                                        Visibility="Collapsed"
+                                        Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBorder" Background="Transparent" BorderBrush="#ff4d4f" BorderThickness="1" CornerRadius="4" Padding="12,0">
+                                                <TextBlock Text="{TemplateBinding Content}" Foreground="#ff4d4f" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="BtnBorder" Property="Background" Value="#2a1215"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- 诊断连接 按钮 -->
+                                <Button x:Name="BtnDiagConnect"
+                                        Content="{root:Loc 诊断连接}"
+                                        Command="{Binding DataContext.DiagnoseConnectionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{x:Null}"
+                                        Height="28" Padding="12,0"
+                                        Visibility="Collapsed"
+                                        Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBorder" Background="Transparent" BorderBrush="#ff4d4f" BorderThickness="1" CornerRadius="4" Padding="12,0">
+                                                <TextBlock Text="{TemplateBinding Content}" Foreground="#ff4d4f" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="BtnBorder" Property="Background" Value="#2a1215"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- 标记已读 按钮 -->
+                                <Button x:Name="BtnMarkRead"
+                                        Content="{root:Loc 标记已读}"
+                                        Command="{Binding DataContext.ToggleReadStatusCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{x:Null}"
+                                        Height="28" Padding="12,0"
+                                        Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBorder" Background="Transparent" BorderBrush="#334052" BorderThickness="1" CornerRadius="4" Padding="12,0">
+                                                <TextBlock Text="{TemplateBinding Content}" Foreground="#a3b1cc" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="BtnBorder" Property="Background" Value="#1c2535"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <TextBlock Grid.Column="2" Text="{Binding Timestamp}" FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="16,4,0,0"/>
+                    </Grid>
+                </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
+                    <Setter TargetName="StatusStrip" Property="Fill" Value="#ff4d4f"/>
+                    <Setter TargetName="IconBg" Property="Background" Value="#2a1215"/>
+                    <Setter TargetName="CardIcon" Property="Kind" Value="AlertCircleOutline"/>
+                    <Setter TargetName="CardIcon" Property="Foreground" Value="#ff4d4f"/>
+                    <Setter TargetName="BtnViewDetails" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
+                    <Setter TargetName="StatusStrip" Property="Fill" Value="#e2b13c"/>
+                    <Setter TargetName="IconBg" Property="Background" Value="#282318"/>
+                    <Setter TargetName="CardIcon" Property="Kind" Value="WrenchOutline"/>
+                    <Setter TargetName="CardIcon" Property="Foreground" Value="#e2b13c"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
+                    <Setter TargetName="StatusStrip" Property="Fill" Value="#5c7080"/>
+                    <Setter TargetName="IconBg" Property="Background" Value="#1e242d"/>
+                    <Setter TargetName="CardIcon" Property="Kind" Value="InformationOutline"/>
+                    <Setter TargetName="CardIcon" Property="Foreground" Value="#5c7080"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Title}" Value="PLC 通信异常">
+                    <Setter TargetName="BtnDiagConnect" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="BtnViewDetails" Property="Visibility" Value="Collapsed"/>
+                    <Setter TargetName="BtnMarkRead" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Title}" Value="PLC通信异常">
+                    <Setter TargetName="BtnDiagConnect" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="BtnViewDetails" Property="Visibility" Value="Collapsed"/>
+                    <Setter TargetName="BtnMarkRead" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsRead}" Value="True">
+                    <Setter TargetName="TitleText" Property="Foreground" Value="#a3b1cc"/>
+                    <Setter TargetName="TitleText" Property="FontWeight" Value="Normal"/>
+                    <Setter TargetName="ContentText" Property="Foreground" Value="#6f7e95"/>
+                    <Setter TargetName="StatusBadge" Property="Background" Value="#2d3748"/>
+                    <Setter TargetName="StatusBadgeText" Property="Text" Value="已读"/>
+                    <Setter TargetName="StatusBadgeText" Property="Foreground" Value="#8b949e"/>
+                    <Setter TargetName="ActionsRow" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <Style x:Key="VisibleForLogCenterStyle" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed"/>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                </Trigger>
+                <DataTrigger Binding="{Binding PageTitle}" Value="日志中心">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="VisibleForNotificationCenterStyle" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding PageTitle}" Value="通知中心">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ExportCsvButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding PageTitle}" Value="日志中心">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NotificationCenterButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding PageTitle}" Value="通知中心">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
@@ -532,10 +747,8 @@
             <RowDefinition Height="Auto"/>
             <!-- 2. Tabs (运行日志 / 操作日志) -->
             <RowDefinition Height="Auto"/>
-            <!-- 3. Main DataGrid -->
+            <!-- 3. Main ListBox -->
             <RowDefinition Height="*"/>
-            <!-- 4. Bottom Pagination -->
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- 0. Header -->
@@ -566,161 +779,135 @@
                 </TextBlock>
             </StackPanel>
 
-            <!-- Right: Export Action -->
-            <Button Grid.Column="1" Command="{Binding ExportCsvCommand}"
-                    Style="{StaticResource HeaderButtonStyle}" Padding="16,0" Height="40">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="DownloadOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#00D2E6"/>
-                    <TextBlock Text="{root:Loc 导出 CSV}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
+            <!-- Right: Actions -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                <!-- 全部标记为已读 -->
+                <Button Command="{Binding MarkAllAsReadCommand}"
+                        Style="{StaticResource NotificationCenterButtonStyle}" Padding="16,0" Height="40">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="CheckAll" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#00d2fc"/>
+                        <TextBlock Text="{root:Loc 全部标记已读}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <!-- 清空所有 -->
+                <Button Command="{Binding ClearAllCommand}"
+                        Style="{StaticResource NotificationCenterButtonStyle}" Padding="16,0" Height="40" Margin="12,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="TrashCanOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#ff4d4f"/>
+                        <TextBlock Text="{root:Loc 清空所有}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <!-- 导出 CSV -->
+                <Button Command="{Binding ExportCsvCommand}"
+                        Style="{StaticResource ExportCsvButtonStyle}" Padding="16,0" Height="40" Margin="12,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="DownloadOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#00d2fc"/>
+                        <TextBlock Text="{root:Loc 导出 CSV}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <!-- 关闭/返回按钮 -->
+                <Button Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                        CommandParameter="Notification"
+                        Style="{StaticResource NotificationCenterButtonStyle}" Padding="16,0" Height="40" Margin="12,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#FFFFFF"/>
+                        <TextBlock Text="{root:Loc 关闭}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <!-- 1. Filters -->
-        <Grid Grid.Row="1" Margin="0,0,0,20">
+        <Grid Grid.Row="1" Margin="0,0,0,20" WindowChrome.IsHitTestVisibleInChrome="True">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/> <!-- 时间范围 -->
-                <ColumnDefinition Width="24"/>
-                <ColumnDefinition Width="Auto"/> <!-- 来源/机台 -->
-                <ColumnDefinition Width="24"/>
-                <ColumnDefinition Width="Auto"/> <!-- 级别筛选 -->
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="260"/> <!-- 搜索框 -->
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- 1.1 时间范围 -->
+            <!-- Left: Filters Stack -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="{root:Loc 时间范围}" Foreground="#B0B8CC" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                <Border Background="#1B1C28" BorderBrush="#333645" BorderThickness="1" CornerRadius="4" Padding="8,0" Height="36">
-                    <DatePicker x:Name="StartDatePicker"
-                                SelectedDate="{Binding StartDate}"
-                                materialDesign:CalendarAssist.IsHeaderVisible="False"
-                                CalendarStyle="{StaticResource DarkCalendarStyle}"
-                                Language="zh-CN"
-                                Foreground="#FFFFFF" FontFamily="Consolas" FontSize="14"
-                                VerticalAlignment="Center" BorderThickness="0" Background="Transparent" Width="110"
-                                Focusable="False"/>
-                </Border>
-                <TextBlock Text="{root:Loc 至}" Foreground="#B0B8CC" FontSize="14" Margin="8,0" VerticalAlignment="Center"/>
-                <Border Background="#1B1C28" BorderBrush="#333645" BorderThickness="1" CornerRadius="4" Padding="8,0" Height="36">
-                    <DatePicker x:Name="EndDatePicker"
-                                SelectedDate="{Binding EndDate}"
-                                materialDesign:CalendarAssist.IsHeaderVisible="False"
-                                CalendarStyle="{StaticResource DarkCalendarStyle}"
-                                Foreground="#FFFFFF" FontFamily="Consolas" FontSize="14"
-                                VerticalAlignment="Center" BorderThickness="0" Background="Transparent" Width="110"
-                                Focusable="False"/>
-                </Border>
+                <!-- 1.1 时间范围 -->
+                <StackPanel Orientation="Horizontal" Style="{StaticResource VisibleForLogCenterStyle}" Margin="0,0,24,0" VerticalAlignment="Center">
+                    <TextBlock Text="{root:Loc 时间范围}" Foreground="#a3b1cc" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <Border Background="#111622" BorderBrush="#222f3e" BorderThickness="1" CornerRadius="4" Padding="8,0" Height="36">
+                        <DatePicker x:Name="StartDatePicker"
+                                    SelectedDate="{Binding StartDate}"
+                                    materialDesign:CalendarAssist.IsHeaderVisible="False"
+                                    CalendarStyle="{StaticResource DarkCalendarStyle}"
+                                    Language="zh-CN"
+                                    Foreground="#FFFFFF" FontFamily="Consolas" FontSize="14"
+                                    VerticalAlignment="Center" BorderThickness="0" Background="Transparent" Width="110"
+                                    Focusable="False"/>
+                    </Border>
+                    <TextBlock Text="{root:Loc 至}" Foreground="#a3b1cc" FontSize="14" Margin="8,0" VerticalAlignment="Center"/>
+                    <Border Background="#111622" BorderBrush="#222f3e" BorderThickness="1" CornerRadius="4" Padding="8,0" Height="36">
+                        <DatePicker x:Name="EndDatePicker"
+                                    SelectedDate="{Binding EndDate}"
+                                    materialDesign:CalendarAssist.IsHeaderVisible="False"
+                                    CalendarStyle="{StaticResource DarkCalendarStyle}"
+                                    Foreground="#FFFFFF" FontFamily="Consolas" FontSize="14"
+                                    VerticalAlignment="Center" BorderThickness="0" Background="Transparent" Width="110"
+                                    Focusable="False"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- 1.2 来源/机台 -->
+                <StackPanel Orientation="Horizontal" Style="{StaticResource VisibleForLogCenterStyle}" Margin="0,0,24,0" VerticalAlignment="Center">
+                    <TextBlock Text="{root:Loc 来源/机台}" Foreground="#a3b1cc" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <ComboBox Width="130" Height="36"
+                              ItemsSource="{Binding Sources}"
+                              SelectedItem="{Binding SelectedSource, Mode=TwoWay}"
+                              Background="#111622"
+                              BorderBrush="#222f3e"
+                              Foreground="#FFFFFF"
+                              FontSize="14"
+                              VerticalAlignment="Center"
+                              HorizontalContentAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Padding="0">
+                        <ComboBox.Resources>
+                            <SolidColorBrush x:Key="MaterialDesignPaper" Color="#111622"/>
+                            <SolidColorBrush x:Key="MaterialDesignBody" Color="#FFFFFF"/>
+                        </ComboBox.Resources>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- 1.3 级别筛选 -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{root:Loc 级别}" Foreground="#a3b1cc" FontSize="14" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                    
+                    <RadioButton Style="{StaticResource AllCapsuleTabStyle}"
+                                 IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=全部, Mode=TwoWay}"/>
+
+                    <RadioButton Style="{StaticResource AlarmCapsuleTabStyle}"
+                                 IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=报警, Mode=TwoWay}"/>
+
+                    <RadioButton Style="{StaticResource MaintenanceCapsuleTabStyle}"
+                                 IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=维护, Mode=TwoWay}"/>
+
+                    <RadioButton Style="{StaticResource SystemCapsuleTabStyle}"
+                                 IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=系统, Mode=TwoWay}"/>
+                </StackPanel>
             </StackPanel>
 
-            <!-- 1.2 来源/机台 -->
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="{root:Loc 来源/机台}" Foreground="#B0B8CC" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                <ComboBox Width="130" Height="36"
-                          ItemsSource="{Binding Sources}"
-                          SelectedItem="{Binding SelectedSource, Mode=TwoWay}"
-                          Background="#1B1C28"
-                          BorderBrush="#333645"
+            <!-- Right: Search Box -->
+            <Grid Grid.Column="1" Style="{StaticResource VisibleForLogCenterStyle}" Width="260" VerticalAlignment="Center">
+                <TextBox Height="36"
+                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                          Background="#111622"
+                          BorderBrush="#222f3e"
+                          BorderThickness="1"
                           Foreground="#FFFFFF"
                           FontSize="14"
-                          VerticalAlignment="Center"
-                          HorizontalContentAlignment="Center"
+                          Padding="30,0,10,0"
                           VerticalContentAlignment="Center"
-                          Padding="0">
-                    <ComboBox.Resources>
-                        <SolidColorBrush x:Key="MaterialDesignPaper" Color="#1B1C28"/>
-                        <SolidColorBrush x:Key="MaterialDesignBody" Color="#FFFFFF"/>
-                    </ComboBox.Resources>
-                </ComboBox>
-            </StackPanel>
-
-            <!-- 1.3 级别筛选 -->
-            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="{root:Loc 级别}" Foreground="#B0B8CC" FontSize="14" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                
-                <RadioButton Content="ALL"
-                             Style="{StaticResource LevelFilterButtonStyle}"
-                             IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=全部, Mode=TwoWay}">
-                    <RadioButton.Resources>
-                        <Style TargetType="RadioButton" BasedOn="{StaticResource LevelFilterButtonStyle}">
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Background" Value="#00D2E6"/>
-                                    <Setter Property="BorderBrush" Value="#00D2E6"/>
-                                    <Setter Property="Foreground" Value="#090E12"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Resources>
-                </RadioButton>
-
-                <RadioButton Content="INFO"
-                             Style="{StaticResource LevelFilterButtonStyle}"
-                             IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=系统, Mode=TwoWay}">
-                    <RadioButton.Resources>
-                        <Style TargetType="RadioButton" BasedOn="{StaticResource LevelFilterButtonStyle}">
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Background" Value="#2B2D38"/>
-                                    <Setter Property="BorderBrush" Value="#5C6070"/>
-                                    <Setter Property="Foreground" Value="#B8C4CC"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Resources>
-                </RadioButton>
-
-                <RadioButton Content="WARN"
-                             Style="{StaticResource LevelFilterButtonStyle}"
-                             IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=维护, Mode=TwoWay}">
-                    <RadioButton.Resources>
-                        <Style TargetType="RadioButton" BasedOn="{StaticResource LevelFilterButtonStyle}">
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Background" Value="#2A2114"/>
-                                    <Setter Property="BorderBrush" Value="#F39C12"/>
-                                    <Setter Property="Foreground" Value="#F39C12"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Resources>
-                </RadioButton>
-
-                <RadioButton Content="ERROR"
-                             Style="{StaticResource LevelFilterButtonStyle}"
-                             IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=报警, Mode=TwoWay}">
-                    <RadioButton.Resources>
-                        <Style TargetType="RadioButton" BasedOn="{StaticResource LevelFilterButtonStyle}">
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Background" Value="#2A1418"/>
-                                    <Setter Property="BorderBrush" Value="#F74C5B"/>
-                                    <Setter Property="Foreground" Value="#F74C5B"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </RadioButton.Resources>
-                </RadioButton>
-            </StackPanel>
-
-            <!-- 1.4 搜索框 -->
-            <Grid Grid.Column="6" VerticalAlignment="Center">
-                <TextBox Height="36"
-                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         Background="#1B1C28"
-                         BorderBrush="#333645"
-                         BorderThickness="1"
-                         Foreground="#FFFFFF"
-                         FontSize="14"
-                         Padding="30,0,10,0"
-                         VerticalContentAlignment="Center"
-                         materialDesign:HintAssist.Hint="{root:Loc 搜索事件消息...}"
-                         materialDesign:HintAssist.Foreground="#5C6070"
-                         materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                          materialDesign:HintAssist.Hint="{root:Loc 搜索事件消息...}"
+                          materialDesign:HintAssist.Foreground="#5c7080"
+                          materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
                 <materialDesign:PackIcon Kind="Magnify"
                                          Width="16"
                                          Height="16"
-                                         Foreground="#5C6070"
+                                         Foreground="#5c7080"
                                          HorizontalAlignment="Left"
                                          VerticalAlignment="Center"
                                          Margin="10,0,0,0"/>
@@ -728,229 +915,27 @@
         </Grid>
 
         <!-- 2. Tabs -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
+        <StackPanel Grid.Row="2" Style="{StaticResource VisibleForLogCenterStyle}" Orientation="Horizontal" Margin="0,0,0,12">
             <RadioButton Content="{root:Loc 运行日志}"
-                         Style="{StaticResource LogTabButtonStyle}"
-                         FontSize="15"
-                         IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=运行日志, Mode=TwoWay}"/>
+                          Style="{StaticResource LogTabButtonStyle}"
+                          FontSize="15"
+                          IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=运行日志, Mode=TwoWay}"/>
             <RadioButton Content="{root:Loc 操作日志}"
-                         Style="{StaticResource LogTabButtonStyle}"
-                         FontSize="15"
-                         IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=操作日志, Mode=TwoWay}"/>
+                          Style="{StaticResource LogTabButtonStyle}"
+                          FontSize="15"
+                          IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=操作日志, Mode=TwoWay}"/>
         </StackPanel>
 
-        <!-- 3. Main DataGrid -->
-        <DataGrid x:Name="LogGrid" Grid.Row="3"
-                  ItemsSource="{Binding Notifications}"
-                  AutoGenerateColumns="False"
-                  HeadersVisibility="Column"
-                  Background="#13141E"
-                  BorderThickness="1"
-                  BorderBrush="#1A1D2A"
-                  GridLinesVisibility="Horizontal"
-                  HorizontalGridLinesBrush="#191C28"
-                  IsReadOnly="True"
-                  SelectionMode="Single"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserResizeRows="False"
-                  CanUserReorderColumns="False"
-                  FontFamily="Segoe UI"
-                  FontSize="15"
-                  RowHeight="48"
-                  ColumnHeaderHeight="40"
-                  VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled"
-                  SelectionUnit="FullRow">
-            
-            <DataGrid.ColumnHeaderStyle>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="Background" Value="#171A24"/>
-                    <Setter Property="Foreground" Value="#8A92A6"/>
-                    <Setter Property="FontFamily" Value="Segoe UI"/>
-                    <Setter Property="FontWeight" Value="SemiBold"/>
-                    <Setter Property="FontSize" Value="13"/>
-                    <Setter Property="Padding" Value="20,0"/>
-                    <Setter Property="Height" Value="40"/>
-                    <Setter Property="BorderBrush" Value="#1E2130"/>
-                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                    <Setter Property="VerticalContentAlignment" Value="Center"/>
-                </Style>
-            </DataGrid.ColumnHeaderStyle>
-
-            <DataGrid.CellStyle>
-                <Style TargetType="DataGridCell">
-                    <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="BorderBrush" Value="Transparent"/>
-                    <Setter Property="BorderThickness" Value="0"/>
-                    <Setter Property="Padding" Value="20,0"/>
-                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                    <Setter Property="VerticalContentAlignment" Value="Center"/>
-                </Style>
-            </DataGrid.CellStyle>
-
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
-                    <!-- INFO: 标准暗底 -->
-                    <Setter Property="Background" Value="#13141E"/>
-                    <Setter Property="Foreground" Value="#E8EDF2"/>
-                    <Setter Property="FontFamily" Value="Segoe UI"/>
-                    <Setter Property="FontSize" Value="15"/>
-                    <Setter Property="BorderBrush" Value="#1A1D2A"/>
-                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                    <Style.Triggers>
-                        <!-- ERROR 行: 极淡暗红底，约 10% 不透明度 wash -->
-                        <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
-                            <Setter Property="Background" Value="#16200A08"/>
-                            <Setter Property="Foreground" Value="#FFD6D6"/>
-                        </DataTrigger>
-                        <!-- WARN 行: 极淡琥珀底 wash -->
-                        <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
-                            <Setter Property="Background" Value="#16201108"/>
-                            <Setter Property="Foreground" Value="#FFEAC4"/>
-                        </DataTrigger>
-                        <!-- 常规 INFO 行 -->
-                        <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
-                            <Setter Property="Background" Value="#13141E"/>
-                            <Setter Property="Foreground" Value="#E8EDF2"/>
-                        </DataTrigger>
-                        <!-- 悬停高亮 -->
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#252736"/>
-                        </Trigger>
-                        <!-- 选中行 -->
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="#2D324A"/>
-                            <Setter Property="Foreground" Value="#FFFFFF"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.RowStyle>
-
-            <DataGrid.Columns>
-                <!-- 时间戳: Consolas 等宽字体确保垂直对齐 -->
-                <DataGridTemplateColumn Header="{root:Loc 时间}" Width="210">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Timestamp}"
-                                       FontFamily="Consolas"
-                                       FontSize="14"
-                                       Foreground="#B0B8CC"
-                                       VerticalAlignment="Center"
-                                       Margin="0"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- 级别 badge -->
-                <DataGridTemplateColumn Header="{root:Loc 级别}" Width="90">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Border x:Name="LevelBadge"
-                                    Width="62"
-                                    Height="24"
-                                    CornerRadius="3"
-                                    BorderThickness="0"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center">
-                                <TextBlock x:Name="LevelText"
-                                           Text="INFO"
-                                           FontFamily="Segoe UI"
-                                           FontSize="11"
-                                           FontWeight="Bold"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-                            <DataTemplate.Triggers>
-                                <!-- INFO: 暗灰底 + 亮灰字 -->
-                                <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
-                                    <Setter TargetName="LevelBadge" Property="Background" Value="#33384D"/>
-                                    <Setter TargetName="LevelText" Property="Text" Value="INFO"/>
-                                    <Setter TargetName="LevelText" Property="Foreground" Value="#D0D6E6"/>
-                                </DataTrigger>
-                                <!-- WARN: 纯实色琥珀底 + 深色字 -->
-                                <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
-                                    <Setter TargetName="LevelBadge" Property="Background" Value="#F5A623"/>
-                                    <Setter TargetName="LevelText" Property="Text" Value="WARN"/>
-                                    <Setter TargetName="LevelText" Property="Foreground" Value="#1A1200"/>
-                                </DataTrigger>
-                                <!-- ERROR: 纯实色红底 + 白字 -->
-                                <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
-                                    <Setter TargetName="LevelBadge" Property="Background" Value="#FF4D4D"/>
-                                    <Setter TargetName="LevelText" Property="Text" Value="ERROR"/>
-                                    <Setter TargetName="LevelText" Property="Foreground" Value="#FFFFFF"/>
-                                </DataTrigger>
-                            </DataTemplate.Triggers>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- 来源/机台 -->
-                <DataGridTemplateColumn Header="{root:Loc 来源/机台}" Width="150">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Source}"
-                                       FontFamily="Segoe UI"
-                                       FontSize="15"
-                                       FontWeight="Medium"
-                                       Foreground="#C8D0E0"
-                                       VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- 事件消息 -->
-                <DataGridTemplateColumn Header="{root:Loc 消息内容}" Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Content}"
-                                       FontFamily="Segoe UI"
-                                       FontSize="15"
-                                       Foreground="#FFFFFF"
-                                       TextTrimming="CharacterEllipsis"
-                                       VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-
-        <!-- 4. Bottom Pagination -->
-        <Grid Grid.Row="4" Margin="0,16,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- 左下角统计 -->
-            <TextBlock Foreground="#5C6070" FontSize="12" xml:space="preserve" VerticalAlignment="Center"><Run Text="{root:Loc 显示第}"/> <Run Text="{Binding CurrentPageStart, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 到}"/> <Run Text="{Binding CurrentPageEnd, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 条，共}"/> <Run Text="{Binding TotalRecords, Mode=OneWay}" Foreground="#8A8D99"/> <Run Text="{root:Loc 条记录}"/></TextBlock>
-            
-            <!-- 右下角分页控制 -->
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-                <!-- 上一页 -->
-                <Button Command="{Binding PreviousPageCommand}" Style="{StaticResource PaginationButtonStyle}" Width="64" Height="28">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ChevronLeft" Width="14" Height="14" VerticalAlignment="Center"/>
-                        <TextBlock Text="{root:Loc 上一页}" FontSize="11" Margin="2,0,0,0" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-                <!-- 页码 -->
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0">
-                    <TextBlock Text="{root:Loc 第}" Foreground="#8A8D99" FontSize="12" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding CurrentPage}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12" Margin="4,0,4,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="{root:Loc '页 / 共'}" Foreground="#8A8D99" FontSize="12" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding TotalPages}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12" Margin="4,0,4,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="{root:Loc 页}" Foreground="#8A8D99" FontSize="12" VerticalAlignment="Center"/>
-                </StackPanel>
-                <!-- 下一页 -->
-                <Button Command="{Binding NextPageCommand}" Style="{StaticResource PaginationButtonStyle}" Width="64" Height="28">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{root:Loc 下一页}" FontSize="11" Margin="0,0,2,0" VerticalAlignment="Center"/>
-                        <materialDesign:PackIcon Kind="ChevronRight" Width="14" Height="14" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-        </Grid>
+        <!-- 3. Main ListBox -->
+        <ListBox x:Name="NotificationListBox"
+                 Grid.Row="3"
+                 ItemsSource="{Binding Notifications}"
+                 ItemTemplate="{StaticResource NotificationCardTemplate}"
+                 ItemContainerStyle="{StaticResource CardListBoxItemStyle}"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 HorizontalContentAlignment="Stretch"/>
     </Grid>
 </UserControl>

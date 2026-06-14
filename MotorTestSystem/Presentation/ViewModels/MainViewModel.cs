@@ -95,7 +95,9 @@ namespace MotorTestSystem.ViewModels
                 HeaderStations.Add(station);
             }
 
-            _currentView = MonitorVM;
+            NotificationVM.PageTitle = "通知中心";
+            NotificationVM.PageIcon = "BellOutline";
+            CurrentView = MonitorVM;
 
             _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
 
@@ -157,6 +159,13 @@ namespace MotorTestSystem.ViewModels
             else CurrentView = MonitorVM; // 兜底
         }
 
+        public bool IsNotificationCenterActive => CurrentView == NotificationVM && NotificationVM?.PageTitle == "通知中心";
+
+        partial void OnCurrentViewChanged(ViewModelBase value)
+        {
+            OnPropertyChanged(nameof(IsNotificationCenterActive));
+        }
+
         private ViewModelBase? _previousViewBeforeNotification;
 
         [RelayCommand]
@@ -168,6 +177,7 @@ namespace MotorTestSystem.ViewModels
                 NotificationVM.PageTitle = "日志中心";
                 NotificationVM.PageIcon = "FolderOpenOutline";
                 CurrentView = NotificationVM;
+                OnPropertyChanged(nameof(IsNotificationCenterActive));
                 return;
             }
 
@@ -187,6 +197,7 @@ namespace MotorTestSystem.ViewModels
                     CurrentView = null!;
                     CurrentView = NotificationVM;
                 }
+                OnPropertyChanged(nameof(IsNotificationCenterActive));
                 return;
             }
 
