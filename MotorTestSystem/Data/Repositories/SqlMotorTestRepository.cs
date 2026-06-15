@@ -56,6 +56,64 @@ namespace MotorTestSystem.Services
             }
         }
 
+        public async Task BulkUpsertAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(results);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var list = results.Where(r => r != null && !string.IsNullOrWhiteSpace(r.Barcode)).ToList();
+            if (list.Count == 0) return;
+
+            var barcodes = list.Select(r => r.Barcode.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+            await _ctx.Db.Ado.UseTranAsync(async () =>
+            {
+                var existingRecords = await _ctx.Db.Queryable<MotorTestRecordEntity>()
+                    .Where(r => barcodes.Contains(r.Barcode))
+                    .ToListAsync(cancellationToken);
+
+                var recordMap = existingRecords.ToDictionary(r => r.Barcode, StringComparer.OrdinalIgnoreCase);
+                var toInsert = new List<MotorTestRecordEntity>();
+                var toUpdate = new List<MotorTestRecordEntity>();
+
+                foreach (var data in list)
+                {
+                    string barcode = data.Barcode.Trim();
+                    if (!recordMap.TryGetValue(barcode, out var record))
+                    {
+                        record = new MotorTestRecordEntity
+                        {
+                            Barcode = barcode,
+                            TestTime = data.CollectedAt,
+                            FinalResult = "NG"
+                        };
+                        recordMap[barcode] = record;
+                        toInsert.Add(record);
+                    }
+                    else
+                    {
+                        if (!toUpdate.Contains(record) && !toInsert.Contains(record))
+                        {
+                            toUpdate.Add(record);
+                        }
+                    }
+
+                    ApplyStage(record, data);
+                    record.TestTime = data.CollectedAt;
+                    record.FinalResult = CalculateFinalResult(record);
+                }
+
+                if (toInsert.Count > 0)
+                {
+                    await _ctx.Db.Insertable(toInsert).ExecuteCommandAsync(cancellationToken);
+                }
+                if (toUpdate.Count > 0)
+                {
+                    await _ctx.Db.Updateable(toUpdate).ExecuteCommandAsync(cancellationToken);
+                }
+            });
+        }
+
         public async Task<IReadOnlyList<MotorTestResult>> QueryAsync(MotorTestQuery query, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(query);

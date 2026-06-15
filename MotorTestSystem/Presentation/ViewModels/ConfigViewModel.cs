@@ -31,7 +31,7 @@ namespace MotorTestSystem.ViewModels
         };
 
         public ConfigViewModel()
-            : this(BackendRuntime.Shared)
+            : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult())
         {
         }
 

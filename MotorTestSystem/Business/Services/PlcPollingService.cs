@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -15,7 +16,8 @@ namespace MotorTestSystem.Services
         private readonly List<IPlcClient> _clients = new();
         private readonly List<Task> _pollingTasks = new();
         private CancellationTokenSource? _cancellationTokenSource;
-        private readonly Dictionary<string, int> _consecutiveFailures = new();
+        private readonly ConcurrentDictionary<string, int> _consecutiveFailures = new();
+        private readonly EventChannelService? _eventChannel;
         private static readonly TimeSpan MinRetryDelay = TimeSpan.FromSeconds(1);
         private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(60);
 
@@ -23,11 +25,13 @@ namespace MotorTestSystem.Services
             IEnumerable<StationConfig> stationConfigs,
             IMotorTestRepository repository,
             IPlcClientFactory clientFactory,
-            TimeSpan? pollInterval = null)
+            TimeSpan? pollInterval = null,
+            EventChannelService? eventChannel = null)
         {
             _repository = repository;
             _clientFactory = clientFactory;
             _pollInterval = pollInterval ?? TimeSpan.FromSeconds(1);
+            _eventChannel = eventChannel;
             _clients.AddRange(stationConfigs.Select(_clientFactory.Create));
         }
 
@@ -44,7 +48,7 @@ namespace MotorTestSystem.Services
             _cancellationTokenSource = new CancellationTokenSource();
             foreach (var client in _clients)
             {
-                _pollingTasks.Add(Task.Run(() => PollStationAsync(client, _cancellationTokenSource.Token)));
+                _pollingTasks.Add(PollStationAsync(client, _cancellationTokenSource.Token));
             }
         }
 
@@ -128,9 +132,16 @@ namespace MotorTestSystem.Services
                     var snapshot = await client.ReadSnapshotAsync(cancellationToken);
                     if (snapshot.CompletionSignal && snapshot.CompletedData != null)
                     {
-                        await _repository.UpsertStageResultAsync(snapshot.CompletedData, cancellationToken);
+                        if (_eventChannel != null)
+                        {
+                            await _eventChannel.WriteWriter.WriteAsync(snapshot.CompletedData, cancellationToken);
+                        }
+                        else
+                        {
+                            await _repository.UpsertStageResultAsync(snapshot.CompletedData, cancellationToken);
+                        }
                         await client.ResetCompletionSignalAsync(cancellationToken);
-                        LogReceived?.Invoke(this, $"{stationId} saved {snapshot.CompletedData.Barcode} {snapshot.CompletedData.Stage} {snapshot.CompletedData.Result}");
+                        LogReceived?.Invoke(this, $"{stationId} queued {snapshot.CompletedData.Barcode} {snapshot.CompletedData.Stage} {snapshot.CompletedData.Result}");
                     }
 
                     // 连接 + 读取成功，重置失败计数
@@ -161,14 +172,12 @@ namespace MotorTestSystem.Services
 
         private int IncrementFailure(string stationId)
         {
-            if (!_consecutiveFailures.ContainsKey(stationId))
-                _consecutiveFailures[stationId] = 0;
-            return ++_consecutiveFailures[stationId];
+            return _consecutiveFailures.AddOrUpdate(stationId, 1, (key, old) => old + 1);
         }
 
         private void ResetFailure(string stationId)
         {
-            _consecutiveFailures.Remove(stationId);
+            _consecutiveFailures.TryRemove(stationId, out _);
         }
 
         /// <summary>
@@ -185,6 +194,7 @@ namespace MotorTestSystem.Services
         private void Publish(StationSnapshot snapshot)
         {
             SnapshotReceived?.Invoke(this, snapshot);
+            _eventChannel?.SnapshotWriter.TryWrite(snapshot);
         }
     }
 }

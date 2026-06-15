@@ -47,7 +47,11 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        BackendRuntime.Shared.Dispose();
+        var task = BackendRuntime.GetSharedAsync();
+        if (task.IsCompleted)
+        {
+            task.Result?.Dispose();
+        }
         base.OnExit(e);
     }
 

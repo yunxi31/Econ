@@ -12,7 +12,9 @@ namespace MotorTestSystem.Services
         private static readonly Random _rng = new(42); // 固定种子保证可复现 — 必须在 Shared 之前
         private readonly INotificationService _notificationService;
 
-        public static BackendRuntime Shared { get; } = CreateDefault();
+        private static readonly Lazy<Task<BackendRuntime>> _sharedInstanceTask = new Lazy<Task<BackendRuntime>>(() => Task.Run(CreateDefaultAsync));
+
+        public static Task<BackendRuntime> GetSharedAsync() => _sharedInstanceTask.Value;
 
         /// <summary>SqlSugar 数据库上下文（公开以供其他服务直接访问）</summary>
         public SqlSugarDbContext DbContext { get; }
@@ -25,6 +27,7 @@ namespace MotorTestSystem.Services
             IUserService userService,
             IAuthService authService,
             INotificationService notificationService,
+            EventChannelService eventChannel,
             HikvisionSdkService? hikvisionService = null)
         {
             StationConfigs = stationConfigs;
@@ -33,7 +36,9 @@ namespace MotorTestSystem.Services
             UserService = userService;
             AuthService = authService;
             _notificationService = notificationService;
-            PollingService = new PlcPollingService(StationConfigs, Repository, plcClientFactory);
+            EventChannel = eventChannel;
+            PollingService = new PlcPollingService(StationConfigs, Repository, plcClientFactory, eventChannel: eventChannel);
+            BatchWriter = new BatchWriteService(Repository, eventChannel.WriteReader);
             HikvisionService = hikvisionService ?? new HikvisionSdkService();
 
             // 订阅 PLC 轮询事件，自动生成实时通知
@@ -48,6 +53,8 @@ namespace MotorTestSystem.Services
         public PlcPollingService PollingService { get; }
         public HikvisionSdkService HikvisionService { get; }
         public INotificationService NotificationService => _notificationService;
+        public EventChannelService EventChannel { get; }
+        public BatchWriteService BatchWriter { get; }
 
         // ---- 工位在线状态跟踪（用于检测离线事件） ----
         private readonly System.Collections.Generic.Dictionary<string, bool> _stationOnlineState = new();
@@ -144,13 +151,13 @@ namespace MotorTestSystem.Services
             }
         }
 
-        private static BackendRuntime CreateDefault()
+        private static async Task<BackendRuntime> CreateDefaultAsync()
         {
             // 1. 初始化 SqlSugar + SQLite 数据库上下文（自动建表 + 种子数据）
             var dbContext = new SqlSugarDbContext();
 
             // 2. 从数据库加载工位配置
-            var configEntities = dbContext.Db.Queryable<StationConfigEntity>().ToList();
+            var configEntities = await dbContext.Db.Queryable<StationConfigEntity>().ToListAsync();
             var configs = new ObservableCollection<StationConfig>(
                 configEntities.Select(ToStationConfigModel));
 
@@ -162,11 +169,13 @@ namespace MotorTestSystem.Services
             var hikvisionService = new HikvisionSdkService();
 
             // 4. 首次运行时播种测试数据（表为空时）
-            // 种子数据写入放在后台线程，避免 UI 线程 SynchronizationContext 死锁
-            System.Threading.Tasks.Task.Run(() => SeedRepositoryIfEmptyAsync(repository, dbContext).GetAwaiter().GetResult()).Wait();
+            await SeedRepositoryIfEmptyAsync(repository, dbContext);
+
+            // 5. 创建 EventChannelService
+            var eventChannel = new EventChannelService();
 
             return new BackendRuntime(configs, dbContext, repository, new PlcClientFactory(useSimulation: false),
-                userService, authService, notificationService, hikvisionService);
+                userService, authService, notificationService, eventChannel, hikvisionService);
         }
 
         /// <summary>
@@ -174,7 +183,7 @@ namespace MotorTestSystem.Services
         /// </summary>
         private static async Task SeedRepositoryIfEmptyAsync(IMotorTestRepository repository, SqlSugarDbContext dbContext)
         {
-            if (dbContext.Db.Queryable<MotorTestRecordEntity>().Any())
+            if (await dbContext.Db.Queryable<MotorTestRecordEntity>().AnyAsync())
                 return; // 已有数据，不重复播种
 
             var now = DateTime.Now;
@@ -401,15 +410,20 @@ namespace MotorTestSystem.Services
             if (_isDisposed) return;
             _isDisposed = true;
 
-            // 停止轮询（含等待任务完成）
-            PollingService.Dispose();
+            // 按照顺序释放资源: BatchWriter → PollingService → EventChannel
+            BatchWriter?.Dispose();
+            PollingService?.Dispose();
+            EventChannel?.Dispose();
 
             // 释放海康 SDK 资源
-            HikvisionService.Dispose();
+            HikvisionService?.Dispose();
 
             // 取消订阅事件（防止静态实例持有引用导致泄漏）
-            PollingService.SnapshotReceived -= OnSnapshotReceivedForNotification;
-            PollingService.LogReceived -= OnLogReceivedForNotification;
+            if (PollingService != null)
+            {
+                PollingService.SnapshotReceived -= OnSnapshotReceivedForNotification;
+                PollingService.LogReceived -= OnLogReceivedForNotification;
+            }
         }
     }
 }

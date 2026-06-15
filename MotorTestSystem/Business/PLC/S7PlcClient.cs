@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MotorTestSystem.Models;
 using S7.Net;
+using S7.Net.Types;
 
 namespace MotorTestSystem.Services
 {
@@ -23,13 +25,19 @@ namespace MotorTestSystem.Services
     /// </summary>
     public sealed class S7PlcClient : IPlcClient
     {
-        private Plc? _plc;
+        private IS7Plc? _plc;
         private readonly SemaphoreSlim _lock = new(1, 1);
         private bool _isDisposed;
+        private readonly Func<CpuType, string, int, short, short, IS7Plc> _plcFactory;
 
-        public S7PlcClient(StationConfig config)
+        public S7PlcClient(StationConfig config) : this(config, (cpu, ip, port, rack, slot) => new S7PlcWrapper(cpu, ip, port, rack, slot))
+        {
+        }
+
+        public S7PlcClient(StationConfig config, Func<CpuType, string, int, short, short, IS7Plc> plcFactory)
         {
             Config = config;
+            _plcFactory = plcFactory;
         }
 
         public StationConfig Config { get; }
@@ -52,10 +60,10 @@ namespace MotorTestSystem.Services
                 CloseConnection();
 
                 var cpuType = ResolveCpuType(Config.PlcModel);
-                _plc = new Plc(cpuType, Config.IpAddress, Config.Port, (short)0, (short)Config.StationId);
+                _plc = _plcFactory(cpuType, Config.IpAddress, Config.Port, (short)0, (short)Config.StationId);
 
                 // 2 秒超时 — S7.Net OpenAsync 不接受 CancellationToken，用 Task.WhenAny 模拟
-                var openTask = _plc.OpenAsync();
+                var openTask = _plc.OpenAsync(cancellationToken);
                 var timeoutTask = Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
                 if (await Task.WhenAny(openTask, timeoutTask) != openTask)
                 {
@@ -104,27 +112,47 @@ namespace MotorTestSystem.Services
             await _lock.WaitAsync(cancellationToken);
             try
             {
-                // 1. 读取完成信号 M100.0
-                var completionObj = await _plc!.ReadAsync(DataType.Memory, 0, 100, VarType.Bit, 1, 0);
-                bool completionSignal = completionObj is bool b && b;
+                // Batch read all items to achieve 1 TCP roundtrip instead of 3
+                var completionItem = new DataItem
+                {
+                    DataType = DataType.Memory,
+                    VarType = VarType.Bit,
+                    DB = 0,
+                    StartByteAdr = 100,
+                    BitAdr = 0,
+                    Count = 1
+                };
+                var wordsItem = new DataItem
+                {
+                    DataType = DataType.DataBlock,
+                    VarType = VarType.Word,
+                    DB = 1,
+                    StartByteAdr = 100,
+                    Count = 4
+                };
+                var barcodeItem = new DataItem
+                {
+                    DataType = DataType.DataBlock,
+                    VarType = VarType.String,
+                    DB = 1,
+                    StartByteAdr = 200,
+                    Count = 20
+                };
+
+                var items = new List<DataItem> { completionItem, wordsItem, barcodeItem };
+                await _plc!.ReadMultipleVarsAsync(items, cancellationToken);
+
+                bool completionSignal = completionItem.Value is bool b && b;
 
                 StageTestData? completedData = null;
                 if (completionSignal)
                 {
-                    // 2. 读取测试数据 DB1.DBW100 起
-                    //    一次性读取 220 字节 (DBW100 ~ DBW209 + 条码区域)
-                    //    条码在 DB1.DBD200，S7 String 格式含 2 字节头 + 最多 254 字节数据
-                    //    为了兼容 S7netPlus 的 ReadClass / ReadString，采用分段读取
-
-                    // 2a. 读数值区域: DB1.DBW100, 共 8 字节 (4 个 Int16)
-                    var rawWords = await _plc.ReadAsync(DataType.DataBlock, 1, 100, VarType.Word, 4);
-
                     short rawCurrent = 0;
                     short speed = 0;
                     short rawLength = 0;
                     short rawDiameter = 0;
 
-                    if (rawWords is ushort[] words && words.Length >= 4)
+                    if (wordsItem.Value is ushort[] words && words.Length >= 4)
                     {
                         rawCurrent = (short)words[0];
                         speed = (short)words[1];
@@ -136,18 +164,7 @@ namespace MotorTestSystem.Services
                     double shaftLength = Math.Round(rawLength / 1000.0, 3);
                     double knurlDiameter = Math.Round(rawDiameter / 1000.0, 3);
 
-                    // 2b. 读条码: DB1.DBD200, S7 String[20]
-                    //     S7 String 头: byte[0]=最大长度, byte[1]=实际长度, 后跟字符
-                    string barcode;
-                    try
-                    {
-                        barcode = (string?)await _plc.ReadAsync(DataType.DataBlock, 1, 200, VarType.String, 20) ?? "UNKNOWN_BARCODE";
-                    }
-                    catch
-                    {
-                        // 降级: 手动读 22 字节并解析
-                        barcode = await ReadBarcodeRawAsync();
-                    }
+                    string barcode = barcodeItem.Value as string ?? "UNKNOWN_BARCODE";
 
                     if (string.IsNullOrWhiteSpace(barcode))
                         barcode = "UNKNOWN_BARCODE";
@@ -167,7 +184,7 @@ namespace MotorTestSystem.Services
                         Barcode = barcode,
                         StationId = Config.Id,
                         Stage = stage,
-                        CollectedAt = DateTime.Now,
+                        CollectedAt = System.DateTime.Now,
                         Result = result
                     };
 
@@ -231,7 +248,7 @@ namespace MotorTestSystem.Services
             try
             {
                 // M100.0 = False
-                await _plc!.WriteAsync(DataType.Memory, 0, 100, false, 0);
+                await _plc!.WriteAsync(DataType.Memory, 0, 100, false, 0, cancellationToken);
             }
             catch
             {
@@ -259,33 +276,6 @@ namespace MotorTestSystem.Services
                 "S7-200" or "S7-200SMART" => CpuType.S7200,
                 _ => CpuType.S71200 // 默认按 S7-1200 处理
             };
-        }
-
-        /// <summary>
-        /// 降级方式读取条码: 手动读取 DB1.DBW200 起始的 22 字节并解析 S7 String 格式
-        /// </summary>
-        private async Task<string> ReadBarcodeRawAsync()
-        {
-            try
-            {
-                // S7 String[20] 在 PLC 中占用 22 字节: byte[0]=maxLen, byte[1]=actualLen, byte[2..21]=chars
-                var rawBytesObj = await _plc!.ReadAsync(DataType.DataBlock, 1, 200, VarType.Byte, 22);
-                var rawBytes = rawBytesObj as byte[];
-
-                if (rawBytes == null || rawBytes.Length < 2)
-                    return "ERR_READ";
-
-                int actualLen = rawBytes[1];
-                if (actualLen <= 0 || actualLen > 20)
-                    return "ERR_LEN";
-
-                string result = Encoding.ASCII.GetString(rawBytes, 2, actualLen).Trim('\0', ' ', '\r', '\n');
-                return string.IsNullOrEmpty(result) ? "UNKNOWN_BARCODE" : result;
-            }
-            catch
-            {
-                return "ERR_READ";
-            }
         }
 
         private static TestStage ResolveStage(string stationId)

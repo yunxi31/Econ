@@ -70,7 +70,7 @@ namespace MotorTestSystem.ViewModels
         public ObservableCollection<StationState> HeaderStations { get; } = new();
 
         public MainViewModel()
-            : this(BackendRuntime.Shared)
+            : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult())
         {
         }
 

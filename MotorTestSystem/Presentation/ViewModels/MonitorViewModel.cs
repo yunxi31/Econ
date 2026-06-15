@@ -19,7 +19,7 @@ namespace MotorTestSystem.ViewModels
         public ObservableCollection<string> SystemLogs { get; } = new();
 
         public MonitorViewModel()
-            : this(BackendRuntime.Shared)
+            : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult())
         {
         }
 

@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "nnUxdN1Z8l0=",
+  "success": true,
+  "projectFilePath": "c:\\Users\\Yunxi\\Desktop\\Econ\\scratch\\inspect_proj\\inspect_proj.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Yunxi\\.nuget\\packages\\s7netplus\\0.20.0\\s7netplus.0.20.0.nupkg.sha512"
+  ],
+  "logs": []
+}

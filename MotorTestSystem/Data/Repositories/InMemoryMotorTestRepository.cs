@@ -39,6 +39,33 @@ namespace MotorTestSystem.Services
             return Task.CompletedTask;
         }
 
+        public Task BulkUpsertAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(results);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            lock (_gate)
+            {
+                foreach (var data in results)
+                {
+                    if (data == null || string.IsNullOrWhiteSpace(data.Barcode)) continue;
+                    
+                    string barcode = data.Barcode.Trim();
+                    if (!_records.TryGetValue(barcode, out var record))
+                    {
+                        record = new MotorTestResult { Barcode = barcode };
+                        _records[barcode] = record;
+                    }
+
+                    ApplyStage(record, data);
+                    record.TestTime = data.CollectedAt;
+                    record.FinalResult = CalculateFinalResult(record);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
         public Task<IReadOnlyList<MotorTestResult>> QueryAsync(MotorTestQuery query, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(query);

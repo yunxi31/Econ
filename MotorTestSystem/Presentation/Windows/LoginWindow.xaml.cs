@@ -16,7 +16,7 @@ namespace MotorTestSystem
         public LoginWindow()
         {
             InitializeComponent();
-            _authService = BackendRuntime.Shared.AuthService;
+            _authService = BackendRuntime.GetSharedAsync().GetAwaiter().GetResult().AuthService;
             UpdateUsernameDefault();
         }
 

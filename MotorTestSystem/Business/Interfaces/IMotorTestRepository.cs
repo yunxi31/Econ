@@ -18,9 +18,11 @@ namespace MotorTestSystem.Services
         /// </summary>
         Task<DefectSummary> GetDefectSummaryAsync(DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// 获取指定时间范围内故障原因排行（Top N）
-        /// </summary>
         Task<IReadOnlyList<FaultRankItem>> GetFaultRankingAsync(DateTime startTime, DateTime endTime, int topN = 5, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 批量更新或插入测试结果
+        /// </summary>
+        Task BulkUpsertAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default);
     }
 }

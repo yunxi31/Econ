@@ -131,9 +131,16 @@ namespace MotorTestSystem.ViewModels
         private const int DailyTarget = 2000;
 
         public DashboardViewModel()
-            : this(BackendRuntime.Shared.Repository, BackendRuntime.Shared)
+            : this(GetRuntime())
         {
         }
+
+        private DashboardViewModel(BackendRuntime runtime)
+            : this(runtime.Repository, runtime)
+        {
+        }
+
+        private static BackendRuntime GetRuntime() => BackendRuntime.GetSharedAsync().GetAwaiter().GetResult();
 
         public DashboardViewModel(IMotorTestRepository repository, BackendRuntime runtime)
         {

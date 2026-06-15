@@ -463,7 +463,7 @@ namespace MotorTestSystem.ViewModels
         private List<MotorTestResult> _cachedResults = new();
 
         public HistoryViewModel()
-            : this(BackendRuntime.Shared.Repository)
+            : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult().Repository)
         {
         }
 

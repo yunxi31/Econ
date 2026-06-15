@@ -108,9 +108,15 @@ namespace MotorTestSystem.ViewModels
         [ObservableProperty]
         private bool _canResetPassword;
 
-        public UserViewModel() : this(BackendRuntime.Shared.UserService, BackendRuntime.Shared.AuthService)
+        public UserViewModel() : this(GetRuntime())
         {
         }
+
+        private UserViewModel(BackendRuntime runtime) : this(runtime.UserService, runtime.AuthService)
+        {
+        }
+
+        private static BackendRuntime GetRuntime() => BackendRuntime.GetSharedAsync().GetAwaiter().GetResult();
 
         public UserViewModel(IUserService userService, IAuthService authService)
         {
