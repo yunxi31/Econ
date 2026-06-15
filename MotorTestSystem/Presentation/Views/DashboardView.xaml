@@ -12,6 +12,7 @@
              d:DesignHeight="700" d:DesignWidth="1400">
     
     <UserControl.Resources>
+        <conv:StringToColorBrushConverter x:Key="StringToColorBrushConverter"/>
         <!-- Global Theme Color Palette -->
         <SolidColorBrush x:Key="PanelBackground" Color="#212431"/>
         <SolidColorBrush x:Key="AccentCyan" Color="#00D2E6"/>
@@ -328,7 +329,7 @@
                                         </TextBlock>
                                         
                                         <!-- 2. Middle ProgressBar -->
-                                        <ProgressBar Grid.Column="1" Value="{Binding Percentage}" Foreground="{Binding ColorBrush}" Style="{StaticResource CapsuleProgressBarStyle}" Margin="10,0,10,0" VerticalAlignment="Center"/>
+                                        <ProgressBar Grid.Column="1" Value="{Binding Percentage}" Foreground="{Binding Color, Converter={StaticResource StringToColorBrushConverter}}" Style="{StaticResource CapsuleProgressBarStyle}" Margin="10,0,10,0" VerticalAlignment="Center"/>
                                         
                                         <!-- 3. Right Percentage -->
                                         <TextBlock Grid.Column="2" Text="{Binding Percentage, StringFormat={}{0}%}" Foreground="White" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>

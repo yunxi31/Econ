@@ -65,6 +65,8 @@ namespace MotorTestSystem.ViewModels
     public partial class HistoryViewModel : ViewModelBase
     {
         private readonly IMotorTestRepository _repository;
+        private readonly IDialogService _dialogService;
+        private readonly IDispatcherService _dispatcherService;
 
         [ObservableProperty]
         private string _searchBarcode = string.Empty;
@@ -463,7 +465,10 @@ namespace MotorTestSystem.ViewModels
         private List<MotorTestResult> _cachedResults = new();
 
         public HistoryViewModel()
-            : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult().Repository)
+            : this(
+                  BackendRuntime.GetSharedAsync().GetAwaiter().GetResult().Repository,
+                  new MotorTestSystem.Presentation.Services.WpfDialogService(),
+                  new MotorTestSystem.Presentation.Services.WpfDispatcherService())
         {
         }
 
@@ -481,8 +486,21 @@ namespace MotorTestSystem.ViewModels
         }
 
         public HistoryViewModel(IMotorTestRepository repository)
+            : this(
+                  repository,
+                  new MotorTestSystem.Presentation.Services.WpfDialogService(),
+                  new MotorTestSystem.Presentation.Services.WpfDispatcherService())
+        {
+        }
+
+        public HistoryViewModel(
+            IMotorTestRepository repository,
+            IDialogService dialogService,
+            IDispatcherService dispatcherService)
         {
             _repository = repository;
+            _dialogService = dialogService;
+            _dispatcherService = dispatcherService;
         }
 
         partial void OnCurrentPageChanged(int value)
@@ -595,11 +613,11 @@ namespace MotorTestSystem.ViewModels
         }
 
         [RelayCommand]
-        private void Export()
+        private async Task ExportAsync()
         {
             if (_cachedResults == null || _cachedResults.Count == 0)
             {
-                ModernMessageBox.Show("当前没有符合条件的测试数据可供导出！", "导出提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                await _dialogService.ShowMessageAsync("当前没有符合条件的测试数据可供导出！", "导出提示", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -642,11 +660,11 @@ namespace MotorTestSystem.ViewModels
                          r.LoadSpeedText));
                 }
 
-                ModernMessageBox.Show($"成功导出 {allModels.Count} 条记录至桌面:\n{exportPath}", "数据导出成功", MessageBoxButton.OK, (MessageBoxImage)99);
+                await _dialogService.ShowMessageAsync($"成功导出 {allModels.Count} 条记录至桌面:\n{exportPath}", "数据导出成功", MessageBoxButton.OK, (MessageBoxImage)99);
             }
             catch (Exception ex)
             {
-                ModernMessageBox.Show($"导出数据失败: {ex.Message}", "导出错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                await _dialogService.ShowMessageAsync($"导出数据失败: {ex.Message}", "导出错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -656,72 +674,28 @@ namespace MotorTestSystem.ViewModels
         {
             if (SelectedMotor == null) return;
 
-            var printDialog = new System.Windows.Controls.PrintDialog();
-            if (printDialog.ShowDialog() != true) return;
-
             IsPrinting = true;
             PrintStatus = "正在准备追溯单...";
 
             try
             {
-                // 1. 在 UI 线程构建 FlowDocument（WPF 要求）
                 var doc = TraceDocumentBuilder.Build(SelectedMotor);
-                var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
-
-                // 2. 在 UI 线程预分页（避免后台分页跨线程问题）
-                PrintStatus = "正在分页...";
-                paginator.ComputePageCount();
-
-                // 3. 获取异步打印写入器（静态方法）
-                var writer = System.Printing.PrintQueue.CreateXpsDocumentWriter(printDialog.PrintQueue);
                 PrintStatus = "正在发送至打印机...";
 
-                // 4. 异步写入 + 超时控制
-                var tcs = new TaskCompletionSource<bool>();
+                bool success = false;
+                // 在 UI 线程上显示打印对话框并打印（WPF PrintDialog 要求 STA 线程）
+                success = _dialogService.ShowPrintDialog(doc);
 
-                void OnWritingCompleted(object? s, AsyncCompletedEventArgs e)
+                if (success)
                 {
-                    writer.WritingCompleted -= OnWritingCompleted;
-                    if (e.Error != null)
-                        tcs.TrySetException(e.Error);
-                    else if (e.Cancelled)
-                        tcs.TrySetCanceled();
-                    else
-                        tcs.TrySetResult(true);
+                    await _dialogService.ShowMessageAsync(
+                        $"电机 [{SelectedMotor.Barcode}] 的追溯单已发送至打印机。",
+                        "打印成功", MessageBoxButton.OK, (MessageBoxImage)99);
                 }
-
-                writer.WritingCompleted += OnWritingCompleted;
-                writer.WriteAsync(paginator, $"电机追溯单 - {SelectedMotor.Barcode}");
-
-                // 30 秒超时自动取消
-                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                using var timeoutReg = timeoutCts.Token.Register(() =>
-                {
-                    writer.CancelAsync();
-                    tcs.TrySetCanceled();
-                });
-
-                // 同时响应外部取消（如用户关闭页面）
-                using var externalReg = cancellationToken.Register(() =>
-                {
-                    writer.CancelAsync();
-                    tcs.TrySetCanceled();
-                });
-
-                await tcs.Task;
-
-                ModernMessageBox.Show(
-                    $"电机 [{SelectedMotor.Barcode}] 的追溯单已发送至打印机。",
-                    "打印成功", MessageBoxButton.OK, (MessageBoxImage)99);
-            }
-            catch (OperationCanceledException)
-            {
-                ModernMessageBox.Show("打印超时已取消，请检查打印机连接状态后重试。",
-                    "打印取消", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch (Exception ex)
             {
-                ModernMessageBox.Show($"打印失败: {ex.Message}", "打印错误",
+                await _dialogService.ShowMessageAsync($"打印失败: {ex.Message}", "打印错误",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -732,42 +706,37 @@ namespace MotorTestSystem.ViewModels
         }
 
         [RelayCommand]
-        private void ViewReport()
+        private async Task ViewReportAsync()
         {
             if (SelectedMotor == null) return;
 
             try
             {
-                var reportWindow = new MotorReportWindow(SelectedMotor);
-                reportWindow.Owner = Application.Current.MainWindow;
-
-                // 传入当前波形图数据到报告窗口
-                reportWindow.SetWaveformData(
+                _dialogService.ShowReportWindow(
+                    SelectedMotor,
                     NoLoadWaveformSeries, NoiseWaveformSeries,
                     WaveformXAxes, NoLoadWaveformYAxes, NoiseWaveformYAxes,
                     WaveformTooltipBgPaint, WaveformTooltipTextPaint);
-
-                reportWindow.ShowDialog();
             }
             catch (Exception ex)
             {
-                ModernMessageBox.Show($"打开报告失败: {ex.Message}", "报告错误",
+                await _dialogService.ShowMessageAsync($"打开报告失败: {ex.Message}", "报告错误",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         [RelayCommand]
-        private void CopyBarcode(string barcode)
+        private async Task CopyBarcodeAsync(string barcode)
         {
             if (!string.IsNullOrEmpty(barcode))
             {
                 try
                 {
-                    Clipboard.SetText(barcode);
+                    _dialogService.SetClipboardText(barcode);
                 }
                 catch (Exception ex)
                 {
-                    ModernMessageBox.Show($"复制条码失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await _dialogService.ShowMessageAsync($"复制条码失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

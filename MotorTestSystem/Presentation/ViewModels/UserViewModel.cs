@@ -14,6 +14,7 @@ namespace MotorTestSystem.ViewModels
     {
         private readonly IUserService _userService;
         private readonly IAuthService _authService;
+        private readonly IDialogService _dialogService;
 
         /// <summary>
         /// 用户列表项（UI 展示用，映射自 AppUser）
@@ -108,20 +109,36 @@ namespace MotorTestSystem.ViewModels
         [ObservableProperty]
         private bool _canResetPassword;
 
+        private static BackendRuntime GetRuntime() => BackendRuntime.GetSharedAsync().GetAwaiter().GetResult();
+
         public UserViewModel() : this(GetRuntime())
         {
         }
 
-        private UserViewModel(BackendRuntime runtime) : this(runtime.UserService, runtime.AuthService)
+        private UserViewModel(BackendRuntime runtime)
+            : this(
+                  runtime.UserService,
+                  runtime.AuthService,
+                  new MotorTestSystem.Presentation.Services.WpfDialogService())
         {
         }
 
-        private static BackendRuntime GetRuntime() => BackendRuntime.GetSharedAsync().GetAwaiter().GetResult();
-
         public UserViewModel(IUserService userService, IAuthService authService)
+            : this(
+                  userService,
+                  authService,
+                  new MotorTestSystem.Presentation.Services.WpfDialogService())
+        {
+        }
+
+        public UserViewModel(
+            IUserService userService,
+            IAuthService authService,
+            IDialogService dialogService)
         {
             _userService = userService;
             _authService = authService;
+            _dialogService = dialogService;
 
             LoadUsers();
             LoadRolePermissions();
@@ -214,35 +231,24 @@ namespace MotorTestSystem.ViewModels
         // ===== 命令 =====
 
         [RelayCommand(CanExecute = nameof(CanAddUser))]
-        private void AddUser()
+        private async Task AddUser()
         {
-            var dialogViewModel = new UserEditDialogViewModel
+            var result = _dialogService.ShowUserEditDialog("新增用户", "", "", "", true);
+            if (result != null)
             {
-                Title = "新增用户",
-                IsEnabled = true
-            };
-
-            var win = new UserEditWindow
-            {
-                DataContext = dialogViewModel,
-                Owner = System.Windows.Application.Current.MainWindow
-            };
-
-            if (win.ShowDialog() == true)
-            {
-                var role = ParseRole(dialogViewModel.SelectedRole);
-                var status = dialogViewModel.IsEnabled ? UserStatus.Active : UserStatus.Disabled;
+                var role = ParseRole(result.Role);
+                var status = result.IsEnabled ? UserStatus.Active : UserStatus.Disabled;
 
                 var error = _userService.Create(
-                    dialogViewModel.Account,
-                    dialogViewModel.Name,
-                    dialogViewModel.Password,
+                    result.Account,
+                    result.Name,
+                    result.Password,
                     role,
                     status);
 
                 if (error != null)
                 {
-                    ModernMessageBox.Show(error, "创建失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    await _dialogService.ShowMessageAsync(error, "创建失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                     return;
                 }
 
@@ -251,35 +257,27 @@ namespace MotorTestSystem.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(CanEditUser))]
-        private void EditUser(UserItem user)
+        private async Task EditUser(UserItem user)
         {
             if (user == null) return;
 
-            var dialogViewModel = new UserEditDialogViewModel
-            {
-                Title = "编辑用户信息",
-                Account = user.Account,
-                Name = user.Name,
-                SelectedRole = user.Role,
-                IsEnabled = user.Status != "禁用"
-            };
+            var result = _dialogService.ShowUserEditDialog(
+                "编辑用户信息",
+                user.Account,
+                user.Name,
+                user.Role,
+                user.Status != "禁用");
 
-            var win = new UserEditWindow
+            if (result != null)
             {
-                DataContext = dialogViewModel,
-                Owner = System.Windows.Application.Current.MainWindow
-            };
+                var role = ParseRole(result.Role);
+                var status = result.IsEnabled ? UserStatus.Active : UserStatus.Disabled;
 
-            if (win.ShowDialog() == true)
-            {
-                var role = ParseRole(dialogViewModel.SelectedRole);
-                var status = dialogViewModel.IsEnabled ? UserStatus.Active : UserStatus.Disabled;
-
-                var error = _userService.Update(user.Id, dialogViewModel.Name, role, status);
+                var error = _userService.Update(user.Id, result.Name, role, status);
 
                 if (error != null)
                 {
-                    ModernMessageBox.Show(error, "更新失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    await _dialogService.ShowMessageAsync(error, "更新失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                     return;
                 }
 
@@ -288,11 +286,11 @@ namespace MotorTestSystem.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(CanResetPassword))]
-        private void ResetPassword(UserItem user)
+        private async Task ResetPassword(UserItem user)
         {
             if (user == null) return;
 
-            var result = ModernMessageBox.Show(
+            var result = await _dialogService.ShowMessageAsync(
                 $"确定要重置用户 {user.Name} ({user.Account}) 的密码为初始密码吗？",
                 "密码重置确认",
                 System.Windows.MessageBoxButton.YesNo,
@@ -304,11 +302,11 @@ namespace MotorTestSystem.ViewModels
             var error = _userService.ResetPassword(user.Id, "123456");
             if (error != null)
             {
-                ModernMessageBox.Show(error, "重置失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                await _dialogService.ShowMessageAsync(error, "重置失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                 return;
             }
 
-            ModernMessageBox.Show(
+            await _dialogService.ShowMessageAsync(
                 $"用户 {user.Name} 的密码已重置为：123456",
                 "密码重置成功",
                 System.Windows.MessageBoxButton.OK,

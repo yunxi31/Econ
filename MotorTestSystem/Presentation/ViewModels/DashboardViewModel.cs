@@ -722,8 +722,6 @@ namespace MotorTestSystem.ViewModels
         public string Name { get; set; } = string.Empty;
         public double Percentage { get; set; }
         public string Color { get; set; } = "#8E9AA7";
-
-        public System.Windows.Media.Brush ColorBrush => (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString(Color)!;
     }
 
     public class FaultReason

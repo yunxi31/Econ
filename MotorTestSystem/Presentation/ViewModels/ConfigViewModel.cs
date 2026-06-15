@@ -19,6 +19,7 @@ namespace MotorTestSystem.ViewModels
     public partial class ConfigViewModel : ViewModelBase
     {
         private readonly BackendRuntime _runtime;
+        private readonly IDialogService _dialogService;
 
         public ObservableCollection<StationConfig> Stations => _runtime.StationConfigs;
 
@@ -31,13 +32,23 @@ namespace MotorTestSystem.ViewModels
         };
 
         public ConfigViewModel()
-            : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult())
+            : this(
+                  BackendRuntime.GetSharedAsync().GetAwaiter().GetResult(),
+                  new MotorTestSystem.Presentation.Services.WpfDialogService())
         {
         }
 
         public ConfigViewModel(BackendRuntime runtime)
+            : this(
+                  runtime,
+                  new MotorTestSystem.Presentation.Services.WpfDialogService())
+        {
+        }
+
+        public ConfigViewModel(BackendRuntime runtime, IDialogService dialogService)
         {
             _runtime = runtime;
+            _dialogService = dialogService;
         }
 
         [RelayCommand]
@@ -66,7 +77,7 @@ namespace MotorTestSystem.ViewModels
                     Message = $"‖ {config.Name} ({config.IpAddress}:{config.Port}) 连接测试成功 ‖‖‖‖", 
                     LevelBrush = "#12DDF7" 
                 });
-                ShowMessage($"{config.Name} ({config.IpAddress}:{config.Port}) 连接正常。", "连接测试成功", MessageBoxImage.Information);
+                await ShowMessage($"{config.Name} ({config.IpAddress}:{config.Port}) 连接正常。", "连接测试成功", MessageBoxImage.Information);
             }
             else
             {
@@ -77,20 +88,20 @@ namespace MotorTestSystem.ViewModels
                     Message = $"‖ {config.Name} ({config.IpAddress}:{config.Port}) 连接测试失败 ‖‖‖‖", 
                     LevelBrush = "#FF5A5F" 
                 });
-                ShowMessage($"{config.Name} ({config.IpAddress}:{config.Port}) 无法建立连接，请检查 IP、端口、协议与网线连接。", "连接测试失败", MessageBoxImage.Warning);
+                await ShowMessage($"{config.Name} ({config.IpAddress}:{config.Port}) 无法建立连接，请检查 IP、端口、协议与网线连接。", "连接测试失败", MessageBoxImage.Warning);
             }
         }
 
         public static System.Action<string, string, MessageBoxImage>? MessageBoxShowMock { get; set; }
 
-        private void ShowMessage(string message, string caption, MessageBoxImage image)
+        private async Task ShowMessage(string message, string caption, MessageBoxImage image)
         {
             if (MessageBoxShowMock != null)
             {
                 MessageBoxShowMock(message, caption, image);
                 return;
             }
-            MessageBox.Show(message, caption, MessageBoxButton.OK, image);
+            await _dialogService.ShowMessageAsync(message, caption, MessageBoxButton.OK, image);
         }
 
         [RelayCommand]
@@ -100,9 +111,9 @@ namespace MotorTestSystem.ViewModels
         }
 
         [RelayCommand]
-        private void SaveAll()
+        private async Task SaveAll()
         {
-            MessageBox.Show("所有配置已成功保存至系统数据库中。", "保存配置成功", MessageBoxButton.OK, MessageBoxImage.Information);
+            await _dialogService.ShowMessageAsync("所有配置已成功保存至系统数据库中。", "保存配置成功", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
