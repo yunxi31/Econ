@@ -15,6 +15,9 @@ namespace MotorTestSystem.Services
         private readonly List<IPlcClient> _clients = new();
         private readonly List<Task> _pollingTasks = new();
         private CancellationTokenSource? _cancellationTokenSource;
+        private readonly Dictionary<string, int> _consecutiveFailures = new();
+        private static readonly TimeSpan MinRetryDelay = TimeSpan.FromSeconds(1);
+        private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(60);
 
         public PlcPollingService(
             IEnumerable<StationConfig> stationConfigs,
@@ -75,17 +78,33 @@ namespace MotorTestSystem.Services
 
         public void Dispose()
         {
-            _cancellationTokenSource?.Cancel();
+            // 同步等待轮询任务完成（避免竞态）
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+                try
+                {
+                    Task.WaitAll(_pollingTasks.ToArray());
+                }
+                catch (AggregateException)
+                {
+                    // 忽略取消异常
+                }
+                _pollingTasks.Clear();
+            }
+
             foreach (var client in _clients)
             {
                 client.Dispose();
             }
 
             _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
         }
 
         private async Task PollStationAsync(IPlcClient client, CancellationToken cancellationToken)
         {
+            string stationId = client.Config.Id;
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
@@ -93,15 +112,16 @@ namespace MotorTestSystem.Services
                     bool connected = await client.ConnectAsync(cancellationToken);
                     if (!connected)
                     {
+                        int failures = IncrementFailure(stationId);
                         Publish(new StationSnapshot
                         {
-                            StationId = client.Config.Id,
+                            StationId = stationId,
                             IsOnline = false,
                             Status = 2,
                             CompletionSignal = false
                         });
 
-                        await Task.Delay(_pollInterval, cancellationToken);
+                        await Task.Delay(GetBackoffDelay(failures), cancellationToken);
                         continue;
                     }
 
@@ -110,8 +130,11 @@ namespace MotorTestSystem.Services
                     {
                         await _repository.UpsertStageResultAsync(snapshot.CompletedData, cancellationToken);
                         await client.ResetCompletionSignalAsync(cancellationToken);
-                        LogReceived?.Invoke(this, $"{snapshot.StationId} saved {snapshot.CompletedData.Barcode} {snapshot.CompletedData.Stage} {snapshot.CompletedData.Result}");
+                        LogReceived?.Invoke(this, $"{stationId} saved {snapshot.CompletedData.Barcode} {snapshot.CompletedData.Stage} {snapshot.CompletedData.Result}");
                     }
+
+                    // 连接 + 读取成功，重置失败计数
+                    ResetFailure(stationId);
 
                     Publish(snapshot);
                     await Task.Delay(_pollInterval, cancellationToken);
@@ -122,17 +145,41 @@ namespace MotorTestSystem.Services
                 }
                 catch (Exception ex)
                 {
+                    int failures = IncrementFailure(stationId);
                     Publish(new StationSnapshot
                     {
-                        StationId = client.Config.Id,
+                        StationId = stationId,
                         IsOnline = false,
                         Status = 2,
                         CompletionSignal = false
                     });
-                    LogReceived?.Invoke(this, $"{client.Config.Id} polling error: {ex.Message}");
-                    await Task.Delay(_pollInterval, cancellationToken);
+                    LogReceived?.Invoke(this, $"{stationId} polling error: {ex.Message}");
+                    await Task.Delay(GetBackoffDelay(failures), cancellationToken);
                 }
             }
+        }
+
+        private int IncrementFailure(string stationId)
+        {
+            if (!_consecutiveFailures.ContainsKey(stationId))
+                _consecutiveFailures[stationId] = 0;
+            return ++_consecutiveFailures[stationId];
+        }
+
+        private void ResetFailure(string stationId)
+        {
+            _consecutiveFailures.Remove(stationId);
+        }
+
+        /// <summary>
+        /// 指数退避: 1s → 2s → 4s → 8s → 16s → 32s → 60s (max)
+        /// </summary>
+        private static TimeSpan GetBackoffDelay(int consecutiveFailures)
+        {
+            if (consecutiveFailures <= 0) return MinRetryDelay;
+            // 2^(n-1) 秒, 上限 60 秒
+            double seconds = Math.Min(Math.Pow(2, consecutiveFailures - 1), MaxRetryDelay.TotalSeconds);
+            return TimeSpan.FromSeconds(Math.Max(seconds, MinRetryDelay.TotalSeconds));
         }
 
         private void Publish(StationSnapshot snapshot)

@@ -194,8 +194,9 @@ namespace MotorTestSystem.Services
                 // Write M100 = False (0x00)
                 await WriteBitAsync(0x90, 100, false, cancellationToken);
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"[MelsecMcClient] ResetCompletionSignal failed: {ex.Message}");
                 CloseConnection();
             }
             finally
@@ -366,12 +367,16 @@ namespace MotorTestSystem.Services
 
             await _stream.WriteAsync(request, 0, request.Length, cancellationToken);
 
+            // 读超时保护：3 秒内必须收到完整响应
+            using var readCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            readCts.CancelAfter(TimeSpan.FromSeconds(3));
+
             // Response header is 11 bytes
             byte[] header = new byte[11];
             int read = 0;
             while (read < 11)
             {
-                int n = await _stream.ReadAsync(header, read, 11 - read, cancellationToken);
+                int n = await _stream.ReadAsync(header, read, 11 - read, readCts.Token);
                 if (n <= 0)
                 {
                     throw new SocketException((int)SocketError.ConnectionReset);
@@ -395,7 +400,7 @@ namespace MotorTestSystem.Services
             read = 0;
             while (read < payloadLength)
             {
-                int n = await _stream.ReadAsync(payload, read, payloadLength - read, cancellationToken);
+                int n = await _stream.ReadAsync(payload, read, payloadLength - read, readCts.Token);
                 if (n <= 0)
                 {
                     throw new SocketException((int)SocketError.ConnectionReset);

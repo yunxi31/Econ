@@ -161,14 +161,21 @@ namespace MotorTestSystem.ViewModels
             // 首次加载：异步启动，避免在 UI 线程同步等待造成死锁
             Application.Current?.Dispatcher?.InvokeAsync(async () =>
             {
-                await RefreshAllDataAsync();
+                try
+                {
+                    await RefreshAllDataAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[DashboardViewModel] Initial refresh failed: {ex.Message}");
+                }
             });
 
             _refreshTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(5)
             };
-            _refreshTimer.Tick += async (_, _) => await RefreshAllDataAsync();
+            _refreshTimer.Tick += OnRefreshTimerTick;
             _refreshTimer.Start();
         }
 
@@ -177,9 +184,28 @@ namespace MotorTestSystem.ViewModels
             // 收到 PLC 数据时触发刷新（节流：避免高频刷新）
             Application.Current?.Dispatcher?.InvokeAsync(async () =>
             {
-                await RefreshAllDataAsync();
-                UpdateOnlineStationCount();
+                try
+                {
+                    await RefreshAllDataAsync();
+                    UpdateOnlineStationCount();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[DashboardViewModel] Snapshot refresh failed: {ex.Message}");
+                }
             });
+        }
+
+        private async void OnRefreshTimerTick(object? sender, EventArgs e)
+        {
+            try
+            {
+                await RefreshAllDataAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DashboardViewModel] Timer refresh failed: {ex.Message}");
+            }
         }
 
         #region Refresh Methods
@@ -665,6 +691,23 @@ namespace MotorTestSystem.ViewModels
         }
 
         #endregion
+
+        private bool _isDisposedByBase;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (_isDisposedByBase) return;
+            _isDisposedByBase = true;
+
+            if (disposing)
+            {
+                _refreshTimer.Stop();
+                _refreshTimer.Tick -= OnRefreshTimerTick;
+                _runtime.PollingService.SnapshotReceived -= OnSnapshotReceived;
+            }
+
+            base.Dispose(disposing);
+        }
     }
 
     public class DefectItem

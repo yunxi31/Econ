@@ -357,8 +357,13 @@ namespace MotorTestSystem.Services
 
         #region IDisposable 实现
 
+        private bool _isDisposed;
+
         public void Dispose()
         {
+            if (_isDisposed) return;
+            _isDisposed = true;
+
             // 登出所有设备
             foreach (var kvp in _loggedUsers)
             {

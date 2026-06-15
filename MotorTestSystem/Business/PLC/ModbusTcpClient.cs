@@ -15,6 +15,7 @@ namespace MotorTestSystem.Services
         private readonly SemaphoreSlim _lock = new(1, 1);
         private bool _isDisposed;
         private ushort _transactionId;
+        private readonly object _transactionIdLock = new();
 
         public ModbusTcpClient(StationConfig config)
         {
@@ -195,8 +196,9 @@ namespace MotorTestSystem.Services
                 // Write M100 = False (FC 05, Coil address 100, value 0x0000)
                 await WriteCoilAsync(100, false, cancellationToken);
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"[ModbusTcpClient] ResetCompletionSignal failed: {ex.Message}");
                 CloseConnection();
             }
             finally
@@ -207,7 +209,12 @@ namespace MotorTestSystem.Services
 
         private async Task<bool> ReadCoilAsync(ushort address, CancellationToken cancellationToken)
         {
-            ushort transactionId = ++_transactionId;
+            ushort transactionId;
+            lock (_transactionIdLock)
+            {
+                transactionId = ++_transactionId;
+                if (_transactionId == 0) _transactionId = 1; // 跳过 0，避免溢出后从 0 开始
+            }
             byte[] request = new byte[12];
             
             // Transaction ID
@@ -245,7 +252,12 @@ namespace MotorTestSystem.Services
 
         private async Task<byte[]> ReadHoldingRegistersAsync(ushort address, ushort count, CancellationToken cancellationToken)
         {
-            ushort transactionId = ++_transactionId;
+            ushort transactionId;
+            lock (_transactionIdLock)
+            {
+                transactionId = ++_transactionId;
+                if (_transactionId == 0) _transactionId = 1;
+            }
             byte[] request = new byte[12];
 
             // Transaction ID
@@ -284,7 +296,12 @@ namespace MotorTestSystem.Services
 
         private async Task WriteCoilAsync(ushort address, bool value, CancellationToken cancellationToken)
         {
-            ushort transactionId = ++_transactionId;
+            ushort transactionId;
+            lock (_transactionIdLock)
+            {
+                transactionId = ++_transactionId;
+                if (_transactionId == 0) _transactionId = 1;
+            }
             byte[] request = new byte[12];
 
             // Transaction ID
@@ -327,12 +344,16 @@ namespace MotorTestSystem.Services
 
             await _stream.WriteAsync(request, 0, request.Length, cancellationToken);
 
+            // 读超时保护：3 秒内必须收到完整响应
+            using var readCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            readCts.CancelAfter(TimeSpan.FromSeconds(3));
+
             // Read the Modbus TCP response header (7 bytes)
             byte[] mbapHeader = new byte[7];
             int read = 0;
             while (read < 7)
             {
-                int n = await _stream.ReadAsync(mbapHeader, read, 7 - read, cancellationToken);
+                int n = await _stream.ReadAsync(mbapHeader, read, 7 - read, readCts.Token);
                 if (n <= 0)
                 {
                     throw new SocketException((int)SocketError.ConnectionReset);
@@ -367,7 +388,7 @@ namespace MotorTestSystem.Services
             read = 0;
             while (read < bytesToRead)
             {
-                int n = await _stream.ReadAsync(payload, read, bytesToRead - read, cancellationToken);
+                int n = await _stream.ReadAsync(payload, read, bytesToRead - read, readCts.Token);
                 if (n <= 0)
                 {
                     throw new SocketException((int)SocketError.ConnectionReset);

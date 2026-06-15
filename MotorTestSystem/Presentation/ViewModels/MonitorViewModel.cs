@@ -203,5 +203,21 @@ namespace MotorTestSystem.ViewModels
 
             dispatcher.InvokeAsync(action);
         }
+
+        private bool _isDisposedByBase;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (_isDisposedByBase) return;
+            _isDisposedByBase = true;
+
+            if (disposing)
+            {
+                _runtime.PollingService.SnapshotReceived -= OnSnapshotReceived;
+                _runtime.PollingService.LogReceived -= OnLogReceived;
+            }
+
+            base.Dispose(disposing);
+        }
     }
 }

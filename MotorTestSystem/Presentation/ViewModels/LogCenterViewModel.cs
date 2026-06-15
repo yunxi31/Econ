@@ -422,5 +422,22 @@ namespace MotorTestSystem.ViewModels
                 System.IO.File.WriteAllText(dialog.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
             }
         }
+
+        private bool _isDisposedByBase;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (_isDisposedByBase) return;
+            _isDisposedByBase = true;
+
+            if (disposing && _notificationService != null)
+            {
+                _notificationService.Notifications.CollectionChanged -= OnServiceCollectionChanged;
+                _notificationService.NotificationReceived -= OnNotificationReceived;
+                _notificationService.UnreadCountChanged -= OnUnreadCountChanged;
+            }
+
+            base.Dispose(disposing);
+        }
     }
 }

@@ -45,6 +45,12 @@ public partial class App : Application
         }
     }
 
+    protected override void OnExit(ExitEventArgs e)
+    {
+        BackendRuntime.Shared.Dispose();
+        base.OnExit(e);
+    }
+
     private void OnDispatcherException(object? sender, DispatcherUnhandledExceptionEventArgs ex)
     {
         _exceptionDepth++;

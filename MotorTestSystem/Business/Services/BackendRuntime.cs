@@ -7,7 +7,7 @@ using MotorTestSystem.Models.Entities;
 
 namespace MotorTestSystem.Services
 {
-    public sealed class BackendRuntime
+    public sealed class BackendRuntime : IDisposable
     {
         private static readonly Random _rng = new(42); // 固定种子保证可复现 — 必须在 Shared 之前
         private readonly INotificationService _notificationService;
@@ -162,7 +162,8 @@ namespace MotorTestSystem.Services
             var hikvisionService = new HikvisionSdkService();
 
             // 4. 首次运行时播种测试数据（表为空时）
-            SeedRepositoryIfEmptyAsync(repository, dbContext).GetAwaiter().GetResult();
+            // 种子数据写入放在后台线程，避免 UI 线程 SynchronizationContext 死锁
+            System.Threading.Tasks.Task.Run(() => SeedRepositoryIfEmptyAsync(repository, dbContext).GetAwaiter().GetResult()).Wait();
 
             return new BackendRuntime(configs, dbContext, repository, new PlcClientFactory(useSimulation: false),
                 userService, authService, notificationService, hikvisionService);
@@ -391,6 +392,24 @@ namespace MotorTestSystem.Services
             }
 
             return idx;
+        }
+
+        private bool _isDisposed;
+
+        public void Dispose()
+        {
+            if (_isDisposed) return;
+            _isDisposed = true;
+
+            // 停止轮询（含等待任务完成）
+            PollingService.Dispose();
+
+            // 释放海康 SDK 资源
+            HikvisionService.Dispose();
+
+            // 取消订阅事件（防止静态实例持有引用导致泄漏）
+            PollingService.SnapshotReceived -= OnSnapshotReceivedForNotification;
+            PollingService.LogReceived -= OnLogReceivedForNotification;
         }
     }
 }

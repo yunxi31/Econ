@@ -54,11 +54,27 @@ namespace MotorTestSystem.Services
                 var cpuType = ResolveCpuType(Config.PlcModel);
                 _plc = new Plc(cpuType, Config.IpAddress, Config.Port, (short)0, (short)Config.StationId);
 
-                // 2 秒超时
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                cts.CancelAfter(TimeSpan.FromSeconds(2));
+                // 2 秒超时 — S7.Net OpenAsync 不接受 CancellationToken，用 Task.WhenAny 模拟
+                var openTask = _plc.OpenAsync();
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+                if (await Task.WhenAny(openTask, timeoutTask) != openTask)
+                {
+                    // 超时：关闭连接并返回
+                    CloseConnection();
+                    return false;
+                }
 
-                await _plc.OpenAsync();
+                // OpenAsync 已完成，检查是否有异常
+                try
+                {
+                    await openTask; // 传播异常
+                }
+                catch
+                {
+                    CloseConnection();
+                    return false;
+                }
+
                 return _plc.IsConnected;
             }
             catch

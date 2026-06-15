@@ -105,7 +105,7 @@ namespace MotorTestSystem.ViewModels
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-            _clockTimer.Tick += (_, _) => CurrentTime = DateTime.Now.ToString("HH:mm:ss");
+            _clockTimer.Tick += OnClockTick;
             _clockTimer.Start();
         }
 
@@ -277,6 +277,28 @@ namespace MotorTestSystem.ViewModels
                 CurrentUserRole = value;
                 CurrentUserName = value;
             }
+        }
+
+        private void OnClockTick(object? sender, EventArgs e)
+        {
+            CurrentTime = DateTime.Now.ToString("HH:mm:ss");
+        }
+
+        private bool _isDisposedByBase;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (_isDisposedByBase) return;
+            _isDisposedByBase = true;
+
+            if (disposing)
+            {
+                _clockTimer.Stop();
+                _clockTimer.Tick -= OnClockTick;
+                _runtime.PollingService.SnapshotReceived -= OnSnapshotReceived;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }
