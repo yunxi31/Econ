@@ -117,6 +117,37 @@ namespace MotorTestSystem.ViewModels
 
         #endregion
 
+        #region 数据持久化监控属性
+
+        [ObservableProperty]
+        private double _writeChannelUtilization;
+
+        [ObservableProperty]
+        private int _deadLetterCount;
+
+        [ObservableProperty]
+        private int _writeDroppedCount;
+
+        [ObservableProperty]
+        private long _dataLossCount;
+
+        [ObservableProperty]
+        private string _channelUtilizationColor = "#8A8D99";
+
+        [ObservableProperty]
+        private string _deadLetterCountColor = "#8A8D99";
+
+        [ObservableProperty]
+        private string _dataLossAlertColor = "#8A8D99";
+
+        [ObservableProperty]
+        private int _syncPendingCount;
+
+        [ObservableProperty]
+        private string _lastSyncTimeText = "";
+
+        #endregion
+
         #region Tooltip Paints
 
         public SolidColorPaint TooltipBgPaint { get; } = new SolidColorPaint(new SKColor(24, 25, 36, 230));
@@ -306,7 +337,8 @@ namespace MotorTestSystem.ViewModels
                     RefreshKpiCardsAsync(),
                     RefreshHourlyChartsAsync(),
                     RefreshDefectDataAsync(),
-                    RefreshFaultRankingAsync()
+                    RefreshFaultRankingAsync(),
+                    RefreshPersistenceMonitorAsync()
                 );
             }
             catch
@@ -708,6 +740,91 @@ namespace MotorTestSystem.ViewModels
             catch (Exception ex)
             {
                 MessageBox.Show($"抓图失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        #endregion
+
+        #region 数据持久化监控刷新
+
+        private async System.Threading.Tasks.Task RefreshPersistenceMonitorAsync()
+        {
+            try
+            {
+                // 通道占用率
+                double util = _runtime.EventChannel.GetWriteChannelUtilization();
+                WriteChannelUtilization = util;
+
+                // 颜色逻辑：<80% 白色，80-95% 黄色，>=95% 红色
+                ChannelUtilizationColor = util >= 0.95 ? "#FF3366" : util >= 0.80 ? "#FFC107" : "#26DE81";
+
+                // 死信队列数量
+                DeadLetterCount = _runtime.DeadLetterQueue?.GetPendingCount() ?? 0;
+                DeadLetterCountColor = DeadLetterCount > 0 ? "#FFC107" : "#8A8D99";
+
+                // 丢弃计数
+                WriteDroppedCount = _runtime.BatchWriter.GetTotalDroppedCount();
+
+                // 数据丢失
+                long lossCount = _runtime.PollingService.TotalDataLossCount;
+                DataLossCount = lossCount;
+                DataLossAlertColor = lossCount > 0 ? "#FFC107" : "#8A8D99";
+
+                // 云端同步状态（10.4）
+                var cloudSync = _runtime.CloudSync;
+                if (cloudSync != null)
+                {
+                    SyncPendingCount = cloudSync.IsEnabled ? cloudSync.GetPendingSyncCount() : 0;
+                    LastSyncTimeText = cloudSync.LastSyncTime.HasValue
+                        ? cloudSync.LastSyncTime.Value.ToLocalTime().ToString("HH:mm:ss")
+                        : cloudSync.IsEnabled ? "等待同步..." : "未启用";
+                }
+                else
+                {
+                    SyncPendingCount = 0;
+                    LastSyncTimeText = "";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"[Dashboard] PersistenceMonitor refresh error: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async Task RetryDeadLetterAsync()
+        {
+            var dlq = _runtime.DeadLetterQueue;
+            if (dlq == null) return;
+
+            try
+            {
+                var entries = await dlq.ScanAsync();
+                int successCount = 0;
+                int failCount = 0;
+
+                foreach (var entry in entries)
+                {
+                    bool retried = await dlq.RetryAsync(entry,
+                        async (data, ct) =>
+                        {
+                            foreach (var item in data)
+                            {
+                                await _runtime.Repository.UpsertStageResultAsync(item, ct);
+                            }
+                        });
+
+                    if (retried) successCount++; else failCount++;
+                }
+
+                System.Diagnostics.Trace.WriteLine(
+                    $"Manual dead letter retry: {successCount} succeeded, {failCount} failed");
+
+                await RefreshPersistenceMonitorAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"Manual dead letter retry error: {ex.Message}");
             }
         }
 

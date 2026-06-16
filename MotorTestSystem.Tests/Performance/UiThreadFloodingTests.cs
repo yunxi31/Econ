@@ -281,6 +281,12 @@ namespace MotorTestSystem.Tests.Performance
             RecordCall();
             return Task.CompletedTask;
         }
+
+        public Task BulkUpsertWithRawSqlAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default)
+        {
+            RecordCall();
+            return Task.CompletedTask;
+        }
     }
 
     public class MockPlcClient : IPlcClient

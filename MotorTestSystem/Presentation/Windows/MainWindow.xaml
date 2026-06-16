@@ -16,7 +16,8 @@
         MinWidth="1180"
         WindowStartupLocation="CenterScreen"
         Background="#090E12"
-        FontFamily="Microsoft YaHei UI">
+        FontFamily="Microsoft YaHei UI"
+        Closing="Window_Closing">
 
     <WindowChrome.WindowChrome>
         <WindowChrome GlassFrameThickness="0" 

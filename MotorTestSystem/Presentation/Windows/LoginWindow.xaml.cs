@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
@@ -82,7 +83,7 @@ namespace MotorTestSystem
             }
         }
 
-        private void PerformLogin()
+        private async void PerformLogin()
         {
             string username = UsernameTextBox.Text.Trim();
             string password = PasswordInput.Password;
@@ -108,15 +109,16 @@ namespace MotorTestSystem
             }
 
             // 使用 AuthService 认证
-            if (_authService.Login(username, password, out string errorMessage))
+            var loginResult = await _authService.LoginAsync(username, password);
+            if (loginResult.Success)
             {
-                AuthenticatedUser = _authService.CurrentUser;
+                AuthenticatedUser = loginResult.User;
                 DialogResult = true;
                 Close();
             }
             else
             {
-                ShowError(errorMessage);
+                ShowError(loginResult.ErrorMessage ?? "登录失败");
             }
         }
 

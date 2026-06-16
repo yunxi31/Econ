@@ -48,6 +48,14 @@
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "dependencies": {
+            "BenchmarkDotNet": {
+              "target": "Package",
+              "version": "[0.14.0, )"
+            },
+            "FsCheck.Xunit": {
+              "target": "Package",
+              "version": "[2.16.6, )"
+            },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
               "version": "[17.9.0, )"

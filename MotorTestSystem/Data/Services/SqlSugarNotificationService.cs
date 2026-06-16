@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using MotorTestSystem.Models;
 using MotorTestSystem.Models.Entities;
@@ -147,6 +148,12 @@ namespace MotorTestSystem.Services
                 NotificationReceived?.Invoke(this, item);
             }
             RaiseUnreadCountChanged();
+        }
+
+        public Task AddRangeAsync(IEnumerable<NotificationItem> notifications)
+        {
+            AddRange(notifications);
+            return Task.CompletedTask;
         }
 
         public void MarkAsRead(string notificationId)

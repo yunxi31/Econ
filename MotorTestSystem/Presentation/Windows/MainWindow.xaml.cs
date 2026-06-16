@@ -1,5 +1,7 @@
 using System;
+using System.ComponentModel;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MotorTestSystem.Services;
 
 namespace MotorTestSystem;
 
@@ -178,6 +181,100 @@ public partial class MainWindow : Window
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// 窗口关闭时显示保存进度提示（9.5）。
+    /// </summary>
+    private async void Window_Closing(object? sender, CancelEventArgs e)
+    {
+        // 如果是登出操作，只做简单清理
+        if (IsLoggingOut) return;
+
+        e.Cancel = true; // 先取消关闭，等保存完成后再关闭
+
+        // 创建进度对话框
+        var progressDialog = new Window
+        {
+            Title = "正在保存数据...",
+            Width = 360,
+            Height = 160,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Owner = this,
+            WindowStyle = WindowStyle.ToolWindow,
+            ResizeMode = ResizeMode.NoResize,
+            ShowInTaskbar = false,
+            Background = new SolidColorBrush(Color.FromRgb(33, 36, 49)),
+            Foreground = Brushes.White,
+            FontFamily = new FontFamily("Microsoft YaHei UI"),
+            Content = new StackPanel
+            {
+                Margin = new Thickness(20),
+                VerticalAlignment = VerticalAlignment.Center,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = "正在保存数据，请稍候...",
+                        FontSize = 16,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Margin = new Thickness(0, 0, 0, 20)
+                    },
+                    new ProgressBar
+                    {
+                        IsIndeterminate = true,
+                        Height = 6,
+                        Margin = new Thickness(0, 0, 0, 10)
+                    },
+                    new TextBlock
+                    {
+                        Text = "正在刷新缓冲区并等待数据写入完成...",
+                        FontSize = 12,
+                        Foreground = new SolidColorBrush(Color.FromRgb(138, 141, 153)),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        TextWrapping = TextWrapping.Wrap,
+                        TextAlignment = TextAlignment.Center
+                    }
+                }
+            }
+        };
+
+        progressDialog.Show();
+
+        try
+        {
+            // 等待 BatchWriteService 刷新完成（带超时）
+            var runtime = Services.BackendRuntime.GetSharedAsync().GetAwaiter().GetResult();
+            if (runtime != null)
+            {
+                var batchWriter = runtime.BatchWriter;
+                if (batchWriter != null)
+                {
+                    // 给 BatchWriteService 一个超时时间来刷新剩余数据
+                    await Task.Delay(2000);
+                    await batchWriter.StopAsync();
+                }
+
+                // 停止 PLC 轮询
+                try { await runtime.PollingService.StopAsync(); }
+                catch { /* suppress */ }
+
+                // 释放运行时
+                runtime.Dispose();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine($"Error during shutdown: {ex.Message}");
+        }
+        finally
+        {
+            progressDialog.Close();
+        }
+
+        // 真正关闭窗口
+        e.Cancel = false;
+        this.Close();
     }
 
     private bool IsVisualDescendant(DependencyObject child, DependencyObject parent)

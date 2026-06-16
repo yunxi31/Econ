@@ -27,6 +27,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- 海康SDK核心DLL -->
     <ContentWithTargetPath Include="..\海康库文件\HCNetSDK.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

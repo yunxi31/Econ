@@ -9,15 +9,30 @@ namespace MotorTestSystem.Services
 {
     public sealed class BackendRuntime : IDisposable
     {
-        private static readonly Random _rng = new(42); // 固定种子保证可复现 — 必须在 Shared 之前
+        private static readonly Random _rng = new(42);
         private readonly INotificationService _notificationService;
 
         private static readonly Lazy<Task<BackendRuntime>> _sharedInstanceTask = new Lazy<Task<BackendRuntime>>(() => Task.Run(CreateDefaultAsync));
 
         public static Task<BackendRuntime> GetSharedAsync() => _sharedInstanceTask.Value;
 
-        /// <summary>SqlSugar 数据库上下文（公开以供其他服务直接访问）</summary>
         public SqlSugarDbContext DbContext { get; }
+        public ObservableCollection<StationConfig> StationConfigs { get; }
+        public IMotorTestRepository Repository { get; }
+        public IUserService UserService { get; }
+        public IAuthService AuthService { get; }
+        public PlcPollingService PollingService { get; }
+        public HikvisionSdkService HikvisionService { get; }
+        public INotificationService NotificationService => _notificationService;
+        public EventChannelService EventChannel { get; }
+        public BatchWriteService BatchWriter { get; }
+        public IDeadLetterQueue? DeadLetterQueue { get; private set; }
+        public NotificationWriter? NotificationWriterService { get; private set; }
+        public CloudSyncService? CloudSync { get; private set; }
+
+        private readonly System.Collections.Generic.Dictionary<string, bool> _stationOnlineState = new();
+        private readonly System.Collections.Generic.Dictionary<string, DateTime> _lastNgAlertTime = new();
+        private static readonly TimeSpan NgAlertCooldown = TimeSpan.FromMinutes(5);
 
         public BackendRuntime(
             ObservableCollection<StationConfig> stationConfigs,
@@ -28,7 +43,9 @@ namespace MotorTestSystem.Services
             IAuthService authService,
             INotificationService notificationService,
             EventChannelService eventChannel,
-            HikvisionSdkService? hikvisionService = null)
+            HikvisionSdkService? hikvisionService = null,
+            IDeadLetterQueue? deadLetterQueue = null,
+            NotificationWriter? notificationWriter = null)
         {
             StationConfigs = stationConfigs;
             DbContext = dbContext;
@@ -37,42 +54,23 @@ namespace MotorTestSystem.Services
             AuthService = authService;
             _notificationService = notificationService;
             EventChannel = eventChannel;
-            PollingService = new PlcPollingService(StationConfigs, Repository, plcClientFactory, eventChannel: eventChannel);
-            BatchWriter = new BatchWriteService(Repository, eventChannel.WriteReader);
-            HikvisionService = hikvisionService ?? new HikvisionSdkService();
+            DeadLetterQueue = deadLetterQueue;
+            NotificationWriterService = notificationWriter;
 
-            // 订阅 PLC 轮询事件，自动生成实时通知
+            PollingService = new PlcPollingService(StationConfigs, Repository, plcClientFactory, eventChannel: eventChannel);
+            BatchWriter = new BatchWriteService(Repository, eventChannel.WriteReader, deadLetterQueue, eventChannel);
+
             PollingService.SnapshotReceived += OnSnapshotReceivedForNotification;
             PollingService.LogReceived += OnLogReceivedForNotification;
         }
 
-        public ObservableCollection<StationConfig> StationConfigs { get; }
-        public IMotorTestRepository Repository { get; }
-        public IUserService UserService { get; }
-        public IAuthService AuthService { get; }
-        public PlcPollingService PollingService { get; }
-        public HikvisionSdkService HikvisionService { get; }
-        public INotificationService NotificationService => _notificationService;
-        public EventChannelService EventChannel { get; }
-        public BatchWriteService BatchWriter { get; }
-
-        // ---- 工位在线状态跟踪（用于检测离线事件） ----
-        private readonly System.Collections.Generic.Dictionary<string, bool> _stationOnlineState = new();
-        private readonly System.Collections.Generic.Dictionary<string, DateTime> _lastNgAlertTime = new();
-        private static readonly TimeSpan NgAlertCooldown = TimeSpan.FromMinutes(5);
-
-        /// <summary>
-        /// PLC 快照事件 → 实时通知生成
-        /// </summary>
         private void OnSnapshotReceivedForNotification(object? sender, StationSnapshot snapshot)
         {
-            // 1. 检测工位离线 → 报警通知
             bool wasOnline = _stationOnlineState.TryGetValue(snapshot.StationId, out var prev) && prev;
             bool isNowOnline = snapshot.IsOnline;
 
             if (wasOnline && !isNowOnline)
             {
-                // 工位从在线变为离线
                 var config = StationConfigs.FirstOrDefault(c => c.Id == snapshot.StationId);
                 string plcModel = config?.PlcModel ?? "未知型号";
                 _notificationService.Add(new NotificationItem
@@ -87,7 +85,6 @@ namespace MotorTestSystem.Services
 
             _stationOnlineState[snapshot.StationId] = isNowOnline;
 
-            // 2. 检测测试结果为 NG → 报警通知（带冷却，避免刷屏）
             if (snapshot.CompletionSignal && snapshot.CompletedData != null
                 && snapshot.CompletedData.Result == "NG")
             {
@@ -112,9 +109,6 @@ namespace MotorTestSystem.Services
             }
         }
 
-        /// <summary>
-        /// 根据阶段测试数据推断不合格原因
-        /// </summary>
         private static string GetNgReason(StageTestData data)
         {
             var reasons = new System.Collections.Generic.List<string>();
@@ -131,12 +125,8 @@ namespace MotorTestSystem.Services
                 : "具体原因待诊断。";
         }
 
-        /// <summary>
-        /// PLC 日志事件 → 系统级通知
-        /// </summary>
         private void OnLogReceivedForNotification(object? sender, string log)
         {
-            // 只对错误日志生成通知（正常日志忽略）
             if (log.Contains("error", StringComparison.OrdinalIgnoreCase)
                 || log.Contains("异常", StringComparison.OrdinalIgnoreCase)
                 || log.Contains("故障", StringComparison.OrdinalIgnoreCase))
@@ -153,43 +143,105 @@ namespace MotorTestSystem.Services
 
         private static async Task<BackendRuntime> CreateDefaultAsync()
         {
-            // 1. 初始化 SqlSugar + SQLite 数据库上下文（自动建表 + 种子数据）
-            var dbContext = new SqlSugarDbContext();
+            // 加载数据持久化配置
+            var persistenceConfig = DataPersistenceConfig.Load();
 
-            // 2. 从数据库加载工位配置
+            var dbContext = new SqlSugarDbContext(persistenceConfig);
+
             var configEntities = await dbContext.Db.Queryable<StationConfigEntity>().ToListAsync();
             var configs = new ObservableCollection<StationConfig>(
                 configEntities.Select(ToStationConfigModel));
 
-            // 3. 创建仓储和用户服务
             var repository = new SqlMotorTestRepository(dbContext);
             var userService = new SqlSugarUserService(dbContext);
             var authService = new AuthService(userService);
             var notificationService = new SqlSugarNotificationService(dbContext);
             var hikvisionService = new HikvisionSdkService();
 
-            // 4. 首次运行时播种测试数据（表为空时）
             await SeedRepositoryIfEmptyAsync(repository, dbContext);
 
-            // 5. 创建 EventChannelService
-            var eventChannel = new EventChannelService();
+            // 创建 EventChannelService（使用配置容量）
+            var eventChannel = new EventChannelService(writeChannelCapacity: persistenceConfig.WriteChannelCapacity);
 
-            return new BackendRuntime(configs, dbContext, repository, new PlcClientFactory(useSimulation: false),
-                userService, authService, notificationService, eventChannel, hikvisionService);
+            // 创建死信队列
+            var deadLetterQueue = new DeadLetterQueue(storagePath: persistenceConfig.DeadLetterQueuePath);
+
+            // 启动时自动补传死信队列
+            await RetryDeadLettersOnStartupAsync(deadLetterQueue, repository);
+
+            // 创建通知通道消费者
+            var notificationWriter = new NotificationWriter(
+                eventChannel.NotificationReader,
+                notificationService);
+
+            // 创建云端同步服务（10.3）
+            var cloudSync = new CloudSyncService(dbContext)
+            {
+                IsEnabled = persistenceConfig.CloudSyncEnabled,
+                Endpoint = persistenceConfig.CloudSyncEndpoint
+            };
+            if (cloudSync.IsEnabled)
+            {
+                await cloudSync.StartAsync();
+            }
+
+            return new BackendRuntime(
+                configs, dbContext, repository, new PlcClientFactory(useSimulation: false),
+                userService, authService, notificationService, eventChannel,
+                hikvisionService, deadLetterQueue, notificationWriter)
+            { CloudSync = cloudSync };
         }
 
         /// <summary>
-        /// 仅在数据库为空时播种测试数据（首次启动）
+        /// 启动时扫描死信队列目录并尝试补传失败的数据（3.4）。
         /// </summary>
+        private static async Task RetryDeadLettersOnStartupAsync(
+            IDeadLetterQueue deadLetterQueue,
+            IMotorTestRepository repository)
+        {
+            try
+            {
+                var entries = await deadLetterQueue.ScanAsync();
+                if (entries.Count == 0) return;
+
+                int successCount = 0;
+                int failCount = 0;
+
+                foreach (var entry in entries)
+                {
+                    bool retried = await deadLetterQueue.RetryAsync(entry,
+                        async (data, ct) =>
+                        {
+                            foreach (var item in data)
+                            {
+                                await repository.UpsertStageResultAsync(item, ct);
+                            }
+                        });
+
+                    if (retried)
+                        successCount++;
+                    else
+                        failCount++;
+                }
+
+                System.Diagnostics.Trace.WriteLine(
+                    $"Dead letter retry completed: {successCount} succeeded, {failCount} failed");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine(
+                    $"Dead letter retry error during startup: {ex.Message}");
+            }
+        }
+
         private static async Task SeedRepositoryIfEmptyAsync(IMotorTestRepository repository, SqlSugarDbContext dbContext)
         {
             if (await dbContext.Db.Queryable<MotorTestRecordEntity>().AnyAsync())
-                return; // 已有数据，不重复播种
+                return;
 
             var now = DateTime.Now;
             int idx = 0;
 
-            // 1. 本月前 3 周的历史数据
             for (int weekAgo = 3; weekAgo >= 1; weekAgo--)
             {
                 DateTime weekStart = now.Date.AddDays(-weekAgo * 7);
@@ -198,7 +250,6 @@ namespace MotorTestSystem.Services
                 idx = await SeedWeekDataAsync(repository, weekStart, weekOk, weekNg, idx);
             }
 
-            // 2. 本周每天的数据（跳过今天）
             DateTime thisWeekStart = now.Date.AddDays(-(int)now.DayOfWeek + (int)DayOfWeek.Monday);
             for (int dayOffset = 0; dayOffset <= Math.Min((int)now.DayOfWeek, 6); dayOffset++)
             {
@@ -212,7 +263,6 @@ namespace MotorTestSystem.Services
                 idx = await SeedDayDataAsync(repository, day, dayOk, dayNg, idx);
             }
 
-            // 3. 今天过去 8 小时
             var todayHourly = new (int hoursAgo, int ok, int ng, NgPattern[] patterns)[]
             {
                 (7, 45, 3, new[] { NgPattern.NoiseHighDiff, NgPattern.NoLoadHighCurrent, NgPattern.NoiseHighDiff }),
@@ -228,14 +278,12 @@ namespace MotorTestSystem.Services
             foreach (var (hoursAgo, okCount, ngCount, patterns) in todayHourly)
             {
                 DateTime hourTime = now.AddHours(-hoursAgo);
-
                 for (int i = 0; i < okCount; i++)
                 {
                     string barcode = MakeBarcode(idx++);
                     DateTime collectedAt = new DateTime(hourTime.Year, hourTime.Month, hourTime.Day, hourTime.Hour, i % 60, _rng.Next(60));
                     await SeedOkRecordAsync(repository, barcode, collectedAt, i);
                 }
-
                 for (int i = 0; i < ngCount; i++)
                 {
                     string barcode = MakeBarcode(idx++);
@@ -246,42 +294,22 @@ namespace MotorTestSystem.Services
             }
         }
 
-        // ===== 工位配置 Entity → Model 转换 =====
-
-        private static StationConfig ToStationConfigModel(StationConfigEntity entity)
+        private static StationConfig ToStationConfigModel(StationConfigEntity entity) => new()
         {
-            return new StationConfig
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                PlcModel = entity.PlcModel,
-                IpAddress = entity.IpAddress,
-                Port = entity.Port,
-                Protocol = entity.Protocol,
-                StationId = (byte)entity.StationId,
-                IsConnected = entity.IsConnected,
-                Status = entity.Status
-            };
-        }
+            Id = entity.Id, Name = entity.Name, PlcModel = entity.PlcModel,
+            IpAddress = entity.IpAddress, Port = entity.Port,
+            Protocol = entity.Protocol, StationId = (byte)entity.StationId,
+            IsConnected = entity.IsConnected, Status = entity.Status
+        };
 
         private static string MakeBarcode(int index) => $"DES-SR-150GEN{1992900399000 + index}";
 
-        // ========================================
-        // NG 故障模式 — 覆盖所有 6 种分类
-        // ========================================
         private enum NgPattern
         {
-            NoLoadHighCurrent,   // 空载电流超限 (>2.5) → "电机起动电流超限"
-            NoLoadHighSpeed,     // 空载转速异常 (>2200) → "空载转速异常"
-            NoiseHighDiff,       // 噪音差值过大 (>15)   → "空载噪声过大"
-            NoiseFwdLoud,        // 正转噪声超限 (>70)   → "正转噪声超限"
-            LoadHighCurrent,     // 负载电流超限 (>3.0)   → "负载电流超限"
-            LoadLowSpeed,        // 负载转速偏低 (<1000)  → "负载转速偏低"
+            NoLoadHighCurrent, NoLoadHighSpeed, NoiseHighDiff,
+            NoiseFwdLoud, LoadHighCurrent, LoadLowSpeed,
         }
 
-        // ========================================
-        // OK 记录 — 全阶段合格
-        // ========================================
         private static async Task SeedOkRecordAsync(IMotorTestRepository repo, string barcode, DateTime time, int variant)
         {
             await repo.UpsertStageResultAsync(new StageTestData
@@ -307,9 +335,6 @@ namespace MotorTestSystem.Services
             });
         }
 
-        // ========================================
-        // NG 记录 — 根据故障模式生成异常数据
-        // ========================================
         private static async Task SeedNgRecordAsync(IMotorTestRepository repo, string barcode, DateTime time, NgPattern pattern)
         {
             bool noLoadNg = pattern is NgPattern.NoLoadHighCurrent or NgPattern.NoLoadHighSpeed;
@@ -319,8 +344,7 @@ namespace MotorTestSystem.Services
                 Result = noLoadNg ? "NG" : "OK",
                 NoLoadCurrent = pattern == NgPattern.NoLoadHighCurrent ? 2.80 + _rng.NextDouble() * 0.5 : 1.82 + _rng.NextDouble() * 0.1,
                 NoLoadSpeed = pattern == NgPattern.NoLoadHighSpeed ? 2300 + _rng.Next(200) : 2050 + _rng.Next(50),
-                ShaftLength = 32.4,
-                KnurlDiameter = 4.42
+                ShaftLength = 32.4, KnurlDiameter = 4.42
             });
 
             bool noiseNg = pattern is NgPattern.NoiseHighDiff or NgPattern.NoiseFwdLoud;
@@ -343,20 +367,15 @@ namespace MotorTestSystem.Services
             });
         }
 
-        // ========================================
-        // 批量生成一天的数据（返回新的 barcode 计数器）
-        // ========================================
         private static async Task<int> SeedDayDataAsync(IMotorTestRepository repo, DateTime day, int okCount, int ngCount, int idx)
         {
             var allPatterns = System.Enum.GetValues<NgPattern>();
-
             for (int i = 0; i < okCount; i++)
             {
                 string barcode = MakeBarcode(idx++);
                 DateTime collectedAt = day.AddHours(8 + (i * 10.0 / okCount) % 12).AddMinutes(_rng.Next(60));
                 await SeedOkRecordAsync(repo, barcode, collectedAt, i);
             }
-
             for (int i = 0; i < ngCount; i++)
             {
                 string barcode = MakeBarcode(idx++);
@@ -364,33 +383,25 @@ namespace MotorTestSystem.Services
                 var pattern = allPatterns[_rng.Next(allPatterns.Length)];
                 await SeedNgRecordAsync(repo, barcode, collectedAt, pattern);
             }
-
             return idx;
         }
 
-        // ========================================
-        // 批量生成一周的数据（返回新的 barcode 计数器）
-        // ========================================
         private static async Task<int> SeedWeekDataAsync(IMotorTestRepository repo, DateTime weekStart, int totalOk, int totalNg, int idx)
         {
             var allPatterns = System.Enum.GetValues<NgPattern>();
-
             for (int d = 0; d < 7; d++)
             {
                 DateTime day = weekStart.AddDays(d);
                 bool isWeekend = day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
-
                 double ratio = isWeekend ? 0.043 : 0.174;
                 int dayOk = Math.Max(1, (int)(totalOk * ratio));
                 int dayNg = Math.Max(0, (int)(totalNg * ratio));
-
                 for (int i = 0; i < dayOk; i++)
                 {
                     string barcode = MakeBarcode(idx++);
                     DateTime collectedAt = day.AddHours(8 + (i * 10.0 / Math.Max(dayOk, 1)) % 12).AddMinutes(_rng.Next(60));
                     await SeedOkRecordAsync(repo, barcode, collectedAt, i);
                 }
-
                 for (int i = 0; i < dayNg; i++)
                 {
                     string barcode = MakeBarcode(idx++);
@@ -399,7 +410,6 @@ namespace MotorTestSystem.Services
                     await SeedNgRecordAsync(repo, barcode, collectedAt, pattern);
                 }
             }
-
             return idx;
         }
 
@@ -410,15 +420,14 @@ namespace MotorTestSystem.Services
             if (_isDisposed) return;
             _isDisposed = true;
 
-            // 按照顺序释放资源: BatchWriter → PollingService → EventChannel
+            // 按依赖顺序释放：NotificationWriter → BatchWriter → PollingService → EventChannel
+            NotificationWriterService?.Dispose();
             BatchWriter?.Dispose();
             PollingService?.Dispose();
             EventChannel?.Dispose();
-
-            // 释放海康 SDK 资源
             HikvisionService?.Dispose();
+            DeadLetterQueue?.Dispose();
 
-            // 取消订阅事件（防止静态实例持有引用导致泄漏）
             if (PollingService != null)
             {
                 PollingService.SnapshotReceived -= OnSnapshotReceivedForNotification;

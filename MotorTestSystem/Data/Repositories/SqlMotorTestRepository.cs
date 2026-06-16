@@ -32,28 +32,32 @@ namespace MotorTestSystem.Services
 
             string barcode = data.Barcode.Trim();
 
-            var existing = await _ctx.Db.Queryable<MotorTestRecordEntity>()
-                .FirstAsync(r => r.Barcode == barcode);
+            // 使用事务包装 SELECT + INSERT/UPDATE 操作，防止并发场景下的竞态条件
+            await _ctx.Db.Ado.UseTranAsync(async () =>
+            {
+                var existing = await _ctx.Db.Queryable<MotorTestRecordEntity>()
+                    .FirstAsync(r => r.Barcode == barcode);
 
-            if (existing == null)
-            {
-                existing = new MotorTestRecordEntity
+                if (existing == null)
                 {
-                    Barcode = barcode,
-                    TestTime = data.CollectedAt,
-                    FinalResult = "NG"
-                };
-                ApplyStage(existing, data);
-                existing.FinalResult = CalculateFinalResult(existing);
-                await _ctx.Db.Insertable(existing).ExecuteCommandAsync(cancellationToken);
-            }
-            else
-            {
-                ApplyStage(existing, data);
-                existing.TestTime = data.CollectedAt;
-                existing.FinalResult = CalculateFinalResult(existing);
-                await _ctx.Db.Updateable(existing).ExecuteCommandAsync(cancellationToken);
-            }
+                    existing = new MotorTestRecordEntity
+                    {
+                        Barcode = barcode,
+                        TestTime = data.CollectedAt,
+                        FinalResult = "NG"
+                    };
+                    ApplyStage(existing, data);
+                    existing.FinalResult = CalculateFinalResult(existing);
+                    await _ctx.Db.Insertable(existing).ExecuteCommandAsync(cancellationToken);
+                }
+                else
+                {
+                    ApplyStage(existing, data);
+                    existing.TestTime = data.CollectedAt;
+                    existing.FinalResult = CalculateFinalResult(existing);
+                    await _ctx.Db.Updateable(existing).ExecuteCommandAsync(cancellationToken);
+                }
+            });
         }
 
         public async Task BulkUpsertAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default)
@@ -112,6 +116,67 @@ namespace MotorTestSystem.Services
                     await _ctx.Db.Updateable(toUpdate).ExecuteCommandAsync(cancellationToken);
                 }
             });
+        }
+
+        public async Task BulkUpsertWithRawSqlAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(results);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var list = results.Where(r => r != null && !string.IsNullOrWhiteSpace(r.Barcode)).ToList();
+            if (list.Count == 0) return;
+
+            using var db = _ctx.Db;
+
+            // 使用原生 ADO.NET 构建 INSERT OR REPLACE 语句
+            var sql = new System.Text.StringBuilder();
+            sql.Append("INSERT OR REPLACE INTO MotorTestRecords (");
+            sql.Append("Barcode, TestTime, FinalResult, ");
+            sql.Append("NoLoadCurrent, NoLoadSpeed, ShaftLength, KnurlDiameter, NoLoadResult, ");
+            sql.Append("FwdNoise, RevNoise, NoiseDiff, NoiseResult, ");
+            sql.Append("LoadCurrent, LoadSpeed, LoadResult) VALUES ");
+
+            var parameters = new Dictionary<string, object>();
+            int index = 0;
+
+            foreach (var data in list)
+            {
+                string stageResult = NormalizeResult(data.Result);
+                string suffix = index.ToString();
+
+                if (index > 0) sql.Append(", ");
+
+                sql.Append($"(@bcode{suffix}, @time{suffix}, @result{suffix}, ");
+                sql.Append($"@nlCurrent{suffix}, @nlSpeed{suffix}, @shaft{suffix}, @knurl{suffix}, @nlResult{suffix}, ");
+                sql.Append($"@fwdNoise{suffix}, @revNoise{suffix}, @noiseDiff{suffix}, @noiseResult{suffix}, ");
+                sql.Append($"@ldCurrent{suffix}, @ldSpeed{suffix}, @ldResult{suffix})");
+
+                parameters[$"@bcode{suffix}"] = data.Barcode.Trim();
+                parameters[$"@time{suffix}"] = data.CollectedAt;
+                parameters[$"@result{suffix}"] = stageResult;
+                parameters[$"@nlCurrent{suffix}"] = data.NoLoadCurrent ?? (object)DBNull.Value;
+                parameters[$"@nlSpeed{suffix}"] = data.NoLoadSpeed ?? (object)DBNull.Value;
+                parameters[$"@shaft{suffix}"] = data.ShaftLength ?? (object)DBNull.Value;
+                parameters[$"@knurl{suffix}"] = data.KnurlDiameter ?? (object)DBNull.Value;
+
+                string nlResult = data.Stage == TestStage.NoLoad ? stageResult : (string?)null ?? "NG";
+                parameters[$"@nlResult{suffix}"] = nlResult;
+                parameters[$"@fwdNoise{suffix}"] = data.FwdNoise ?? (object)DBNull.Value;
+                parameters[$"@revNoise{suffix}"] = data.RevNoise ?? (object)DBNull.Value;
+                parameters[$"@noiseDiff{suffix}"] = data.NoiseDiff ?? (object)DBNull.Value;
+
+                string noiseResult = data.Stage == TestStage.Noise ? stageResult : (string?)null ?? "NG";
+                parameters[$"@noiseResult{suffix}"] = noiseResult;
+                parameters[$"@ldCurrent{suffix}"] = data.LoadCurrent ?? (object)DBNull.Value;
+                parameters[$"@ldSpeed{suffix}"] = data.LoadSpeed ?? (object)DBNull.Value;
+
+                string loadResult = data.Stage == TestStage.Load ? stageResult : (string?)null ?? "NG";
+                parameters[$"@ldResult{suffix}"] = loadResult;
+
+                index++;
+            }
+
+            await db.Ado.ExecuteCommandAsync(sql.ToString(), parameters);
         }
 
         public async Task<IReadOnlyList<MotorTestResult>> QueryAsync(MotorTestQuery query, CancellationToken cancellationToken = default)

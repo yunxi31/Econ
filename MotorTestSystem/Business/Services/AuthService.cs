@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using MotorTestSystem.Models;
 
 namespace MotorTestSystem.Services
 {
     /// <summary>
-    /// 认证与权限服务实现
+    /// 认证与权限服务实现（异步 Login）
     /// </summary>
     public class AuthService : IAuthService
     {
@@ -23,39 +24,33 @@ namespace MotorTestSystem.Services
 
         public AppRole CurrentRole => _currentUser?.Role ?? AppRole.Operator;
 
-        public bool Login(string account, string password, out string errorMessage)
+        public async Task<AuthLoginResult> LoginAsync(string account, string password)
         {
-            errorMessage = string.Empty;
-
             if (string.IsNullOrWhiteSpace(account))
             {
-                errorMessage = "请输入用户名！";
-                return false;
+                return AuthLoginResult.Fail("请输入用户名！");
             }
 
-            var user = _userService.GetByAccount(account);
+            var user = await _userService.GetByAccountAsync(account);
             if (user == null)
             {
-                errorMessage = "用户不存在！";
-                return false;
+                return AuthLoginResult.Fail("用户不存在！");
             }
 
             if (user.Status == UserStatus.Disabled)
             {
-                errorMessage = "该账号已被禁用，请联系管理员！";
-                return false;
+                return AuthLoginResult.Fail("该账号已被禁用，请联系管理员！");
             }
 
-            if (!_userService.ValidatePassword(account, password))
+            if (!await _userService.ValidatePasswordAsync(account, password))
             {
-                errorMessage = "密码错误！";
-                return false;
+                return AuthLoginResult.Fail("密码错误！");
             }
 
             // 登录成功
             _currentUser = user;
-            _userService.UpdateLastLoginTime(user.Id);
-            return true;
+            await _userService.UpdateLastLoginTimeAsync(user.Id);
+            return AuthLoginResult.Ok(user);
         }
 
         public void Logout()

@@ -21,6 +21,27 @@ namespace MotorTestSystem.Services
         private static readonly TimeSpan MinRetryDelay = TimeSpan.FromSeconds(1);
         private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(60);
 
+        // ---- 序列号检测（用于断网重连后的数据完整性） ----
+        private readonly ConcurrentDictionary<string, int> _lastSequenceNumbers = new();
+        private readonly ConcurrentDictionary<string, long> _dataLossCounts = new();
+
+        public event EventHandler<StationSnapshot>? SnapshotReceived;
+        public event EventHandler<string>? LogReceived;
+
+        /// <summary>
+        /// 获取指定工位的累计数据丢失次数。
+        /// </summary>
+        public long GetDataLossCount(string stationId) =>
+            _dataLossCounts.TryGetValue(stationId, out var count) ? count : 0;
+
+        /// <summary>
+        /// 是否有任何工位检测到数据丢失。
+        /// </summary>
+        public bool HasAnyDataLoss => _dataLossCounts.Values.Any(v => v > 0);
+
+        /// <summary>所有工位的数据丢失次数合计</summary>
+        public long TotalDataLossCount => _dataLossCounts.Values.Sum();
+
         public PlcPollingService(
             IEnumerable<StationConfig> stationConfigs,
             IMotorTestRepository repository,
@@ -35,15 +56,10 @@ namespace MotorTestSystem.Services
             _clients.AddRange(stationConfigs.Select(_clientFactory.Create));
         }
 
-        public event EventHandler<StationSnapshot>? SnapshotReceived;
-        public event EventHandler<string>? LogReceived;
-
         public void Start()
         {
             if (_cancellationTokenSource != null)
-            {
                 return;
-            }
 
             _cancellationTokenSource = new CancellationTokenSource();
             foreach (var client in _clients)
@@ -55,9 +71,7 @@ namespace MotorTestSystem.Services
         public async Task StopAsync()
         {
             if (_cancellationTokenSource == null)
-            {
                 return;
-            }
 
             _cancellationTokenSource.Cancel();
 
@@ -82,7 +96,6 @@ namespace MotorTestSystem.Services
 
         public void Dispose()
         {
-            // 同步等待轮询任务完成（避免竞态）
             if (_cancellationTokenSource != null)
             {
                 _cancellationTokenSource.Cancel();
@@ -92,7 +105,6 @@ namespace MotorTestSystem.Services
                 }
                 catch (AggregateException)
                 {
-                    // 忽略取消异常
                 }
                 _pollingTasks.Clear();
             }
@@ -130,6 +142,24 @@ namespace MotorTestSystem.Services
                     }
 
                     var snapshot = await client.ReadSnapshotAsync(cancellationToken);
+
+                    // ---- 序列号跳跃检测（重连后检测数据是否连续） ----
+                    if (snapshot.SequenceNumber.HasValue)
+                    {
+                        if (_lastSequenceNumbers.TryGetValue(stationId, out var lastSeq))
+                        {
+                            int gap = snapshot.SequenceNumber.Value - lastSeq;
+                            if (gap > 1)
+                            {
+                                // 检测到序列号跳跃
+                                _dataLossCounts.AddOrUpdate(stationId, gap - 1, (_, old) => old + gap - 1);
+                                LogReceived?.Invoke(this,
+                                    $"{stationId} sequence number gap detected: {lastSeq} → {snapshot.SequenceNumber} (gap={gap - 1}, total lost={_dataLossCounts[stationId]})");
+                            }
+                        }
+                        _lastSequenceNumbers[stationId] = snapshot.SequenceNumber.Value;
+                    }
+
                     if (snapshot.CompletionSignal && snapshot.CompletedData != null)
                     {
                         if (_eventChannel != null)
@@ -144,7 +174,6 @@ namespace MotorTestSystem.Services
                         LogReceived?.Invoke(this, $"{stationId} queued {snapshot.CompletedData.Barcode} {snapshot.CompletedData.Stage} {snapshot.CompletedData.Result}");
                     }
 
-                    // 连接 + 读取成功，重置失败计数
                     ResetFailure(stationId);
 
                     Publish(snapshot);
@@ -180,13 +209,9 @@ namespace MotorTestSystem.Services
             _consecutiveFailures.TryRemove(stationId, out _);
         }
 
-        /// <summary>
-        /// 指数退避: 1s → 2s → 4s → 8s → 16s → 32s → 60s (max)
-        /// </summary>
         private static TimeSpan GetBackoffDelay(int consecutiveFailures)
         {
             if (consecutiveFailures <= 0) return MinRetryDelay;
-            // 2^(n-1) 秒, 上限 60 秒
             double seconds = Math.Min(Math.Pow(2, consecutiveFailures - 1), MaxRetryDelay.TotalSeconds);
             return TimeSpan.FromSeconds(Math.Max(seconds, MinRetryDelay.TotalSeconds));
         }

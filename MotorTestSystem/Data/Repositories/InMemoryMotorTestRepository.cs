@@ -66,6 +66,11 @@ namespace MotorTestSystem.Services
             return Task.CompletedTask;
         }
 
+        public Task BulkUpsertWithRawSqlAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default)
+        {
+            return BulkUpsertAsync(results, cancellationToken);
+        }
+
         public Task<IReadOnlyList<MotorTestResult>> QueryAsync(MotorTestQuery query, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(query);

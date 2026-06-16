@@ -198,6 +198,12 @@ namespace MotorTestSystem.Services
             }
         }
 
+        public Task AddRangeAsync(IEnumerable<NotificationItem> notifications)
+        {
+            AddRange(notifications);
+            return Task.CompletedTask;
+        }
+
         public void MarkAsRead(string notificationId)
         {
             lock (_lock)

@@ -14,6 +14,16 @@ namespace MotorTestSystem.Services
         private static readonly object _initLock = new();
         private static bool _initialized;
 
+        /// <summary>
+        /// SQLite 同步模式：NORMAL / FULL / OFF
+        /// </summary>
+        public string SyncMode { get; set; } = "NORMAL";
+
+        /// <summary>
+        /// 是否启用长连接
+        /// </summary>
+        public bool LongConnection { get; set; }
+
         public ISqlSugarClient Db { get; }
 
         /// <summary>
@@ -22,8 +32,11 @@ namespace MotorTestSystem.Services
         public static string DbPath { get; } = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory, "Data", "MotorTest.db");
 
-        public SqlSugarDbContext()
+        public SqlSugarDbContext(DataPersistenceConfig? config = null)
         {
+            SyncMode = config?.SQLiteSyncMode ?? "NORMAL";
+            LongConnection = config?.SQLiteLongConnection ?? false;
+
             // 确保数据目录存在
             var dir = Path.GetDirectoryName(DbPath)!;
             if (!Directory.Exists(dir))
@@ -35,21 +48,17 @@ namespace MotorTestSystem.Services
             {
                 ConnectionString = $"Data Source={DbPath};",
                 DbType = DbType.Sqlite,
-                IsAutoCloseConnection = true,   // 自动释放连接
-                InitKeyType = InitKeyType.Attribute, // 从特性读取主键
+                IsAutoCloseConnection = !LongConnection, // 根据配置控制连接策略
+                InitKeyType = InitKeyType.Attribute,
                 MoreSettings = new ConnMoreSettings
                 {
-                    IsAutoRemoveDataCache = true  // 自动清理缓存
+                    IsAutoRemoveDataCache = true
                 },
                 ConfigureExternalServices = new ConfigureExternalServices
                 {
-                    EntityNameService = (type, entity) =>
-                    {
-                        // 统一处理：枚举存储为 int
-                    },
+                    EntityNameService = (type, entity) => { },
                     EntityService = (property, column) =>
                     {
-                        // SQLite 不支持 decimal，统一用 double
                         if (column.DataType == "decimal")
                         {
                             column.DataType = "REAL";
@@ -59,14 +68,39 @@ namespace MotorTestSystem.Services
             },
             config =>
             {
-                // SQL 执行日志（调试用）
                 config.Aop.OnLogExecuting = (sql, pars) =>
                 {
                     System.Diagnostics.Debug.WriteLine($"[SQL] {sql}");
                 };
             });
 
+            // 应用 PRAGMA 配置
+            ApplyPragmaSettings();
+
             InitializeDatabase();
+        }
+
+        /// <summary>
+        /// 应用 PRAGMA 同步模式配置。
+        /// </summary>
+        private void ApplyPragmaSettings()
+        {
+            string normalizedSync = SyncMode?.ToUpperInvariant() switch
+            {
+                "FULL" => "FULL",
+                "OFF" => "OFF",
+                _ => "NORMAL"
+            };
+
+            try
+            {
+                Db.Ado.ExecuteCommand($"PRAGMA synchronous = {normalizedSync};");
+                System.Diagnostics.Debug.WriteLine($"[SQLite] PRAGMA synchronous = {normalizedSync}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"Failed to set PRAGMA synchronous: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -83,7 +117,8 @@ namespace MotorTestSystem.Services
                     typeof(MotorTestRecordEntity),
                     typeof(UserEntity),
                     typeof(StationConfigEntity),
-                    typeof(NotificationEntity)
+                    typeof(NotificationEntity),
+                    typeof(SyncQueueEntity)
                 );
 
                 // 种子数据（仅在表为空时插入）

@@ -125,6 +125,11 @@ namespace MotorTestSystem.Tests.Performance
                 await Task.Delay(LatencyMs, cancellationToken);
             }
         }
+
+        public Task BulkUpsertWithRawSqlAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default)
+        {
+            return BulkUpsertAsync(results, cancellationToken);
+        }
     }
 
     public class JitterMockPlcClient : IPlcClient

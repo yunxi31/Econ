@@ -24,5 +24,10 @@ namespace MotorTestSystem.Services
         /// 批量更新或插入测试结果
         /// </summary>
         Task BulkUpsertAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 使用原生 ADO.NET 批量 INSERT OR REPLACE（性能评估用，9.2）。
+        /// </summary>
+        Task BulkUpsertWithRawSqlAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default);
     }
 }

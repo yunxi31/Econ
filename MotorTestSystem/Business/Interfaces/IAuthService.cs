@@ -1,9 +1,10 @@
+using System.Threading.Tasks;
 using MotorTestSystem.Models;
 
 namespace MotorTestSystem.Services
 {
     /// <summary>
-    /// 认证与权限服务接口
+    /// 认证与权限服务接口（Login 已异步化）
     /// </summary>
     public interface IAuthService
     {
@@ -13,14 +14,8 @@ namespace MotorTestSystem.Services
         /// <summary>当前用户是否已认证</summary>
         bool IsAuthenticated { get; }
 
-        /// <summary>
-        /// 登录认证
-        /// </summary>
-        /// <param name="account">账号</param>
-        /// <param name="password">密码</param>
-        /// <param name="errorMessage">错误消息</param>
-        /// <returns>是否登录成功</returns>
-        bool Login(string account, string password, out string errorMessage);
+        /// <summary>异步登录认证</summary>
+        Task<AuthLoginResult> LoginAsync(string account, string password);
 
         /// <summary>登出</summary>
         void Logout();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MotorTestSystem.Models;
 using MotorTestSystem.Services;
 
@@ -19,6 +20,16 @@ namespace MotorTestSystem.ViewModels
         public ObservableCollection<string> SystemLogs { get; } = new();
         public ObservableCollection<string> RecentBarcodes { get; } = new();
         public ObservableCollection<string> Alerts { get; } = new();
+
+        #region 数据丢失告警属性
+
+        [ObservableProperty]
+        private bool _hasDataLossAlert;
+
+        [ObservableProperty]
+        private long _dataLossCount;
+
+        #endregion
 
         public MonitorViewModel()
             : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult())
@@ -146,7 +157,13 @@ namespace MotorTestSystem.ViewModels
 
         private void OnSnapshotReceived(object? sender, StationSnapshot snapshot)
         {
-            RunOnUiThread(() => ApplySnapshot(snapshot));
+            RunOnUiThread(() =>
+            {
+                ApplySnapshot(snapshot);
+                // 实时刷新数据丢失告警
+                DataLossCount = _runtime.PollingService.TotalDataLossCount;
+                HasDataLossAlert = _runtime.PollingService.HasAnyDataLoss;
+            });
         }
 
         private void OnLogReceived(object? sender, string message)

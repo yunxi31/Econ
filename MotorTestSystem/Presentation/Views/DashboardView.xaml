@@ -93,6 +93,7 @@
             <RowDefinition Height="125"/>
             <RowDefinition Height="1.1*"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- TITLE / HEADER -->
@@ -417,5 +418,8 @@
                 </Grid>
             </Border>
         </Grid>
+
+        <!-- 数据持久化监控面板 -->
+        <local:DataPersistenceMonitorControl Grid.Row="4" Margin="12,4,12,4"/>
     </Grid>
 </UserControl>

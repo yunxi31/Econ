@@ -140,16 +140,16 @@ namespace MotorTestSystem.ViewModels
             _authService = authService;
             _dialogService = dialogService;
 
-            LoadUsers();
+            _ = LoadUsersAsync();
             LoadRolePermissions();
             RefreshPermissions();
         }
 
         // ===== 数据加载 =====
 
-        private void LoadUsers()
+        private async Task LoadUsersAsync()
         {
-            var users = _userService.GetAll();
+            var users = await _userService.GetAllAsync();
             _allUsers = users.Select(MapToItem).ToList();
             FilterUsers();
         }
@@ -239,7 +239,7 @@ namespace MotorTestSystem.ViewModels
                 var role = ParseRole(result.Role);
                 var status = result.IsEnabled ? UserStatus.Active : UserStatus.Disabled;
 
-                var error = _userService.Create(
+                var error = await _userService.CreateAsync(
                     result.Account,
                     result.Name,
                     result.Password,
@@ -252,7 +252,7 @@ namespace MotorTestSystem.ViewModels
                     return;
                 }
 
-                LoadUsers(); // 重新加载
+                await LoadUsersAsync(); // 重新加载
             }
         }
 
@@ -273,7 +273,7 @@ namespace MotorTestSystem.ViewModels
                 var role = ParseRole(result.Role);
                 var status = result.IsEnabled ? UserStatus.Active : UserStatus.Disabled;
 
-                var error = _userService.Update(user.Id, result.Name, role, status);
+                var error = await _userService.UpdateAsync(user.Id, result.Name, role, status);
 
                 if (error != null)
                 {
@@ -281,7 +281,7 @@ namespace MotorTestSystem.ViewModels
                     return;
                 }
 
-                LoadUsers(); // 重新加载
+                await LoadUsersAsync(); // 重新加载
             }
         }
 
@@ -299,7 +299,7 @@ namespace MotorTestSystem.ViewModels
             if (result != System.Windows.MessageBoxResult.Yes) return;
 
             // 重置为默认密码 123456
-            var error = _userService.ResetPassword(user.Id, "123456");
+            var error = await _userService.ResetPasswordAsync(user.Id, "123456");
             if (error != null)
             {
                 await _dialogService.ShowMessageAsync(error, "重置失败", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);

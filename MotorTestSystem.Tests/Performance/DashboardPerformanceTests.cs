@@ -212,5 +212,10 @@ namespace MotorTestSystem.Tests.Performance
         {
             return Task.CompletedTask;
         }
+
+        public Task BulkUpsertWithRawSqlAsync(IEnumerable<StageTestData> results, CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

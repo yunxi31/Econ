@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using MotorTestSystem.Models;
 
 namespace MotorTestSystem.Services
@@ -25,7 +27,10 @@ namespace MotorTestSystem.Services
         void Add(NotificationItem notification);
 
         /// <summary>批量添加通知</summary>
-        void AddRange(System.Collections.Generic.IEnumerable<NotificationItem> notifications);
+        void AddRange(IEnumerable<NotificationItem> notifications);
+
+        /// <summary>异步批量添加通知（用于 NotificationWriter 批量写入）</summary>
+        Task AddRangeAsync(IEnumerable<NotificationItem> notifications);
 
         /// <summary>标记指定通知为已读</summary>
         void MarkAsRead(string notificationId);

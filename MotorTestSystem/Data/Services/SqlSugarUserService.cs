@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using MotorTestSystem.Models;
 using MotorTestSystem.Models.Entities;
 
 namespace MotorTestSystem.Services
 {
     /// <summary>
-    /// 基于 SqlSugar + SQLite 的用户服务实现
+    /// 基于 SqlSugar + SQLite 的用户服务实现（全异步）
     /// </summary>
     public class SqlSugarUserService : IUserService
     {
@@ -19,7 +20,6 @@ namespace MotorTestSystem.Services
         public SqlSugarUserService(SqlSugarDbContext ctx)
         {
             _ctx = ctx;
-            // 从数据库中获取最大 ID 序号，确保后续 ID 不重复
             InitializeIdSequence();
         }
 
@@ -41,32 +41,32 @@ namespace MotorTestSystem.Services
 
         // ===== 查询 =====
 
-        public IReadOnlyList<AppUser> GetAll()
+        public async Task<IReadOnlyList<AppUser>> GetAllAsync()
         {
-            var entities = _ctx.Db.Queryable<UserEntity>()
+            var entities = await _ctx.Db.Queryable<UserEntity>()
                 .OrderBy(u => u.Id)
-                .ToList();
+                .ToListAsync();
 
             return entities.Select(ToModel).ToList();
         }
 
-        public AppUser? GetById(string id)
+        public async Task<AppUser?> GetByIdAsync(string id)
         {
-            var entity = _ctx.Db.Queryable<UserEntity>()
-                .First(u => u.Id == id);
+            var entity = await _ctx.Db.Queryable<UserEntity>()
+                .FirstAsync(u => u.Id == id);
             return entity != null ? ToModel(entity) : null;
         }
 
-        public AppUser? GetByAccount(string account)
+        public async Task<AppUser?> GetByAccountAsync(string account)
         {
-            var entity = _ctx.Db.Queryable<UserEntity>()
-                .First(u => u.Account == account);
+            var entity = await _ctx.Db.Queryable<UserEntity>()
+                .FirstAsync(u => u.Account == account);
             return entity != null ? ToModel(entity) : null;
         }
 
         // ===== 增删改 =====
 
-        public string? Create(string account, string name, string password, AppRole role, UserStatus status = UserStatus.Active)
+        public async Task<string?> CreateAsync(string account, string name, string password, AppRole role, UserStatus status = UserStatus.Active)
         {
             if (string.IsNullOrWhiteSpace(account))
                 return "账号不能为空";
@@ -77,8 +77,7 @@ namespace MotorTestSystem.Services
             if (string.IsNullOrWhiteSpace(password))
                 return "密码不能为空";
 
-            // 检查账号唯一性
-            if (_ctx.Db.Queryable<UserEntity>().Any(u => u.Account == account))
+            if (await _ctx.Db.Queryable<UserEntity>().AnyAsync(u => u.Account == account))
                 return $"账号 {account} 已存在";
 
             var entity = new UserEntity
@@ -93,13 +92,13 @@ namespace MotorTestSystem.Services
                 UpdatedAt = DateTime.Now,
             };
 
-            _ctx.Db.Insertable(entity).ExecuteCommand();
-            return null; // 成功
+            await _ctx.Db.Insertable(entity).ExecuteCommandAsync();
+            return null;
         }
 
-        public string? Update(string userId, string name, AppRole role, UserStatus status)
+        public async Task<string?> UpdateAsync(string userId, string name, AppRole role, UserStatus status)
         {
-            var entity = _ctx.Db.Queryable<UserEntity>().First(u => u.Id == userId);
+            var entity = await _ctx.Db.Queryable<UserEntity>().FirstAsync(u => u.Id == userId);
             if (entity == null)
                 return "用户不存在";
 
@@ -111,25 +110,25 @@ namespace MotorTestSystem.Services
             entity.Status = (int)status;
             entity.UpdatedAt = DateTime.Now;
 
-            _ctx.Db.Updateable(entity).ExecuteCommand();
+            await _ctx.Db.Updateable(entity).ExecuteCommandAsync();
             return null;
         }
 
-        public string? Delete(string userId)
+        public async Task<string?> DeleteAsync(string userId)
         {
-            var entity = _ctx.Db.Queryable<UserEntity>().First(u => u.Id == userId);
+            var entity = await _ctx.Db.Queryable<UserEntity>().FirstAsync(u => u.Id == userId);
             if (entity == null)
                 return "用户不存在";
 
-            _ctx.Db.Deleteable(entity).ExecuteCommand();
+            await _ctx.Db.Deleteable(entity).ExecuteCommandAsync();
             return null;
         }
 
         // ===== 密码管理 =====
 
-        public string? ResetPassword(string userId, string newPassword)
+        public async Task<string?> ResetPasswordAsync(string userId, string newPassword)
         {
-            var entity = _ctx.Db.Queryable<UserEntity>().First(u => u.Id == userId);
+            var entity = await _ctx.Db.Queryable<UserEntity>().FirstAsync(u => u.Id == userId);
             if (entity == null)
                 return "用户不存在";
 
@@ -138,13 +137,13 @@ namespace MotorTestSystem.Services
 
             entity.PasswordHash = HashPassword(newPassword);
             entity.UpdatedAt = DateTime.Now;
-            _ctx.Db.Updateable(entity).ExecuteCommand();
+            await _ctx.Db.Updateable(entity).ExecuteCommandAsync();
             return null;
         }
 
-        public string? ChangePassword(string userId, string oldPassword, string newPassword)
+        public async Task<string?> ChangePasswordAsync(string userId, string oldPassword, string newPassword)
         {
-            var entity = _ctx.Db.Queryable<UserEntity>().First(u => u.Id == userId);
+            var entity = await _ctx.Db.Queryable<UserEntity>().FirstAsync(u => u.Id == userId);
             if (entity == null)
                 return "用户不存在";
 
@@ -156,41 +155,37 @@ namespace MotorTestSystem.Services
 
             entity.PasswordHash = HashPassword(newPassword);
             entity.UpdatedAt = DateTime.Now;
-            _ctx.Db.Updateable(entity).ExecuteCommand();
+            await _ctx.Db.Updateable(entity).ExecuteCommandAsync();
             return null;
         }
 
-        public bool ValidatePassword(string account, string password)
+        public async Task<bool> ValidatePasswordAsync(string account, string password)
         {
-            var entity = _ctx.Db.Queryable<UserEntity>()
-                .First(u => u.Account == account);
+            var entity = await _ctx.Db.Queryable<UserEntity>()
+                .FirstAsync(u => u.Account == account);
 
             if (entity == null) return false;
             if ((UserStatus)entity.Status == UserStatus.Disabled) return false;
             return entity.PasswordHash == HashPassword(password);
         }
 
-        public void UpdateLastLoginTime(string userId)
+        public async Task UpdateLastLoginTimeAsync(string userId)
         {
-            var entity = _ctx.Db.Queryable<UserEntity>().First(u => u.Id == userId);
+            var entity = await _ctx.Db.Queryable<UserEntity>().FirstAsync(u => u.Id == userId);
             if (entity != null)
             {
                 entity.LastLoginTime = DateTime.Now;
-                _ctx.Db.Updateable(entity)
+                await _ctx.Db.Updateable(entity)
                     .UpdateColumns(u => new { u.LastLoginTime })
-                    .ExecuteCommand();
+                    .ExecuteCommandAsync();
             }
         }
-
-        // ===== 密码哈希 =====
 
         internal static string HashPassword(string password)
         {
             var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
             return Convert.ToHexString(bytes);
         }
-
-        // ===== 实体 → 领域模型转换 =====
 
         private static AppUser ToModel(UserEntity entity)
         {
