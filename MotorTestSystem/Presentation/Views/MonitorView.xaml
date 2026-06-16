@@ -123,42 +123,15 @@
                     </Border>
 
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel Margin="20,20,20,20">
-                            <Border Height="56" Background="#202A35" CornerRadius="2" Padding="14,0">
-                                <Grid>
-                                    <TextBlock Text="SN-99482-XA1" Style="{StaticResource CyanMonoStyle}"/>
-                                    <TextBlock Text="OK" Foreground="{StaticResource GreenBrush}" FontFamily="Consolas" FontSize="19" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
-                            <Border Height="56" BorderBrush="#2B3744" BorderThickness="0,0,0,1" Padding="14,0">
-                                <Grid>
-                                    <TextBlock Text="SN-99481-XA1" Style="{StaticResource CyanMonoStyle}"/>
-                                    <TextBlock Text="OK" Foreground="{StaticResource GreenBrush}" FontFamily="Consolas" FontSize="19" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
-                            <Border Height="68" Background="#3A2028" Padding="14,0">
-                                <Grid>
-                                    <TextBlock Text="SN-99480-XA1" Style="{StaticResource CyanMonoStyle}"/>
-                                    <TextBlock Text="NG" Foreground="{StaticResource RedBrush}" FontFamily="Consolas" FontSize="19" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <TextBlock.Effect>
-                                            <DropShadowEffect Color="#FF5258" BlurRadius="12" ShadowDepth="0" Opacity="0.85"/>
-                                        </TextBlock.Effect>
-                                    </TextBlock>
-                                </Grid>
-                            </Border>
-                            <Border Height="56" BorderBrush="#2B3744" BorderThickness="0,0,0,1" Padding="14,0">
-                                <Grid>
-                                    <TextBlock Text="SN-99479-XA1" Style="{StaticResource CyanMonoStyle}"/>
-                                    <TextBlock Text="OK" Foreground="{StaticResource GreenBrush}" FontFamily="Consolas" FontSize="19" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
-                            <Border Height="56" Padding="14,0">
-                                <Grid>
-                                    <TextBlock Text="SN-99478-XA1" Style="{StaticResource CyanMonoStyle}"/>
-                                    <TextBlock Text="OK" Foreground="{StaticResource GreenBrush}" FontFamily="Consolas" FontSize="19" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
-                        </StackPanel>
+                        <ItemsControl ItemsSource="{Binding RecentBarcodes}" Margin="20,20,20,20">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Height="56" Background="#202A35" CornerRadius="2" Padding="14,0">
+                                        <TextBlock Text="{Binding}" Style="{StaticResource CyanMonoStyle}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </ScrollViewer>
                 </Grid>
             </Border>
@@ -191,26 +164,18 @@
                     </Border>
 
                     <StackPanel Grid.Row="1" Margin="20,24,20,0">
-                        <Grid Margin="0,0,0,28">
-                            <Border Width="3" Background="{StaticResource RedBrush}" HorizontalAlignment="Left"/>
-                            <StackPanel Margin="22,0,0,0">
-                                <TextBlock Text="{root:Loc A4: 噪音超标}" Foreground="{StaticResource RedBrush}" FontSize="18" FontWeight="Bold"/>
-                                <TextBlock Text="{root:Loc SN-99480-XA1 测量值 78.9dB (限值 65.0)}"
-                                           Foreground="#BFC8D1"
-                                           FontSize="15"
-                                           Margin="0,12,0,0"/>
-                                <TextBlock Text="14:21:10 UTC" Foreground="#7F8B95" FontSize="13" Margin="0,14,0,0"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <Grid>
-                            <Border Width="3" Background="#D59A00" HorizontalAlignment="Left"/>
-                            <StackPanel Margin="22,0,0,0">
-                                <TextBlock Text="{root:Loc Cam-2 离线}" Foreground="#D59A00" FontSize="18" FontWeight="Bold"/>
-                                <TextBlock Text="{root:Loc B线视图连接丢失}" Foreground="#BFC8D1" FontSize="15" Margin="0,12,0,0"/>
-                                <TextBlock Text="13:45:00 UTC" Foreground="#7F8B95" FontSize="13" Margin="0,14,0,0"/>
-                            </StackPanel>
-                        </Grid>
+                        <ItemsControl ItemsSource="{Binding Alerts}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,28">
+                                        <Border Width="3" Background="{StaticResource RedBrush}" HorizontalAlignment="Left"/>
+                                        <StackPanel Margin="22,0,0,0">
+                                            <TextBlock Text="{Binding}" Foreground="{StaticResource RedBrush}" FontSize="18" FontWeight="Bold"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -387,7 +352,7 @@
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Text="{root:Loc 电压}" Style="{StaticResource MetricLabelStyle}"/>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="220.1" Style="{StaticResource MetricValueStyle}"/>
+                                        <TextBlock Text="{Binding NoLoadStations[0].Voltage, StringFormat={}{0:F1}}" Style="{StaticResource MetricValueStyle}"/>
                                         <TextBlock Text=" V" Foreground="{StaticResource MutedBrush}" FontSize="14" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
                                     </StackPanel>
                                 </StackPanel>
@@ -408,8 +373,8 @@
                             </Grid>
                             <Border Height="1" Background="#2F3A47" Margin="0,16,0,26"/>
                             <Grid>
-                                <ProgressBar Value="60" Style="{StaticResource ThinProgressBarStyle}" VerticalAlignment="Center"/>
-                                <TextBlock Text="60%" Foreground="{StaticResource CyanBrush}" FontFamily="Consolas" FontSize="17" HorizontalAlignment="Right" Margin="0,0,0,-26"/>
+                                <ProgressBar Value="{Binding NoLoadStations[0].Progress}" Style="{StaticResource ThinProgressBarStyle}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding NoLoadStations[0].Progress, StringFormat={}{0:F0}%}" Foreground="{StaticResource CyanBrush}" FontFamily="Consolas" FontSize="17" HorizontalAlignment="Right" Margin="0,0,0,-26"/>
                             </Grid>
                         </StackPanel>
                     </Grid>
@@ -458,8 +423,8 @@
                             </Grid>
                             <Border Height="1" Background="#2F3A47" Margin="0,16,0,26"/>
                             <Grid>
-                                <ProgressBar Value="85" Style="{StaticResource ThinProgressBarStyle}" VerticalAlignment="Center"/>
-                                <TextBlock Text="85%" Foreground="{StaticResource CyanBrush}" FontFamily="Consolas" FontSize="17" HorizontalAlignment="Right" Margin="0,0,0,-26"/>
+                                <ProgressBar Value="{Binding NoiseStations[0].Progress}" Style="{StaticResource ThinProgressBarStyle}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding NoiseStations[0].Progress, StringFormat={}{0:F0}%}" Foreground="{StaticResource CyanBrush}" FontFamily="Consolas" FontSize="17" HorizontalAlignment="Right" Margin="0,0,0,-26"/>
                             </Grid>
                         </StackPanel>
                     </Grid>
@@ -521,20 +486,20 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Text="{root:Loc 电压}" Style="{StaticResource MetricLabelStyle}"/>
-                                    <TextBlock Text="-- V" Foreground="#8B969F" FontFamily="Consolas" FontSize="22"/>
+                                    <TextBlock Text="{Binding NoLoadStations[1].Voltage, StringFormat={}{0:F1} V}" Foreground="#8B969F" FontFamily="Consolas" FontSize="22"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="14,0,0,0">
                                     <TextBlock Text="{root:Loc 电流}" Style="{StaticResource MetricLabelStyle}"/>
-                                    <TextBlock Text="-- A" Foreground="#8B969F" FontFamily="Consolas" FontSize="22"/>
+                                    <TextBlock Text="{Binding NoLoadStations[1].Current, StringFormat={}{0:F1} A}" Foreground="#8B969F" FontFamily="Consolas" FontSize="22"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Margin="14,0,0,0">
                                     <TextBlock Text="{root:Loc 转速}" Style="{StaticResource MetricLabelStyle}"/>
-                                    <TextBlock Text="-- RPM" Foreground="#8B969F" FontFamily="Consolas" FontSize="22"/>
+                                    <TextBlock Text="{Binding NoLoadStations[1].Rpm, StringFormat={}{0} RPM}" Foreground="#8B969F" FontFamily="Consolas" FontSize="22"/>
                                 </StackPanel>
                             </Grid>
                             <Border Height="1" Background="#26313A" Margin="0,18,0,26"/>
                             <Grid>
-                                <ProgressBar Value="0" Style="{StaticResource ThinProgressBarStyle}" Foreground="#2A323B" VerticalAlignment="Center"/>
+                                <ProgressBar Value="{Binding NoLoadStations[1].Progress}" Style="{StaticResource ThinProgressBarStyle}" Foreground="#2A323B" VerticalAlignment="Center"/>
                                 <TextBlock Text="{root:Loc 准备就绪}" Foreground="#9EA8B2" FontSize="15" HorizontalAlignment="Right" Margin="0,0,0,-26"/>
                             </Grid>
                         </StackPanel>
@@ -614,8 +579,8 @@
                             </Grid>
                             <Border Height="1" Background="#2F3A47" Margin="0,18,0,26"/>
                             <Grid>
-                                <ProgressBar Value="20" Style="{StaticResource ThinProgressBarStyle}" VerticalAlignment="Center"/>
-                                <TextBlock Text="20%" Foreground="{StaticResource CyanBrush}" FontFamily="Consolas" FontSize="17" HorizontalAlignment="Right" Margin="0,0,0,-26"/>
+                                <ProgressBar Value="{Binding LoadStations[1].Progress}" Style="{StaticResource ThinProgressBarStyle}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding LoadStations[1].Progress, StringFormat={}{0:F0}%}" Foreground="{StaticResource CyanBrush}" FontFamily="Consolas" FontSize="17" HorizontalAlignment="Right" Margin="0,0,0,-26"/>
                             </Grid>
                         </StackPanel>
                     </Grid>

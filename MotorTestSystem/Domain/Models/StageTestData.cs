@@ -21,5 +21,10 @@ namespace MotorTestSystem.Models
 
         public double? LoadCurrent { get; set; }
         public int? LoadSpeed { get; set; }
+
+        public double? Progress { get; set; }
+        public double? Voltage { get; set; }
+        public double? Current { get; set; }
+        public int? RPM { get; set; }
     }
 }

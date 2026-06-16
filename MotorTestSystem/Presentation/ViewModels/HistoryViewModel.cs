@@ -160,6 +160,7 @@ namespace MotorTestSystem.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasSelectedMotor))]
         [NotifyPropertyChangedFor(nameof(SelectedMotorResult))]
+        [NotifyCanExecuteChangedFor(nameof(PrintTraceCommand))]
         private MotorTestRecordModel? _selectedMotor;
 
         public bool HasSelectedMotor => SelectedMotor != null;
@@ -170,6 +171,7 @@ namespace MotorTestSystem.ViewModels
         // ---- 打印状态 ----
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsNotPrinting))]
+        [NotifyCanExecuteChangedFor(nameof(PrintTraceCommand))]
         private bool _isPrinting;
 
         [ObservableProperty]
@@ -506,6 +508,14 @@ namespace MotorTestSystem.ViewModels
         partial void OnCurrentPageChanged(int value)
         {
             RenderCurrentPage();
+            PreviousPageCommand.NotifyCanExecuteChanged();
+            NextPageCommand.NotifyCanExecuteChanged();
+        }
+
+        partial void OnTotalPagesChanged(int value)
+        {
+            PreviousPageCommand.NotifyCanExecuteChanged();
+            NextPageCommand.NotifyCanExecuteChanged();
         }
 
         private void RenderCurrentPage()
@@ -574,22 +584,20 @@ namespace MotorTestSystem.ViewModels
             }
         }
 
-        [RelayCommand]
+        private bool CanPreviousPage() => CurrentPage > 1;
+
+        [RelayCommand(CanExecute = nameof(CanPreviousPage))]
         private void PreviousPage()
         {
-            if (CurrentPage > 1)
-            {
-                CurrentPage--;
-            }
+            CurrentPage--;
         }
 
-        [RelayCommand]
+        private bool CanNextPage() => CurrentPage < TotalPages;
+
+        [RelayCommand(CanExecute = nameof(CanNextPage))]
         private void NextPage()
         {
-            if (CurrentPage < TotalPages)
-            {
-                CurrentPage++;
-            }
+            CurrentPage++;
         }
 
         [RelayCommand]
@@ -668,11 +676,13 @@ namespace MotorTestSystem.ViewModels
             }
         }
 
+        private bool CanPrintTrace() => !IsPrinting && SelectedMotor != null;
+
         // ---- 任务三：操作面板命令 ----
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanPrintTrace))]
         private async Task PrintTraceAsync(CancellationToken cancellationToken)
         {
-            if (SelectedMotor == null) return;
+            if (!CanPrintTrace()) return;
 
             IsPrinting = true;
             PrintStatus = "正在准备追溯单...";

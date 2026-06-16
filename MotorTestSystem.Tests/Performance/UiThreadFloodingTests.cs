@@ -125,23 +125,69 @@ namespace MotorTestSystem.Tests.Performance
 
     public static class StaHelper
     {
-        public static Task RunAsync(Func<Task> action)
+        private static void ResetApplicationStaticFields()
+        {
+            var appField = typeof(Application).GetField("_appInstance",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            if (appField != null)
+            {
+                appField.SetValue(null, null);
+            }
+            var appCreatedField = typeof(Application).GetField("_appCreatedInThisAppDomain",
+                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            if (appCreatedField != null)
+            {
+                appCreatedField.SetValue(null, false);
+            }
+        }
+
+         public static Task RunAsync(Func<Task> action)
         {
             var tcs = new TaskCompletionSource();
             var thread = new Thread(() =>
             {
                 try
                 {
+                    ResetApplicationStaticFields();
                     if (Application.Current == null)
                     {
-                        new Application();
+                        try
+                        {
+                            new Application();
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // Ignore if Application was already created in AppDomain
+                        }
                     }
-                    action().GetAwaiter().GetResult();
+
+                    var dispatcher = Dispatcher.CurrentDispatcher;
+                    var syncContext = new DispatcherSynchronizationContext(dispatcher);
+                    SynchronizationContext.SetSynchronizationContext(syncContext);
+
+                    var task = action();
+                    var frame = new DispatcherFrame();
+                    task.ContinueWith(t =>
+                    {
+                        dispatcher.BeginInvoke(new Action(() => { frame.Continue = false; }));
+                    });
+
+                    if (!task.IsCompleted)
+                    {
+                        Dispatcher.PushFrame(frame);
+                    }
+
+                    task.GetAwaiter().GetResult();
                     tcs.SetResult();
                 }
                 catch (Exception ex)
                 {
                     tcs.SetException(ex);
+                }
+                finally
+                {
+                    ResetApplicationStaticFields();
+                    SynchronizationContext.SetSynchronizationContext(null);
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);

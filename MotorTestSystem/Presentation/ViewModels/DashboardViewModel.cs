@@ -19,6 +19,7 @@ namespace MotorTestSystem.ViewModels
         private readonly IMotorTestRepository _repository;
         private readonly BackendRuntime _runtime;
         private readonly DispatcherTimer _refreshTimer;
+        private readonly Dispatcher _dispatcher;
 
         #region KPI Card Properties
 
@@ -57,10 +58,10 @@ namespace MotorTestSystem.ViewModels
         #region Chart Properties
 
         [ObservableProperty]
-        private ISeries[] _outputSeries = Array.Empty<ISeries>();
+        private System.Collections.ObjectModel.ObservableCollection<ISeries> _outputSeries = new();
 
         [ObservableProperty]
-        private ISeries[] _defectDistributionSeries = Array.Empty<ISeries>();
+        private System.Collections.ObjectModel.ObservableCollection<ISeries> _defectDistributionSeries = new();
 
         [ObservableProperty]
         private Axis[] _xAxes = Array.Empty<Axis>();
@@ -75,7 +76,7 @@ namespace MotorTestSystem.ViewModels
         private Axis[] _passRateYAxes = Array.Empty<Axis>();
 
         [ObservableProperty]
-        private ISeries[] _passRateSeries = Array.Empty<ISeries>();
+        private System.Collections.ObjectModel.ObservableCollection<ISeries> _passRateSeries = new();
 
         #endregion
 
@@ -146,6 +147,84 @@ namespace MotorTestSystem.ViewModels
         {
             _repository = repository;
             _runtime = runtime;
+            _dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+
+            OutputSeries = new System.Collections.ObjectModel.ObservableCollection<ISeries>
+            {
+                new StackedColumnSeries<int>
+                {
+                    Name = "合格",
+                    Values = new System.Collections.ObjectModel.ObservableCollection<int>(new int[8]),
+                    Stroke = null,
+                    Fill = new SolidColorPaint(SKColor.Parse("#00DFFF")),
+                    Padding = 8,
+                    MaxBarWidth = 32
+                },
+                new StackedColumnSeries<int>
+                {
+                    Name = "不合格",
+                    Values = new System.Collections.ObjectModel.ObservableCollection<int>(new int[8]),
+                    Stroke = null,
+                    Fill = new SolidColorPaint(SKColor.Parse("#FF3366")),
+                    Padding = 8,
+                    MaxBarWidth = 32
+                }
+            };
+
+            DefectDistributionSeries = new System.Collections.ObjectModel.ObservableCollection<ISeries>
+            {
+                new PieSeries<double>
+                {
+                    Name = "空载不合格",
+                    Values = new System.Collections.ObjectModel.ObservableCollection<double>(new double[] { 33.3 }),
+                    InnerRadius = 35,
+                    Fill = new SolidColorPaint(SKColor.Parse("#FFA500")),
+                    Stroke = null
+                },
+                new PieSeries<double>
+                {
+                    Name = "噪音不合格",
+                    Values = new System.Collections.ObjectModel.ObservableCollection<double>(new double[] { 33.3 }),
+                    InnerRadius = 35,
+                    Fill = new SolidColorPaint(SKColor.Parse("#FF3366")),
+                    Stroke = null
+                },
+                new PieSeries<double>
+                {
+                    Name = "负载不合格",
+                    Values = new System.Collections.ObjectModel.ObservableCollection<double>(new double[] { 33.4 }),
+                    InnerRadius = 35,
+                    Fill = new SolidColorPaint(SKColor.Parse("#8E9AA7")),
+                    Stroke = null
+                }
+            };
+
+            PassRateSeries = new System.Collections.ObjectModel.ObservableCollection<ISeries>
+            {
+                new LineSeries<double>
+                {
+                    Name = "实际",
+                    Values = new System.Collections.ObjectModel.ObservableCollection<double>(new double[8]),
+                    Stroke = new SolidColorPaint(SKColor.Parse("#00FFB2"), 4),
+                    Fill = new LinearGradientPaint(
+                        new[] { SKColor.Parse("#4000FFB2"), SKColor.Parse("#0000FFB2") },
+                        new SKPoint(0.5f, 0),
+                        new SKPoint(0.5f, 1)),
+                    GeometrySize = 10,
+                    GeometryStroke = new SolidColorPaint(SKColor.Parse("#00FFB2"), 2),
+                    GeometryFill = new SolidColorPaint(SKColor.Parse("#1A1D24")),
+                    LineSmoothness = 0.6
+                },
+                new LineSeries<double>
+                {
+                    Name = $"目标 ({TargetPassRate}%)",
+                    Values = new System.Collections.ObjectModel.ObservableCollection<double>(new double[8]),
+                    Stroke = new SolidColorPaint(SKColor.Parse("#FFC107"), 2),
+                    Fill = null,
+                    GeometrySize = 0,
+                    LineSmoothness = 0
+                }
+            };
 
             // 初始化良率 Y 轴
             PassRateYAxes = new Axis[]
@@ -338,27 +417,17 @@ namespace MotorTestSystem.ViewModels
 
             // 更新小时生产统计柱状图
             XAxes = CreateAxis(labels, -0.5, 7.5);
-            OutputSeries = new ISeries[]
+            if (OutputSeries.Count == 2 && 
+                OutputSeries[0] is StackedColumnSeries<int> okSeries && 
+                okSeries.Values is System.Collections.ObjectModel.ObservableCollection<int> okColl &&
+                OutputSeries[1] is StackedColumnSeries<int> ngSeries && 
+                ngSeries.Values is System.Collections.ObjectModel.ObservableCollection<int> ngColl)
             {
-                new StackedColumnSeries<int>
-                {
-                    Name = "合格",
-                    Values = okValues,
-                    Stroke = null,
-                    Fill = new SolidColorPaint(SKColor.Parse("#00DFFF")),
-                    Padding = 8,
-                    MaxBarWidth = 32
-                },
-                new StackedColumnSeries<int>
-                {
-                    Name = "不合格",
-                    Values = ngValues,
-                    Stroke = null,
-                    Fill = new SolidColorPaint(SKColor.Parse("#FF3366")),
-                    Padding = 8,
-                    MaxBarWidth = 32
-                }
-            };
+                okColl.Clear();
+                foreach (var val in okValues) okColl.Add(val);
+                ngColl.Clear();
+                foreach (var val in ngValues) ngColl.Add(val);
+            }
 
             YAxes = new Axis[]
             {
@@ -374,28 +443,49 @@ namespace MotorTestSystem.ViewModels
             await UpdatePassRateChartAsync(labels, passRateValues, useRealData);
         }
 
+        private void UpdatePassRateValues(double[] values)
+        {
+            if (PassRateSeries.Count == 2 &&
+                PassRateSeries[0] is LineSeries<double> actualSeries &&
+                actualSeries.Values is System.Collections.ObjectModel.ObservableCollection<double> actualColl &&
+                PassRateSeries[1] is LineSeries<double> targetSeries &&
+                targetSeries.Values is System.Collections.ObjectModel.ObservableCollection<double> targetColl)
+            {
+                actualColl.Clear();
+                foreach (var val in values)
+                {
+                    actualColl.Add(val);
+                }
+
+                targetColl.Clear();
+                for (int i = 0; i < values.Length; i++)
+                {
+                    targetColl.Add(TargetPassRate);
+                }
+            }
+        }
+
         private async System.Threading.Tasks.Task UpdatePassRateChartAsync(string[] todayLabels, double[] todayValues, bool hasRealData)
         {
             if (_currentDimension == "今日")
             {
                 PassRateXAxes = CreateAxis(todayLabels, -0.5, 7.5);
-                PassRateSeries = hasRealData
-                    ? CreateLineSeries(todayValues, true)
-                    : CreateLineSeries(Enumerable.Repeat(0.0, todayLabels.Length).ToArray(), true);
+                double[] targetValues = hasRealData ? todayValues : Enumerable.Repeat(0.0, todayLabels.Length).ToArray();
+                UpdatePassRateValues(targetValues);
             }
             else if (_currentDimension == "本周")
             {
                 var weekLabels = new[] { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
                 var weekValues = await CalculateWeeklyPassRatesAsync();
                 PassRateXAxes = CreateAxis(weekLabels, -0.5, 6.5);
-                PassRateSeries = CreateLineSeries(weekValues, true);
+                UpdatePassRateValues(weekValues);
             }
             else if (_currentDimension == "本月")
             {
                 var monthLabels = new[] { "第一周", "第二周", "第三周", "第四周" };
                 var monthValues = await CalculateMonthlyPassRatesAsync();
                 PassRateXAxes = CreateAxis(monthLabels, -0.5, 3.5);
-                PassRateSeries = CreateLineSeries(monthValues, true);
+                UpdatePassRateValues(monthValues);
             }
         }
 
@@ -464,33 +554,18 @@ namespace MotorTestSystem.ViewModels
             double noise = defectSummary.TotalNgCount > 0 ? defectSummary.NoisePercentage : 33.3;
             double load = defectSummary.TotalNgCount > 0 ? defectSummary.LoadPercentage : 33.4;
 
-            DefectDistributionSeries = new ISeries[]
+            if (DefectDistributionSeries.Count == 3 &&
+                DefectDistributionSeries[0] is PieSeries<double> noLoadSeries && noLoadSeries.Values is System.Collections.ObjectModel.ObservableCollection<double> noLoadColl &&
+                DefectDistributionSeries[1] is PieSeries<double> noiseSeries && noiseSeries.Values is System.Collections.ObjectModel.ObservableCollection<double> noiseColl &&
+                DefectDistributionSeries[2] is PieSeries<double> loadSeries && loadSeries.Values is System.Collections.ObjectModel.ObservableCollection<double> loadColl)
             {
-                new PieSeries<double>
-                {
-                    Name = "空载不合格",
-                    Values = new double[] { noLoad },
-                    InnerRadius = 35,
-                    Fill = new SolidColorPaint(SKColor.Parse("#FFA500")),
-                    Stroke = null
-                },
-                new PieSeries<double>
-                {
-                    Name = "噪音不合格",
-                    Values = new double[] { noise },
-                    InnerRadius = 35,
-                    Fill = new SolidColorPaint(SKColor.Parse("#FF3366")),
-                    Stroke = null
-                },
-                new PieSeries<double>
-                {
-                    Name = "负载不合格",
-                    Values = new double[] { load },
-                    InnerRadius = 35,
-                    Fill = new SolidColorPaint(SKColor.Parse("#8E9AA7")),
-                    Stroke = null
-                }
-            };
+                noLoadColl.Clear();
+                noLoadColl.Add(noLoad);
+                noiseColl.Clear();
+                noiseColl.Add(noise);
+                loadColl.Clear();
+                loadColl.Add(load);
+            }
         }
 
         private async System.Threading.Tasks.Task RefreshFaultRankingAsync()

@@ -17,6 +17,8 @@ namespace MotorTestSystem.ViewModels
         public ObservableCollection<StationState> NoiseStations { get; } = new();
         public ObservableCollection<StationState> LoadStations { get; } = new();
         public ObservableCollection<string> SystemLogs { get; } = new();
+        public ObservableCollection<string> RecentBarcodes { get; } = new();
+        public ObservableCollection<string> Alerts { get; } = new();
 
         public MonitorViewModel()
             : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult())
@@ -156,6 +158,15 @@ namespace MotorTestSystem.ViewModels
                 {
                     SystemLogs.RemoveAt(SystemLogs.Count - 1);
                 }
+
+                if (message.Contains("警报") || message.Contains("超标") || message.Contains("异常"))
+                {
+                    Alerts.Insert(0, message);
+                    while (Alerts.Count > 5)
+                    {
+                        Alerts.RemoveAt(5);
+                    }
+                }
             });
         }
 
@@ -190,6 +201,22 @@ namespace MotorTestSystem.ViewModels
 
             state.LoadCurrent = data.LoadCurrent ?? state.LoadCurrent;
             state.LoadSpeed = data.LoadSpeed ?? state.LoadSpeed;
+
+            // 新增属性更新
+            state.Progress = data.Progress ?? state.Progress;
+            state.Voltage = data.Voltage ?? state.Voltage;
+            state.Current = data.Current ?? state.Current;
+            state.Rpm = data.RPM ?? state.Rpm;
+
+            // 更新最近条码列表
+            if (!string.IsNullOrEmpty(data.Barcode) && data.Barcode != "等待中")
+            {
+                RecentBarcodes.Insert(0, $"{snapshot.StationId}: {data.Barcode}");
+                while (RecentBarcodes.Count > 5)
+                {
+                    RecentBarcodes.RemoveAt(5);
+                }
+            }
         }
 
         private static void RunOnUiThread(Action action)

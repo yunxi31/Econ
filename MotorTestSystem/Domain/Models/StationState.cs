@@ -63,6 +63,18 @@ namespace MotorTestSystem.Models
         [ObservableProperty]
         private int _loadSpeed;
 
+        [ObservableProperty]
+        private double _progress;
+
+        [ObservableProperty]
+        private double _voltage;
+
+        [ObservableProperty]
+        private double _current;
+
+        [ObservableProperty]
+        private int _rpm;
+
         public string DisplayToolTip => $"{Id}工位 ({GetTestTypeName(Id)}): {GetStatusName(Status)}";
 
         private static string GetTestTypeName(string id)
