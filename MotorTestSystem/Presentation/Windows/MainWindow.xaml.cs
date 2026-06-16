@@ -154,11 +154,41 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
-    private void LogoutButton_Click(object sender, RoutedEventArgs e)
+    private async void LogoutButton_Click(object sender, RoutedEventArgs e)
     {
         UserCardPopup.IsOpen = false;
         IsLoggingOut = true;
-        this.Close();
+
+        try
+        {
+            // 1. 清理 AuthService 会话
+            var runtime = Services.BackendRuntime.GetSharedAsync().GetAwaiter().GetResult();
+            runtime?.AuthService.Logout();
+
+            // 2. 停止 PLC 轮询
+            if (runtime?.PollingService != null)
+            {
+                try { await runtime.PollingService.StopAsync(); }
+                catch { /* 抑制停止过程中的异常 */ }
+            }
+
+            // 3. 停止批量写入
+            if (runtime?.BatchWriter != null)
+            {
+                try { await runtime.BatchWriter.StopAsync(); }
+                catch { /* 抑制停止过程中的异常 */ }
+            }
+
+            // 4. 释放运行时资源
+            runtime?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine($"Logout cleanup error: {ex.Message}");
+        }
+
+        // 5. 显式关闭应用程序（确保进程终止）
+        Application.Current.Shutdown();
     }
 
     private void LanguageToggleButton_Click(object sender, RoutedEventArgs e)

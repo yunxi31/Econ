@@ -115,7 +115,11 @@ namespace MotorTestSystem.Services
                 NoLoadCurrent = current,
                 NoLoadSpeed = speed,
                 ShaftLength = shaftLength,
-                KnurlDiameter = knurlDiameter
+                KnurlDiameter = knurlDiameter,
+                Progress = Math.Round(30.0 + _random.NextDouble() * 60.0, 1),
+                Voltage = Math.Round(218.0 + _random.NextDouble() * 4.0, 1),
+                Current = current,
+                RPM = speed
             };
         }
 
@@ -135,7 +139,11 @@ namespace MotorTestSystem.Services
                 Result = result,
                 FwdNoise = fwdNoise,
                 RevNoise = revNoise,
-                NoiseDiff = noiseDiff
+                NoiseDiff = noiseDiff,
+                Progress = Math.Round(40.0 + _random.NextDouble() * 55.0, 1),
+                Voltage = Math.Round(218.0 + _random.NextDouble() * 4.0, 1),
+                Current = Math.Round(0.8 + _random.NextDouble() * 0.4, 3),
+                RPM = _random.Next(1800, 2100)
             };
         }
 
@@ -153,7 +161,11 @@ namespace MotorTestSystem.Services
                 CollectedAt = DateTime.Now,
                 Result = result,
                 LoadCurrent = current,
-                LoadSpeed = speed
+                LoadSpeed = speed,
+                Progress = Math.Round(60.0 + _random.NextDouble() * 38.0, 1),
+                Voltage = Math.Round(218.0 + _random.NextDouble() * 4.0, 1),
+                Current = current,
+                RPM = speed
             };
         }
 

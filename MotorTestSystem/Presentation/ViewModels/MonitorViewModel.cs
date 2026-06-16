@@ -43,7 +43,7 @@ namespace MotorTestSystem.ViewModels
 
             _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
             _runtime.PollingService.LogReceived += OnLogReceived;
-            // _runtime.PollingService.Start();
+            _runtime.PollingService.Start();
         }
 
         private void BuildStationStates()
@@ -134,23 +134,37 @@ namespace MotorTestSystem.ViewModels
                 case "A1":
                     state.NoLoadCurrent = 1.2;
                     state.NoLoadSpeed = 1450;
+                    state.Voltage = 219.5;
+                    state.Current = 1.2;
+                    state.Rpm = 1450;
+                    state.Progress = 35.0;
+                    break;
+                case "A2":
+                    state.Voltage = 0.0;
+                    state.Current = 0.0;
+                    state.Rpm = 0;
+                    state.Progress = 0.0;
                     break;
                 case "A3":
                     state.FwdNoise = 62.4;
                     state.RevNoise = 0.8;
                     state.NoiseDiff = 28.5;
+                    state.Progress = 55.0;
                     break;
                 case "A4":
                     state.FwdNoise = 78.9;
                     state.NoiseDiff = 65.0;
+                    state.Progress = 100.0;
                     break;
                 case "A5":
                     state.LoadCurrent = 15.2;
                     state.LoadSpeed = 42;
+                    state.Progress = 100.0;
                     break;
                 case "A6":
                     state.LoadCurrent = 10.1;
                     state.LoadSpeed = 38;
+                    state.Progress = 45.0;
                     break;
             }
         }

@@ -186,7 +186,7 @@ namespace MotorTestSystem.Services
             }
 
             return new BackendRuntime(
-                configs, dbContext, repository, new PlcClientFactory(useSimulation: false),
+                configs, dbContext, repository, new PlcClientFactory(useSimulation: true),
                 userService, authService, notificationService, eventChannel,
                 hikvisionService, deadLetterQueue, notificationWriter)
             { CloudSync = cloudSync };
