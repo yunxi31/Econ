@@ -19,7 +19,10 @@ namespace MotorTestSystem.ViewModels
         public ObservableCollection<StationState> LoadStations { get; } = new();
         public ObservableCollection<string> SystemLogs { get; } = new();
         public ObservableCollection<string> RecentBarcodes { get; } = new();
-        public ObservableCollection<string> Alerts { get; } = new();
+        public ObservableCollection<AlertItem> Alerts { get; } = new();
+
+        [ObservableProperty]
+        private int _unhandledAlertCount;
 
         #region 数据丢失告警属性
 
@@ -192,9 +195,12 @@ namespace MotorTestSystem.ViewModels
 
                 if (message.Contains("警报") || message.Contains("超标") || message.Contains("异常"))
                 {
-                    Alerts.Insert(0, message);
+                    Alerts.Insert(0, new AlertItem(message, () => RunOnUiThread(() => UnhandledAlertCount--)));
+                    UnhandledAlertCount++;
                     while (Alerts.Count > 5)
                     {
+                        var removed = Alerts[5];
+                        if (!removed.IsHandled) UnhandledAlertCount--;
                         Alerts.RemoveAt(5);
                     }
                 }

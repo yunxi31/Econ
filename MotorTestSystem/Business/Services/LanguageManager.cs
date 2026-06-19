@@ -430,6 +430,10 @@ namespace MotorTestSystem
             { " 缺陷件数超警戒", " Defects Exceed Warning" },
             { "< 上一页", "< Prev" },
             { "1 未处理", "1 Unresolved" },
+            { "未处理", "Unresolved" },
+            { "标记已处理", "Mark Resolved" },
+            { "✓ 已处理", "✓ Resolved" },
+
             { "A4: 噪音超标", "A4: Noise Exceeded" },
             { "B线视图连接丢失", "B-Line View Connection Lost" },
             { "CAM-01 主测试工位", "CAM-01 Main Station" },

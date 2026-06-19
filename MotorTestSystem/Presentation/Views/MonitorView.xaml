@@ -158,7 +158,21 @@
                                 <TextBlock Text="{root:Loc 系统警报}" Style="{StaticResource SectionTitleStyle}" Margin="12,0,0,0"/>
                             </StackPanel>
                             <Border Background="#7D3C45" CornerRadius="3" Padding="11,6" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <TextBlock Text="{root:Loc 1 未处理}" Foreground="{StaticResource RedBrush}" FontSize="14"/>
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding UnhandledAlertCount}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Foreground="{StaticResource RedBrush}" FontSize="14">
+                                    <Run Text="{Binding UnhandledAlertCount, Mode=OneWay}"/>
+                                    <Run Text=" "/>
+                                    <Run Text="{root:Loc 未处理}"/>
+                                </TextBlock>
                             </Border>
                         </Grid>
                     </Border>
@@ -167,12 +181,41 @@
                         <ItemsControl ItemsSource="{Binding Alerts}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Margin="0,0,0,28">
-                                        <Border Width="3" Background="{StaticResource RedBrush}" HorizontalAlignment="Left"/>
-                                        <StackPanel Margin="22,0,0,0">
-                                            <TextBlock Text="{Binding}" Foreground="{StaticResource RedBrush}" FontSize="18" FontWeight="Bold"/>
+                                    <Grid Margin="0,0,0,18">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border x:Name="AccentBar" Width="3" Background="{StaticResource RedBrush}" HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
+                                        <StackPanel Margin="16,0,0,0">
+                                            <TextBlock x:Name="MsgText" Text="{Binding Message}" Foreground="{StaticResource RedBrush}" FontSize="15" FontWeight="Bold" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Timestamp}" Foreground="{StaticResource DimBrush}" FontSize="11" Margin="0,3,0,0"/>
+                                        </StackPanel>
+                                        <!-- 操作列 -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
+                                            <Border x:Name="HandleBtn"
+                                                    Background="Transparent" Cursor="Hand"
+                                                    CornerRadius="2" BorderBrush="#3A4E5C" BorderThickness="1" Padding="8,4">
+                                                <Border.InputBindings>
+                                                    <MouseBinding MouseAction="LeftClick" Command="{Binding MarkHandledCommand}"/>
+                                                </Border.InputBindings>
+                                                <TextBlock Text="{root:Loc 标记已处理}" Foreground="#8A9EAC" FontSize="11"/>
+                                            </Border>
+                                            <Border x:Name="HandledBadge"
+                                                    Visibility="Collapsed"
+                                                    Background="#182820" CornerRadius="2" Padding="8,4">
+                                                <TextBlock Text="{root:Loc ✓ 已处理}" Foreground="#3A7A5C" FontSize="11"/>
+                                            </Border>
                                         </StackPanel>
                                     </Grid>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsHandled}" Value="True">
+                                            <Setter TargetName="AccentBar" Property="Background" Value="#2E3A45"/>
+                                            <Setter TargetName="MsgText" Property="Foreground" Value="{StaticResource DimBrush}"/>
+                                            <Setter TargetName="HandleBtn" Property="Visibility" Value="Collapsed"/>
+                                            <Setter TargetName="HandledBadge" Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

@@ -93,7 +93,6 @@
             <RowDefinition Height="125"/>
             <RowDefinition Height="1.1*"/>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- TITLE / HEADER -->
@@ -106,7 +105,7 @@
                 <Border Width="4" Height="18" Background="#00DFFF" CornerRadius="2" Margin="0,0,10,0"/>
                 <TextBlock Text="{root:Loc 生产监控数据看板}" Foreground="White" FontSize="20" FontWeight="Bold"/>
             </StackPanel>
-            <TextBlock Grid.Column="1" Text="{root:Loc 数据实时更新 (每5秒)}" Foreground="#6E7C8A" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <local:DataPersistenceMonitorControl Grid.Column="1" VerticalAlignment="Center"/>
         </Grid>
  
         <!-- STATS CARDS -->
@@ -419,7 +418,5 @@
             </Border>
         </Grid>
 
-        <!-- 数据持久化监控面板 -->
-        <local:DataPersistenceMonitorControl Grid.Row="4" Margin="12,4,12,4"/>
     </Grid>
 </UserControl>

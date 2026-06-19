@@ -63,14 +63,31 @@ namespace MotorTestSystem.ViewModels
         [ObservableProperty]
         private System.Collections.ObjectModel.ObservableCollection<ISeries> _defectDistributionSeries = new();
 
-        [ObservableProperty]
-        private Axis[] _xAxes = Array.Empty<Axis>();
+        // 轴对象只创建一次，刷新时只改 Labels，避免重建触发动画闪烁
+        private readonly Axis _xAxis = new Axis
+        {
+            Labels = Array.Empty<string>(),
+            LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+            SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C"))
+        };
 
-        [ObservableProperty]
-        private Axis[] _yAxes = Array.Empty<Axis>();
+        private readonly Axis _yAxis = new Axis
+        {
+            MinLimit = 0,
+            LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+            SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C"))
+        };
 
-        [ObservableProperty]
-        private Axis[] _passRateXAxes = Array.Empty<Axis>();
+        private readonly Axis _passRateXAxis = new Axis
+        {
+            Labels = Array.Empty<string>(),
+            LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
+            SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C"))
+        };
+
+        public Axis[] XAxes { get; }
+        public Axis[] YAxes { get; }
+        public Axis[] PassRateXAxes { get; }
 
         [ObservableProperty]
         private Axis[] _passRateYAxes = Array.Empty<Axis>();
@@ -82,8 +99,20 @@ namespace MotorTestSystem.ViewModels
 
         #region List Properties
 
-        public System.Collections.ObjectModel.ObservableCollection<DefectItem> DefectList { get; } = new();
-        public System.Collections.ObjectModel.ObservableCollection<FaultReason> TopFaultList { get; } = new();
+        public System.Collections.ObjectModel.ObservableCollection<DefectItem> DefectList { get; } = new()
+        {
+            new DefectItem { Name = "空载不合格", Percentage = 0, Color = "#FFA500" },
+            new DefectItem { Name = "噪音不合格", Percentage = 0, Color = "#FF3366" },
+            new DefectItem { Name = "负载不合格", Percentage = 0, Color = "#8E9AA7" }
+        };
+        public System.Collections.ObjectModel.ObservableCollection<FaultReason> TopFaultList { get; } = new()
+        {
+            new FaultReason { Rank = "01", Name = "暂无数据", Count = 0, Color = "#8E9AA7" },
+            new FaultReason { Rank = "02", Name = "暂无数据", Count = 0, Color = "#8E9AA7" },
+            new FaultReason { Rank = "03", Name = "暂无数据", Count = 0, Color = "#8E9AA7" },
+            new FaultReason { Rank = "04", Name = "暂无数据", Count = 0, Color = "#8E9AA7" },
+            new FaultReason { Rank = "05", Name = "暂无数据", Count = 0, Color = "#8E9AA7" }
+        };
 
         #endregion
 
@@ -257,7 +286,7 @@ namespace MotorTestSystem.ViewModels
                 }
             };
 
-            // 初始化良率 Y 轴
+            // 初始化良率 Y 轴（同样只创建一次）
             PassRateYAxes = new Axis[]
             {
                 new Axis
@@ -271,6 +300,11 @@ namespace MotorTestSystem.ViewModels
                     SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C"))
                 }
             };
+
+            // 初始化只读轴数组（引用 field，避免每次刷新重建对象）
+            XAxes = new[] { _xAxis };
+            YAxes = new[] { _yAxis };
+            PassRateXAxes = new[] { _passRateXAxis };
 
             // 订阅 PLC 轮询事件，实时刷新
             _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
@@ -447,8 +481,11 @@ namespace MotorTestSystem.ViewModels
                 }
             }
 
-            // 更新小时生产统计柱状图
-            XAxes = CreateAxis(labels, -0.5, 7.5);
+            // 只更新 Labels，不重建 Axis 对象，避免触发轴动画闪烁
+            _xAxis.Labels = labels;
+            _xAxis.MinLimit = -0.5;
+            _xAxis.MaxLimit = 7.5;
+
             if (OutputSeries.Count == 2 && 
                 OutputSeries[0] is StackedColumnSeries<int> okSeries && 
                 okSeries.Values is System.Collections.ObjectModel.ObservableCollection<int> okColl &&
@@ -461,15 +498,8 @@ namespace MotorTestSystem.ViewModels
                 foreach (var val in ngValues) ngColl.Add(val);
             }
 
-            YAxes = new Axis[]
-            {
-                new Axis
-                {
-                    MinLimit = 0,
-                    LabelsPaint = new SolidColorPaint(SKColor.Parse("#6E7C8A")),
-                    SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#20232C"))
-                }
-            };
+            // Y 轴只需确认 MinLimit，无需重建
+            _yAxis.MinLimit = 0;
 
             // 更新良率趋势折线图
             await UpdatePassRateChartAsync(labels, passRateValues, useRealData);
@@ -501,7 +531,9 @@ namespace MotorTestSystem.ViewModels
         {
             if (_currentDimension == "今日")
             {
-                PassRateXAxes = CreateAxis(todayLabels, -0.5, 7.5);
+                _passRateXAxis.Labels = todayLabels;
+                _passRateXAxis.MinLimit = -0.5;
+                _passRateXAxis.MaxLimit = 7.5;
                 double[] targetValues = hasRealData ? todayValues : Enumerable.Repeat(0.0, todayLabels.Length).ToArray();
                 UpdatePassRateValues(targetValues);
             }
@@ -509,14 +541,18 @@ namespace MotorTestSystem.ViewModels
             {
                 var weekLabels = new[] { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
                 var weekValues = await CalculateWeeklyPassRatesAsync();
-                PassRateXAxes = CreateAxis(weekLabels, -0.5, 6.5);
+                _passRateXAxis.Labels = weekLabels;
+                _passRateXAxis.MinLimit = -0.5;
+                _passRateXAxis.MaxLimit = 6.5;
                 UpdatePassRateValues(weekValues);
             }
             else if (_currentDimension == "本月")
             {
                 var monthLabels = new[] { "第一周", "第二周", "第三周", "第四周" };
                 var monthValues = await CalculateMonthlyPassRatesAsync();
-                PassRateXAxes = CreateAxis(monthLabels, -0.5, 3.5);
+                _passRateXAxis.Labels = monthLabels;
+                _passRateXAxis.MinLimit = -0.5;
+                _passRateXAxis.MaxLimit = 3.5;
                 UpdatePassRateValues(monthValues);
             }
         }
@@ -565,38 +601,28 @@ namespace MotorTestSystem.ViewModels
 
             var defectSummary = await _repository.GetDefectSummaryAsync(start, end);
 
-            // 更新不良分布列表
-            DefectList.Clear();
-            if (defectSummary.TotalNgCount > 0)
-            {
-                DefectList.Add(new DefectItem { Name = "空载不合格", Percentage = defectSummary.NoLoadPercentage, Color = "#FFA500" });
-                DefectList.Add(new DefectItem { Name = "噪音不合格", Percentage = defectSummary.NoisePercentage, Color = "#FF3366" });
-                DefectList.Add(new DefectItem { Name = "负载不合格", Percentage = defectSummary.LoadPercentage, Color = "#8E9AA7" });
-            }
-            else
-            {
-                // 无数据时显示默认比例
-                DefectList.Add(new DefectItem { Name = "空载不合格", Percentage = 0, Color = "#FFA500" });
-                DefectList.Add(new DefectItem { Name = "噪音不合格", Percentage = 0, Color = "#FF3366" });
-                DefectList.Add(new DefectItem { Name = "负载不合格", Percentage = 0, Color = "#8E9AA7" });
-            }
+            // in-place 更新，避免 Clear+Add 导致闪烁
+            double noLoad = defectSummary.TotalNgCount > 0 ? defectSummary.NoLoadPercentage : 0;
+            double noise  = defectSummary.TotalNgCount > 0 ? defectSummary.NoisePercentage  : 0;
+            double load   = defectSummary.TotalNgCount > 0 ? defectSummary.LoadPercentage   : 0;
 
-            // 更新环形饼图
-            double noLoad = defectSummary.TotalNgCount > 0 ? defectSummary.NoLoadPercentage : 33.3;
-            double noise = defectSummary.TotalNgCount > 0 ? defectSummary.NoisePercentage : 33.3;
-            double load = defectSummary.TotalNgCount > 0 ? defectSummary.LoadPercentage : 33.4;
+            DefectList[0].Percentage = noLoad;
+            DefectList[1].Percentage = noise;
+            DefectList[2].Percentage = load;
+
+            // 饼图：用索引赋值替代 Clear+Add
+            double pieNoLoad = defectSummary.TotalNgCount > 0 ? noLoad : 33.3;
+            double pieNoise  = defectSummary.TotalNgCount > 0 ? noise  : 33.3;
+            double pieLoad   = defectSummary.TotalNgCount > 0 ? load   : 33.4;
 
             if (DefectDistributionSeries.Count == 3 &&
                 DefectDistributionSeries[0] is PieSeries<double> noLoadSeries && noLoadSeries.Values is System.Collections.ObjectModel.ObservableCollection<double> noLoadColl &&
-                DefectDistributionSeries[1] is PieSeries<double> noiseSeries && noiseSeries.Values is System.Collections.ObjectModel.ObservableCollection<double> noiseColl &&
-                DefectDistributionSeries[2] is PieSeries<double> loadSeries && loadSeries.Values is System.Collections.ObjectModel.ObservableCollection<double> loadColl)
+                DefectDistributionSeries[1] is PieSeries<double> noiseSeries  && noiseSeries.Values  is System.Collections.ObjectModel.ObservableCollection<double> noiseColl  &&
+                DefectDistributionSeries[2] is PieSeries<double> loadSeries   && loadSeries.Values   is System.Collections.ObjectModel.ObservableCollection<double> loadColl)
             {
-                noLoadColl.Clear();
-                noLoadColl.Add(noLoad);
-                noiseColl.Clear();
-                noiseColl.Add(noise);
-                loadColl.Clear();
-                loadColl.Add(load);
+                if (noLoadColl.Count == 0) noLoadColl.Add(pieNoLoad); else noLoadColl[0] = pieNoLoad;
+                if (noiseColl.Count  == 0) noiseColl.Add(pieNoise);   else noiseColl[0]  = pieNoise;
+                if (loadColl.Count   == 0) loadColl.Add(pieLoad);     else loadColl[0]   = pieLoad;
             }
         }
 
@@ -607,32 +633,24 @@ namespace MotorTestSystem.ViewModels
 
             var ranking = await _repository.GetFaultRankingAsync(start, end, 5);
 
-            TopFaultList.Clear();
-            if (ranking.Count > 0)
+            // in-place 更新固定5行，避免 Clear+Add 导致闪烁
+            for (int i = 0; i < 5; i++)
             {
-                foreach (var item in ranking)
+                var row = TopFaultList[i];
+                if (i < ranking.Count)
                 {
-                    TopFaultList.Add(new FaultReason
-                    {
-                        Rank = item.Rank.ToString("D2"),
-                        Name = item.Name,
-                        Count = item.Count,
-                        Color = item.Rank == 1 ? "#FF3366" : item.Rank == 2 ? "#FFA500" : "#8E9AA7"
-                    });
+                    var item = ranking[i];
+                    row.Rank  = item.Rank.ToString("D2");
+                    row.Name  = item.Name;
+                    row.Count = item.Count;
+                    row.Color = item.Rank == 1 ? "#FF3366" : item.Rank == 2 ? "#FFA500" : "#8E9AA7";
                 }
-            }
-            else
-            {
-                // 无数据时显示空占位
-                for (int i = 1; i <= 5; i++)
+                else
                 {
-                    TopFaultList.Add(new FaultReason
-                    {
-                        Rank = i.ToString("D2"),
-                        Name = "暂无数据",
-                        Count = 0,
-                        Color = "#8E9AA7"
-                    });
+                    row.Rank  = (i + 1).ToString("D2");
+                    row.Name  = "暂无数据";
+                    row.Count = 0;
+                    row.Color = "#8E9AA7";
                 }
             }
         }
@@ -909,19 +927,28 @@ namespace MotorTestSystem.ViewModels
         }
     }
 
-    public class DefectItem
+    public class DefectItem : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
     {
-        public string Name { get; set; } = string.Empty;
-        public double Percentage { get; set; }
-        public string Color { get; set; } = "#8E9AA7";
+        private string _name = string.Empty;
+        private double _percentage;
+        private string _color = "#8E9AA7";
+
+        public string Name { get => _name; set => SetProperty(ref _name, value); }
+        public double Percentage { get => _percentage; set => SetProperty(ref _percentage, value); }
+        public string Color { get => _color; set => SetProperty(ref _color, value); }
     }
 
-    public class FaultReason
+    public class FaultReason : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
     {
-        public string Rank { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public int Count { get; set; }
-        public string Color { get; set; } = "#8E9AA7";
+        private string _rank = string.Empty;
+        private string _name = string.Empty;
+        private int _count;
+        private string _color = "#8E9AA7";
+
+        public string Rank { get => _rank; set => SetProperty(ref _rank, value); }
+        public string Name { get => _name; set => SetProperty(ref _name, value); }
+        public int Count { get => _count; set => SetProperty(ref _count, value); }
+        public string Color { get => _color; set => SetProperty(ref _color, value); }
     }
 
     /// <summary>

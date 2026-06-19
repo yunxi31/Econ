@@ -250,6 +250,11 @@ namespace MotorTestSystem.ViewModels
             // 筛选时间段 (Start/End Date)
             filtered = filtered.Where(n => n.Model.CreatedAt.Date >= StartDate.Date && n.Model.CreatedAt.Date <= EndDate.Date);
 
+            // Tab 过滤：运行日志 = Alarm+System，操作日志 = Maintenance
+            filtered = SelectedTab == "操作日志"
+                ? filtered.Where(n => n.Type == NotificationType.Maintenance)
+                : filtered.Where(n => n.Type != NotificationType.Maintenance);
+
             if (SelectedFilter != "全部")
             {
                 string targetType = SelectedFilter switch
