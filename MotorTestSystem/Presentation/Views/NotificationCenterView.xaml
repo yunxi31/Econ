@@ -1,0 +1,941 @@
+<UserControl x:Class="MotorTestSystem.Views.NotificationCenterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.expression/blend/2008" 
+             xmlns:local="clr-namespace:MotorTestSystem.Views"
+             xmlns:vm="clr-namespace:MotorTestSystem.ViewModels"
+             xmlns:conv="clr-namespace:MotorTestSystem.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:root="clr-namespace:MotorTestSystem"
+             xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
+             mc:Ignorable="d" 
+             d:DesignHeight="760" d:DesignWidth="1080"
+             Background="#13141E"
+             WindowChrome.IsHitTestVisibleInChrome="True"
+             Language="{Binding Source={x:Static root:LanguageManager.Instance}, Path=CurrentLanguage, Converter={StaticResource LanguageToXmlLanguageConverter}, ConverterCulture=en-US}">
+
+    <UserControl.Resources>
+        <!-- Converters -->
+        <conv:StringEqualsToBoolConverter x:Key="StringEqualsToBoolConverter"/>
+
+        <!-- Custom Calendar Button Styles -->
+        <Style x:Key="DarkCalendarDayButtonStyle" TargetType="CalendarDayButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="MinWidth" Value="24"/>
+            <Setter Property="MinHeight" Value="24"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CalendarDayButton">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="4" Margin="1">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#2A2E3D"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#00D2E6"/>
+                                <Setter Property="Foreground" Value="#13141E"/>
+                            </Trigger>
+                            <Trigger Property="IsToday" Value="True">
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#00D2E6"/>
+                                <Setter TargetName="Bg" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsInactive" Value="True">
+                                <Setter Property="Foreground" Value="#4E5266"/>
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DarkCalendarButtonStyle" TargetType="CalendarButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CalendarButton">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="4" Margin="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#2A2E3D"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom Dark CalendarItem Style -->
+        <Style x:Key="DarkCalendarItemStyle" TargetType="{x:Type primitives:CalendarItem}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type primitives:CalendarItem}">
+                        <ControlTemplate.Resources>
+                            <!-- Day title template (e.g. Sun, Mon) -->
+                            <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type primitives:CalendarItem}, ResourceId=DayTitleTemplate}">
+                                <TextBlock Text="{Binding}" 
+                                           FontFamily="Segoe UI" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="11" 
+                                           Foreground="#8A8D99" 
+                                           Margin="0,8,0,8" 
+                                           HorizontalAlignment="Center" 
+                                           VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </ControlTemplate.Resources>
+                        
+                        <Grid Name="PART_Root">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup Name="CommonStates"/>
+                            </VisualStateManager.VisualStateGroups>
+                            
+                            <Border BorderThickness="1" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    Background="{TemplateBinding Background}" 
+                                    CornerRadius="6">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="40" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Prev Button -->
+                                    <Button Name="PART_PreviousButton" Width="28" Height="28" 
+                                            Style="{x:Null}"
+                                            HorizontalAlignment="Left" VerticalAlignment="Center"
+                                            Margin="8,0,0,0" Focusable="False" Grid.Column="0" Grid.Row="0">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="4" Cursor="Hand">
+                                                    <Path x:Name="arrow" Data="M288.75,232.25L288.75,240.625 283,236.625z" 
+                                                          Stretch="Fill" Fill="#FFFFFF" Width="6" Height="10" 
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="BtnBorder" Property="Background" Value="#2A2E3D"/>
+                                                        <Setter TargetName="arrow" Property="Fill" Value="#00D2E6"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter TargetName="arrow" Property="Fill" Value="#55586A"/>
+                                                        <Setter TargetName="BtnBorder" Property="Opacity" Value="0.35"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+
+                                    <!-- Header Button (Month/Year) -->
+                                    <Button Name="PART_HeaderButton" 
+                                            Style="{x:Null}"
+                                            Foreground="#FFFFFF"
+                                            HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                            FontSize="13" FontWeight="SemiBold"
+                                            Focusable="False" Grid.Column="1" Grid.Row="0">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="4" Padding="8,4,8,4" Cursor="Hand">
+                                                    <TextBlock Text="{TemplateBinding Content}" 
+                                                               Foreground="{TemplateBinding Foreground}"
+                                                               HorizontalAlignment="Center" 
+                                                               VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Foreground" Value="#00D2E6"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Foreground" Value="#55586A"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+
+                                    <!-- Next Button -->
+                                    <Button Name="PART_NextButton" Width="28" Height="28" 
+                                            Style="{x:Null}"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Margin="0,0,8,0" Focusable="False" Grid.Column="2" Grid.Row="0">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="4" Cursor="Hand">
+                                                    <Path x:Name="arrow" Data="M282.875,231.875L282.875,240.375 288.625,236z" 
+                                                          Stretch="Fill" Fill="#FFFFFF" Width="6" Height="10" 
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="BtnBorder" Property="Background" Value="#2A2E3D"/>
+                                                        <Setter TargetName="arrow" Property="Fill" Value="#00D2E6"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter TargetName="arrow" Property="Fill" Value="#55586A"/>
+                                                        <Setter TargetName="BtnBorder" Property="Opacity" Value="0.35"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+
+                                    <!-- Grid views -->
+                                    <Grid Name="PART_MonthView" Margin="8,0,8,8" 
+                                          HorizontalAlignment="Center" Visibility="Visible" 
+                                          Grid.Row="1" Grid.ColumnSpan="3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                    </Grid>
+                                    
+                                    <Grid Name="PART_YearView" Margin="8,0,8,8" 
+                                          HorizontalAlignment="Center" Visibility="Hidden" 
+                                          Grid.Row="1" Grid.ColumnSpan="3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                            
+                            <Rectangle RadiusX="2" RadiusY="2" Stretch="Fill" Fill="#A5FFFFFF" 
+                                       Stroke="#A5FFFFFF" StrokeThickness="1" 
+                                       Name="PART_DisabledVisual" Opacity="0" Visibility="Collapsed" />
+                        </Grid>
+                        
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Visibility" TargetName="PART_DisabledVisual" Value="Visible" />
+                                <Setter Property="Opacity" TargetName="PART_DisabledVisual" Value="0.5" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding Path=DisplayMode, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Calendar}}" Value="Year">
+                                <Setter Property="Visibility" TargetName="PART_MonthView" Value="Hidden" />
+                                <Setter Property="Visibility" TargetName="PART_YearView" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=DisplayMode, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Calendar}}" Value="Decade">
+                                <Setter Property="Visibility" TargetName="PART_MonthView" Value="Hidden" />
+                                <Setter Property="Visibility" TargetName="PART_YearView" Value="Visible" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom Dark Calendar Style -->
+        <Style x:Key="DarkCalendarStyle" TargetType="Calendar">
+            <Setter Property="Background" Value="#181924"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#333645"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CalendarDayButtonStyle" Value="{StaticResource DarkCalendarDayButtonStyle}"/>
+            <Setter Property="CalendarButtonStyle" Value="{StaticResource DarkCalendarButtonStyle}"/>
+            <Setter Property="CalendarItemStyle" Value="{StaticResource DarkCalendarItemStyle}"/>
+        </Style>
+
+
+
+        <SolidColorBrush x:Key="BackgroundDark" Color="#0b1019"/>
+        <SolidColorBrush x:Key="PanelBackground" Color="#151c27"/>
+        <SolidColorBrush x:Key="AccentCyan" Color="#00d2fc"/>
+        <SolidColorBrush x:Key="AccentRed" Color="#ff4d4f"/>
+        <SolidColorBrush x:Key="AccentWarning" Color="#e2b13c"/>
+        <SolidColorBrush x:Key="AccentSystem" Color="#5c7080"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#a3b1cc"/>
+
+        <!-- Header Button Style -->
+        <Style x:Key="HeaderButtonStyle" TargetType="Button">
+            <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Background" Value="#111622"/>
+            <Setter Property="BorderBrush" Value="#222f3e"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#a3b1cc"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="BtnBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BtnBorder" Property="Background" Value="#1c2535"/>
+                                <Setter TargetName="BtnBorder" Property="BorderBrush" Value="#00d2fc"/>
+                                <Setter Property="Foreground" Value="#ffffff"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="BtnBorder" Property="Background" Value="#090e12"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Capsule Tab Button Styles -->
+        <Style x:Key="AllCapsuleTabStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="#111622"/>
+            <Setter Property="BorderBrush" Value="#222f3e"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#a3b1cc"/>
+            <Setter Property="GroupName" Value="FilterPills"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="PillBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                Padding="12,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock x:Name="PillText" Text="{root:Loc 全部}" FontSize="13" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Border x:Name="BadgeBorder" Background="#1E242D" CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="BadgeText" Text="{Binding AllCount}" Foreground="#a3b1cc" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#00d2fc"/>
+                                <Setter TargetName="PillBorder" Property="BorderBrush" Value="#00d2fc"/>
+                                <Setter Property="Foreground" Value="#090e12"/>
+                                <Setter TargetName="BadgeBorder" Property="Background" Value="#090e12"/>
+                                <Setter TargetName="BadgeText" Property="Foreground" Value="#00d2fc"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#1c2535"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AlarmCapsuleTabStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="#111622"/>
+            <Setter Property="BorderBrush" Value="#222f3e"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#a3b1cc"/>
+            <Setter Property="GroupName" Value="FilterPills"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="PillBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                Padding="12,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <materialDesign:PackIcon x:Name="PillIcon" Kind="AlertCircleOutline" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="#ff4d4f"/>
+                                <TextBlock x:Name="PillText" Text="{root:Loc 报警}" FontSize="13" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Border x:Name="BadgeBorder" Background="#1E242D" CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="BadgeText" Text="{Binding AlarmCount}" Foreground="#a3b1cc" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#ff4d4f"/>
+                                <Setter TargetName="PillBorder" Property="BorderBrush" Value="#ff4d4f"/>
+                                <Setter TargetName="PillIcon" Property="Foreground" Value="#ffffff"/>
+                                <Setter Property="Foreground" Value="#ffffff"/>
+                                <Setter TargetName="BadgeBorder" Property="Background" Value="#2a1215"/>
+                                <Setter TargetName="BadgeText" Property="Foreground" Value="#ff4d4f"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#1c2535"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MaintenanceCapsuleTabStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="#111622"/>
+            <Setter Property="BorderBrush" Value="#222f3e"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#a3b1cc"/>
+            <Setter Property="GroupName" Value="FilterPills"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="PillBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                Padding="12,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <materialDesign:PackIcon x:Name="PillIcon" Kind="WrenchOutline" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="#e2b13c"/>
+                                <TextBlock x:Name="PillText" Text="{root:Loc 维护}" FontSize="13" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Border x:Name="BadgeBorder" Background="#1E242D" CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="BadgeText" Text="{Binding MaintenanceCount}" Foreground="#a3b1cc" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#e2b13c"/>
+                                <Setter TargetName="PillBorder" Property="BorderBrush" Value="#e2b13c"/>
+                                <Setter TargetName="PillIcon" Property="Foreground" Value="#1a1200"/>
+                                <Setter Property="Foreground" Value="#1a1200"/>
+                                <Setter TargetName="BadgeBorder" Property="Background" Value="#282318"/>
+                                <Setter TargetName="BadgeText" Property="Foreground" Value="#e2b13c"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#1c2535"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SystemCapsuleTabStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="#111622"/>
+            <Setter Property="BorderBrush" Value="#222f3e"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#a3b1cc"/>
+            <Setter Property="GroupName" Value="FilterPills"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="PillBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="16"
+                                Padding="12,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <materialDesign:PackIcon x:Name="PillIcon" Kind="InformationOutline" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="#5c7080"/>
+                                <TextBlock x:Name="PillText" Text="{root:Loc 系统}" FontSize="13" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Border x:Name="BadgeBorder" Background="#1E242D" CornerRadius="9" MinWidth="18" Height="18" Padding="5,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="BadgeText" Text="{Binding SystemCount}" Foreground="#a3b1cc" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#5c7080"/>
+                                <Setter TargetName="PillBorder" Property="BorderBrush" Value="#5c7080"/>
+                                <Setter TargetName="PillIcon" Property="Foreground" Value="#ffffff"/>
+                                <Setter Property="Foreground" Value="#ffffff"/>
+                                <Setter TargetName="BadgeBorder" Property="Background" Value="#1e242d"/>
+                                <Setter TargetName="BadgeText" Property="Foreground" Value="#ffffff"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#1c2535"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ListBoxItem Style to strip selection styles -->
+        <Style x:Key="CardListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Log Tab Button Style -->
+        <Style x:Key="LogTabButtonStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Foreground" Value="#8A8D99"/>
+            <Setter Property="GroupName" Value="LogTabs"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,24,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="TabBorder"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="0,0,0,2"
+                                Padding="4,4,4,8">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#00d2fc"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Foreground" Value="#00d2fc"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Notification Card Template -->
+        <DataTemplate x:Key="NotificationCardTemplate">
+            <Border Background="#1E293B" BorderBrush="#334052" BorderThickness="1" CornerRadius="12" Padding="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Rectangle x:Name="StatusStrip" Grid.Column="0" Fill="#5c7080"/>
+
+                    <Grid Grid.Column="1" Margin="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border x:Name="IconBg" Grid.Column="0" Width="38" Height="38" CornerRadius="19" Background="#1e242d" VerticalAlignment="Top" Margin="0,2,16,0">
+                            <materialDesign:PackIcon x:Name="CardIcon" Kind="Cog" Width="20" Height="20" Foreground="#5c7080" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <TextBlock x:Name="TitleText" Text="{Binding Title}" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                                <Border x:Name="StatusBadge" Margin="8,0,0,0" Padding="6,2" CornerRadius="4" Background="#ff4d4f" VerticalAlignment="Center">
+                                    <TextBlock x:Name="StatusBadgeText" Text="{root:Loc 未读}" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                                </Border>
+                            </StackPanel>
+
+                            <TextBlock x:Name="ContentText" Text="{Binding Content}" FontSize="14" Foreground="#a3b1cc" TextWrapping="Wrap" Margin="0,0,0,12" LineHeight="20"/>
+
+                            <StackPanel x:Name="ActionsRow" Orientation="Horizontal">
+                                <!-- 查看详情 按钮 -->
+                                <Button x:Name="BtnViewDetails"
+                                        Content="{root:Loc 查看详情}"
+                                        Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{x:Null}"
+                                        Height="28" Padding="12,0"
+                                        Margin="0,0,8,0"
+                                        Visibility="Collapsed"
+                                        Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBorder" Background="Transparent" BorderBrush="#ff4d4f" BorderThickness="1" CornerRadius="4" Padding="12,0">
+                                                <TextBlock Text="{TemplateBinding Content}" Foreground="#ff4d4f" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="BtnBorder" Property="Background" Value="#2a1215"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- 诊断连接 按钮 -->
+                                <Button x:Name="BtnDiagConnect"
+                                        Content="{root:Loc 诊断连接}"
+                                        Command="{Binding DataContext.DiagnoseConnectionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{x:Null}"
+                                        Height="28" Padding="12,0"
+                                        Visibility="Collapsed"
+                                        Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBorder" Background="Transparent" BorderBrush="#ff4d4f" BorderThickness="1" CornerRadius="4" Padding="12,0">
+                                                <TextBlock Text="{TemplateBinding Content}" Foreground="#ff4d4f" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="BtnBorder" Property="Background" Value="#2a1215"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- 标记已读 按钮 -->
+                                <Button x:Name="BtnMarkRead"
+                                        Content="{root:Loc 标记已读}"
+                                        Command="{Binding DataContext.ToggleReadStatusCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{x:Null}"
+                                        Height="28" Padding="12,0"
+                                        Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="BtnBorder" Background="Transparent" BorderBrush="#334052" BorderThickness="1" CornerRadius="4" Padding="12,0">
+                                                <TextBlock Text="{TemplateBinding Content}" Foreground="#a3b1cc" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="BtnBorder" Property="Background" Value="#1c2535"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <TextBlock Grid.Column="2" Text="{Binding Timestamp}" FontSize="12" Foreground="#94A3B8" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="16,4,0,0"/>
+                    </Grid>
+                </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding TypeDisplay}" Value="报警">
+                    <Setter TargetName="StatusStrip" Property="Fill" Value="#ff4d4f"/>
+                    <Setter TargetName="IconBg" Property="Background" Value="#2a1215"/>
+                    <Setter TargetName="CardIcon" Property="Kind" Value="AlertCircleOutline"/>
+                    <Setter TargetName="CardIcon" Property="Foreground" Value="#ff4d4f"/>
+                    <Setter TargetName="BtnViewDetails" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TypeDisplay}" Value="维护">
+                    <Setter TargetName="StatusStrip" Property="Fill" Value="#e2b13c"/>
+                    <Setter TargetName="IconBg" Property="Background" Value="#282318"/>
+                    <Setter TargetName="CardIcon" Property="Kind" Value="WrenchOutline"/>
+                    <Setter TargetName="CardIcon" Property="Foreground" Value="#e2b13c"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TypeDisplay}" Value="系统">
+                    <Setter TargetName="StatusStrip" Property="Fill" Value="#5c7080"/>
+                    <Setter TargetName="IconBg" Property="Background" Value="#1e242d"/>
+                    <Setter TargetName="CardIcon" Property="Kind" Value="InformationOutline"/>
+                    <Setter TargetName="CardIcon" Property="Foreground" Value="#5c7080"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Title}" Value="PLC 通信异常">
+                    <Setter TargetName="BtnDiagConnect" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="BtnViewDetails" Property="Visibility" Value="Collapsed"/>
+                    <Setter TargetName="BtnMarkRead" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Title}" Value="PLC通信异常">
+                    <Setter TargetName="BtnDiagConnect" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="BtnViewDetails" Property="Visibility" Value="Collapsed"/>
+                    <Setter TargetName="BtnMarkRead" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsRead}" Value="True">
+                    <Setter TargetName="TitleText" Property="Foreground" Value="#a3b1cc"/>
+                    <Setter TargetName="TitleText" Property="FontWeight" Value="Normal"/>
+                    <Setter TargetName="ContentText" Property="Foreground" Value="#6f7e95"/>
+                    <Setter TargetName="StatusBadge" Property="Background" Value="#2d3748"/>
+                    <Setter TargetName="StatusBadgeText" Property="Text" Value="已读"/>
+                    <Setter TargetName="StatusBadgeText" Property="Foreground" Value="#8b949e"/>
+                    <Setter TargetName="ActionsRow" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <Style x:Key="VisibleForLogCenterStyle" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding PageTitle}" Value="日志中心">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="VisibleForNotificationCenterStyle" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding PageTitle}" Value="通知中心">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ExportCsvButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding PageTitle}" Value="日志中心">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NotificationCenterButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding PageTitle}" Value="通知中心">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="38,30,38,30">
+        <Grid.RowDefinitions>
+            <!-- 0. Header (Title + Buttons) -->
+            <RowDefinition Height="Auto"/>
+            <!-- 1. Filters -->
+            <RowDefinition Height="Auto"/>
+            <!-- 2. Tabs (运行日志 / 操作日志) -->
+            <RowDefinition Height="Auto"/>
+            <!-- 3. Main ListBox -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 0. Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: Icon + Title -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <materialDesign:PackIcon Kind="{Binding PageIcon}"
+                                         Width="28"
+                                         Height="28"
+                                         Foreground="#FFFFFF"
+                                         VerticalAlignment="Center"/>
+                <TextBlock Foreground="#FFFFFF"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Margin="12,0,0,0"
+                           VerticalAlignment="Center">
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource LocMultiConverter}">
+                            <Binding Path="PageTitle" />
+                            <Binding Source="{x:Static root:LanguageManager.Instance}" Path="CurrentLanguage" />
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </StackPanel>
+
+            <!-- Right: Actions -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                <!-- 全部标记为已读 -->
+                <Button Command="{Binding MarkAllAsReadCommand}"
+                        Style="{StaticResource NotificationCenterButtonStyle}" Padding="16,0" Height="40">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="CheckAll" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#00d2fc"/>
+                        <TextBlock Text="{root:Loc 全部标记已读}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <!-- 清空所有 -->
+                <Button Command="{Binding ClearAllCommand}"
+                        Style="{StaticResource NotificationCenterButtonStyle}" Padding="16,0" Height="40" Margin="12,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="TrashCanOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#ff4d4f"/>
+                        <TextBlock Text="{root:Loc 清空所有}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <!-- 导出 CSV -->
+                <Button Command="{Binding ExportCsvCommand}"
+                        Style="{StaticResource ExportCsvButtonStyle}" Padding="16,0" Height="40" Margin="12,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="DownloadOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#00d2fc"/>
+                        <TextBlock Text="{root:Loc 导出 CSV}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <!-- 关闭/返回按钮 -->
+                <Button Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                        CommandParameter="Notification"
+                        Style="{StaticResource NotificationCenterButtonStyle}" Padding="16,0" Height="40" Margin="12,0,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#FFFFFF"/>
+                        <TextBlock Text="{root:Loc 关闭}" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- 1. Filters -->
+        <Grid Grid.Row="1" Margin="0,0,0,20" WindowChrome.IsHitTestVisibleInChrome="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: Filters Stack -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- 1.1 时间范围 -->
+                <StackPanel Orientation="Horizontal" Style="{StaticResource VisibleForLogCenterStyle}" Margin="0,0,24,0" VerticalAlignment="Center">
+                    <TextBlock Text="{root:Loc 时间范围}" Foreground="#a3b1cc" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <Border Background="#111622" BorderBrush="#222f3e" BorderThickness="1" CornerRadius="4" Padding="8,0" Height="36">
+                        <DatePicker x:Name="StartDatePicker"
+                                    SelectedDate="{Binding StartDate}"
+                                    materialDesign:CalendarAssist.IsHeaderVisible="False"
+                                    CalendarStyle="{StaticResource DarkCalendarStyle}"
+                                    Language="zh-CN"
+                                    Foreground="#FFFFFF" FontFamily="Consolas" FontSize="14"
+                                    VerticalAlignment="Center" BorderThickness="0" Background="Transparent" Width="110"
+                                    Focusable="False"/>
+                    </Border>
+                    <TextBlock Text="{root:Loc 至}" Foreground="#a3b1cc" FontSize="14" Margin="8,0" VerticalAlignment="Center"/>
+                    <Border Background="#111622" BorderBrush="#222f3e" BorderThickness="1" CornerRadius="4" Padding="8,0" Height="36">
+                        <DatePicker x:Name="EndDatePicker"
+                                    SelectedDate="{Binding EndDate}"
+                                    materialDesign:CalendarAssist.IsHeaderVisible="False"
+                                    CalendarStyle="{StaticResource DarkCalendarStyle}"
+                                    Foreground="#FFFFFF" FontFamily="Consolas" FontSize="14"
+                                    VerticalAlignment="Center" BorderThickness="0" Background="Transparent" Width="110"
+                                    Focusable="False"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- 1.2 来源/机台 -->
+                <StackPanel Orientation="Horizontal" Style="{StaticResource VisibleForLogCenterStyle}" Margin="0,0,24,0" VerticalAlignment="Center">
+                    <TextBlock Text="{root:Loc 来源/机台}" Foreground="#a3b1cc" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <ComboBox Width="130" Height="36"
+                              ItemsSource="{Binding Sources}"
+                              SelectedItem="{Binding SelectedSource, Mode=TwoWay}"
+                              Background="#111622"
+                              BorderBrush="#222f3e"
+                              Foreground="#FFFFFF"
+                              FontSize="14"
+                              VerticalAlignment="Center"
+                              HorizontalContentAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Padding="0">
+                        <ComboBox.Resources>
+                            <SolidColorBrush x:Key="MaterialDesignPaper" Color="#111622"/>
+                            <SolidColorBrush x:Key="MaterialDesignBody" Color="#FFFFFF"/>
+                        </ComboBox.Resources>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- 1.3 级别筛选 -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{root:Loc 级别}" Foreground="#a3b1cc" FontSize="14" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                    
+                    <RadioButton Style="{StaticResource AllCapsuleTabStyle}"
+                                 IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=全部, Mode=TwoWay}"/>
+
+                    <RadioButton Style="{StaticResource AlarmCapsuleTabStyle}"
+                                 IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=报警, Mode=TwoWay}"/>
+
+                    <RadioButton Style="{StaticResource MaintenanceCapsuleTabStyle}"
+                                 IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=维护, Mode=TwoWay}"/>
+
+                    <RadioButton Style="{StaticResource SystemCapsuleTabStyle}"
+                                 IsChecked="{Binding SelectedFilter, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=系统, Mode=TwoWay}"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Right: Search Box -->
+            <Grid Grid.Column="1" Style="{StaticResource VisibleForLogCenterStyle}" Width="260" VerticalAlignment="Center">
+                <TextBox Height="36"
+                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                          Background="#111622"
+                          BorderBrush="#222f3e"
+                          BorderThickness="1"
+                          Foreground="#FFFFFF"
+                          FontSize="14"
+                          Padding="30,0,10,0"
+                          VerticalContentAlignment="Center"
+                          materialDesign:HintAssist.Hint="{root:Loc 搜索事件消息...}"
+                          materialDesign:HintAssist.Foreground="#5c7080"
+                          materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                <materialDesign:PackIcon Kind="Magnify"
+                                         Width="16"
+                                         Height="16"
+                                         Foreground="#5c7080"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Center"
+                                         Margin="10,0,0,0"/>
+            </Grid>
+        </Grid>
+
+        <!-- 2. Tabs -->
+        <StackPanel Grid.Row="2" Style="{StaticResource VisibleForLogCenterStyle}" Orientation="Horizontal" Margin="0,0,0,12">
+            <RadioButton Content="{root:Loc 运行日志}"
+                          Style="{StaticResource LogTabButtonStyle}"
+                          FontSize="15"
+                          IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=运行日志, Mode=TwoWay}"/>
+            <RadioButton Content="{root:Loc 操作日志}"
+                          Style="{StaticResource LogTabButtonStyle}"
+                          FontSize="15"
+                          IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter=操作日志, Mode=TwoWay}"/>
+        </StackPanel>
+
+        <!-- 3. Main ListBox -->
+        <ListBox x:Name="NotificationListBox"
+                 Grid.Row="3"
+                 ItemsSource="{Binding Notifications}"
+                 ItemTemplate="{StaticResource NotificationCardTemplate}"
+                 ItemContainerStyle="{StaticResource CardListBoxItemStyle}"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 HorizontalContentAlignment="Stretch"/>
+    </Grid>
+</UserControl>

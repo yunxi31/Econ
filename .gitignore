@@ -1,0 +1,65 @@
+## Build outputs
+[Bb]in/
+[Oo]bj/
+[Oo]bj-check/
+msbuild-obj-check/
+
+## IDE configurations
+.idea/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.resharper
+
+## NuGet packages
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## OS generated files
+.DS_Store
+Thumbs.db
+
+## Logs and backups
+*.log
+*.log.*
+*_backup.*
+*Recovered.*
+
+## Temporary files & Python scripts
+*.py
+*.pyc
+__pycache__/
+*.txt
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.zip
+*.dll
+*.lib
+*.exe
+*.PDF
+*.pdf
+
+## Except for genuine assets and docs inside project directories
+!MotorTestSystem/Resources/Images/mock_video.jpg
+!MotorTestSystem/docs/screenshot.png
+!docs/*.md
+
+## Agent metadata directories
+.codebuddy/
+.kiro/
+.workbuddy/
+scratch/
+scratch_baml/
+decompiled_src/
+
+## Specific local folders that shouldn't be on git
+三菱MC/
+海康库文件/

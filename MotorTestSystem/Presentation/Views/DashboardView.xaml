@@ -1,0 +1,422 @@
+<UserControl x:Class="MotorTestSystem.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MotorTestSystem.Views"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             xmlns:conv="clr-namespace:MotorTestSystem.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:root="clr-namespace:MotorTestSystem"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1400">
+    
+    <UserControl.Resources>
+        <conv:StringToColorBrushConverter x:Key="StringToColorBrushConverter"/>
+        <!-- Global Theme Color Palette -->
+        <SolidColorBrush x:Key="PanelBackground" Color="#212431"/>
+        <SolidColorBrush x:Key="AccentCyan" Color="#00D2E6"/>
+        <SolidColorBrush x:Key="AccentGreen" Color="#26DE81"/>
+        <SolidColorBrush x:Key="BorderDark" Color="#333645"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#8A8D99"/>
+
+        <!-- Capsule ProgressBar Style -->
+        <Style TargetType="ProgressBar" x:Key="CapsuleProgressBarStyle">
+            <Setter Property="Height" Value="6"/>
+            <Setter Property="Background" Value="#2A2D3C"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid x:Name="TemplateRoot">
+                            <Border x:Name="PART_Track" Background="{TemplateBinding Background}" CornerRadius="3"/>
+                            <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="3" HorizontalAlignment="Left"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Segmented Control RadioButton Style -->
+        <Style x:Key="SegmentedRadioButtonStyle" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="BackgroundBorder" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="4" 
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <ContentPresenter x:Name="ContentSite"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  Margin="{TemplateBinding Padding}"/>
+                                <!-- Underline Indicator -->
+                                <Border x:Name="UnderlineIndicator"
+                                        Height="2"
+                                        Background="{StaticResource AccentCyan}"
+                                        VerticalAlignment="Bottom"
+                                        HorizontalAlignment="Stretch"
+                                        Margin="8,0,8,0"
+                                        Visibility="Collapsed"
+                                        CornerRadius="1"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BackgroundBorder" Property="Background" Value="#1AFFFFFF"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="BackgroundBorder" Property="Background" Value="#1F00D2E6"/>
+                                <Setter Property="Foreground" Value="{StaticResource AccentCyan}"/>
+                                <Setter TargetName="UnderlineIndicator" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#12141A">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="125"/>
+            <RowDefinition Height="1.1*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+
+        <!-- TITLE / HEADER -->
+        <Grid Grid.Row="0" Margin="20,15,20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="4" Height="18" Background="#00DFFF" CornerRadius="2" Margin="0,0,10,0"/>
+                <TextBlock Text="{root:Loc 生产监控数据看板}" Foreground="White" FontSize="20" FontWeight="Bold"/>
+            </StackPanel>
+            <local:DataPersistenceMonitorControl Grid.Column="1" VerticalAlignment="Center"/>
+        </Grid>
+ 
+        <!-- STATS CARDS -->
+        <UniformGrid Grid.Row="1" Columns="5" Margin="15,5,15,10">
+            <!-- Card 0: 设备运行状态 -->
+            <local:KpiCardControl Title="{root:Loc 设备运行状态}" 
+                                  Value="{Binding OnlineStationDisplay}" 
+                                  Unit="{root:Loc 台}" 
+                                  TrendText="{Binding OnlineRateText}" 
+                                  ValueForeground="{StaticResource AccentGreen}" 
+                                  TrendForeground="{StaticResource AccentGreen}"
+                                  Margin="5,0"/>
+ 
+            <!-- Card 1: 累计加工总数 -->
+            <Border Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="5,0">
+                <Grid Margin="15,12,15,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{root:Loc 累计加工总数}" Foreground="#8E9AA7" FontSize="12" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Row="1" Text="{Binding TotalChecked, StringFormat={}{0:N0}}" Foreground="#00DFFF" FontSize="28" FontWeight="Bold" VerticalAlignment="Center"/>
+                    
+                    <!-- Progress Bar (approx 70% filled) -->
+                    <StackPanel Grid.Row="2" Margin="0,4,0,0">
+                        <ProgressBar Value="{Binding CompletionProgress}" Foreground="#00DFFF" Style="{StaticResource CapsuleProgressBarStyle}"/>
+                        <Grid Margin="0,4,0,0">
+                            <TextBlock Text="{root:Loc 完成进度}" Foreground="#6E7C8A" FontSize="10"/>
+                            <TextBlock Text="{Binding CompletionProgressText}" Foreground="#00DFFF" FontSize="10" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Border>
+ 
+            <!-- Card 2: 合格总数 -->
+            <Border Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="5,0">
+                <Grid Margin="15,12,15,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{root:Loc 合格总数}" Foreground="#8E9AA7" FontSize="12" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Row="1" Text="{Binding OkCount, StringFormat={}{0:N0}}" Foreground="#00FFB2" FontSize="28" FontWeight="Bold" VerticalAlignment="Center"/>
+                    
+                    <!-- Bottom trend text -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0">
+                        <materialDesign:PackIcon Kind="TrendingUp" Foreground="#00FFB2" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                        <TextBlock Text="+2.4%" Foreground="#00FFB2" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock Text=" vs prev shift" Foreground="#6E7C8A" FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+ 
+            <!-- Card 3: 不良总数 (Highlight Warn Red) -->
+            <Border Background="#1B1E26" BorderBrush="#FF3366" BorderThickness="1.5" CornerRadius="8" Margin="5,0">
+                <Grid Margin="15,12,15,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <TextBlock Text="{root:Loc 不良总数}" Foreground="#8E9AA7" FontSize="12" FontWeight="SemiBold"/>
+                        <materialDesign:PackIcon Kind="AlertCircleOutline" Foreground="#FF3366" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </Grid>
+                    <TextBlock Grid.Row="1" Text="{Binding NgCount, StringFormat={}{0:N0}}" Foreground="#FF3366" FontSize="28" FontWeight="Bold" VerticalAlignment="Center"/>
+                    
+                    <!-- Bottom warning text -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0">
+                        <materialDesign:PackIcon Kind="TrendingDown" Foreground="#FF3366" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                        <TextBlock Text="{root:Loc 需处理}" Foreground="#FF3366" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock Text="{root:Loc  缺陷件数超警戒}" Foreground="#6E7C8A" FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+ 
+            <!-- Card 4: 今日良率 -->
+            <Border Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="5,0">
+                <Grid Margin="15,12,15,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="{root:Loc 今日良率}" Foreground="#8E9AA7" FontSize="12" FontWeight="SemiBold"/>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding PassRate, StringFormat={}{0:F1}}" Foreground="White" FontSize="28" FontWeight="Bold"/>
+                            <TextBlock Text="%" Foreground="White" FontSize="16" VerticalAlignment="Bottom" Margin="2,0,0,3" FontWeight="Bold"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="❙❙" Foreground="#00FFB2" FontSize="10" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <TextBlock Text="{root:Loc  目标良率 98%}" Foreground="#6E7C8A" FontSize="10" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Circular Progress Ring -->
+                    <Grid Grid.Column="1" Width="52" Height="52" VerticalAlignment="Center" Margin="5,0,0,0">
+                        <Ellipse Stroke="#252934" StrokeThickness="3.5" Width="44" Height="44"/>
+                        <Ellipse x:Name="PassRateRingEllipse" Stroke="#00FFB2" StrokeThickness="3.5" Width="44" Height="44"
+                                 StrokeDashArray="0 138.23" StrokeDashOffset="0" StrokeEndLineCap="Round"/>
+                        <TextBlock x:Name="PassRateRingText" Text="0%" Foreground="#00FFB2" FontSize="9" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </UniformGrid>
+
+        <!-- MIDDLE ROW: 2 CHARTS -->
+        <Grid Grid.Row="2" Margin="20,10,20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Chart 1: 小时生产统计 -->
+            <Border Grid.Column="0" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="0,0,8,0" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                        <Border Width="3" Height="14" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{root:Loc 小时生产统计 (pcs)}" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <lvc:CartesianChart Grid.Row="1" Background="Transparent" Series="{Binding OutputSeries}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" TooltipFindingStrategy="CompareAllTakeClosest" TooltipBackgroundPaint="{Binding TooltipBgPaint}" TooltipTextPaint="{Binding TooltipTextPaint}" TooltipTextSize="12"/>
+                </Grid>
+            </Border>
+ 
+            <!-- Chart 2: 良率趋势图 -->
+            <Border Grid.Column="1" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="8,0,0,0" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+ 
+                    <Grid Grid.Row="0" Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="3" Height="14" Background="#00FFB2" CornerRadius="1.5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{root:Loc 良率趋势及目标对比 (%)}" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <!-- Segmented Switch for Time Dimension -->
+                        <Border Grid.Column="1" Background="#141722" BorderBrush="#333645" BorderThickness="1" CornerRadius="6" Padding="2" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Content="{root:Loc 今日}" Style="{StaticResource SegmentedRadioButtonStyle}" IsChecked="True" GroupName="TimeDimension"
+                                             Command="{Binding SelectTimeDimensionCommand}" CommandParameter="今日"/>
+                                <RadioButton Content="{root:Loc 本周}" Style="{StaticResource SegmentedRadioButtonStyle}" GroupName="TimeDimension"
+                                             Command="{Binding SelectTimeDimensionCommand}" CommandParameter="本周"/>
+                                <RadioButton Content="{root:Loc 本月}" Style="{StaticResource SegmentedRadioButtonStyle}" GroupName="TimeDimension"
+                                             Command="{Binding SelectTimeDimensionCommand}" CommandParameter="本月"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+ 
+                    <lvc:CartesianChart Grid.Row="1" Background="Transparent" Series="{Binding PassRateSeries}" XAxes="{Binding PassRateXAxes}" YAxes="{Binding PassRateYAxes}" TooltipBackgroundPaint="{Binding TooltipBgPaint}" TooltipTextPaint="{Binding TooltipTextPaint}" TooltipTextSize="12"/>
+                </Grid>
+            </Border>
+        </Grid>
+ 
+        <!-- BOTTOM ROW: 2 PANELS -->
+        <Grid Grid.Row="3" Margin="20,10,20,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+ 
+            <!-- Panel 0: 各阶段不良分布 -->
+            <Border Grid.Column="0" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="0,0,8,0" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+ 
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                        <Border Width="3" Height="14" Background="#FFA500" CornerRadius="1.5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{root:Loc 各阶段不良占比与分布}" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+ 
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="5.5*"/>
+                            <ColumnDefinition Width="4.5*"/>
+                        </Grid.ColumnDefinitions>
+ 
+                        <!-- Left Progress Bars -->
+                        <ItemsControl Grid.Column="0" ItemsSource="{Binding DefectList}" VerticalAlignment="Center" Margin="5,0,15,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,8,0,8" VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="75"/>  <!-- Left Text -->
+                                            <ColumnDefinition Width="*"/>   <!-- Horizontal Capsule ProgressBar -->
+                                            <ColumnDefinition Width="40"/>  <!-- Right Percentage -->
+                                        </Grid.ColumnDefinitions>
+ 
+                                        <!-- 1. Left Text -->
+                                        <TextBlock Grid.Column="0" Foreground="#8E9AA7" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center">
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource LocMultiConverter}">
+                                                    <Binding Path="Name" />
+                                                    <Binding Source="{x:Static root:LanguageManager.Instance}" Path="CurrentLanguage" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                        
+                                        <!-- 2. Middle ProgressBar -->
+                                        <ProgressBar Grid.Column="1" Value="{Binding Percentage}" Foreground="{Binding Color, Converter={StaticResource StringToColorBrushConverter}}" Style="{StaticResource CapsuleProgressBarStyle}" Margin="10,0,10,0" VerticalAlignment="Center"/>
+                                        
+                                        <!-- 3. Right Percentage -->
+                                        <TextBlock Grid.Column="2" Text="{Binding Percentage, StringFormat={}{0}%}" Foreground="White" FontSize="12" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+ 
+                        <!-- Right Donut Chart (Clean and Thick) -->
+                        <Grid Grid.Column="1" Width="130" Height="130" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <lvc:PieChart Series="{Binding DefectDistributionSeries}"
+                                          LegendPosition="Hidden"
+                                          TooltipPosition="Hidden"
+                                          Background="Transparent"/>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+ 
+            <!-- Panel 1: 前五项故障原因 -->
+            <Border Grid.Column="1" Background="#1B1E26" BorderBrush="#252934" BorderThickness="1" CornerRadius="8" Margin="8,0,0,0" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+ 
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                        <Border Width="3" Height="14" Background="#FF3366" CornerRadius="1.5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{root:Loc 故障类别 Top 5 排行}" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </StackPanel>
+ 
+                    <!-- Top 5 Fault List -->
+                    <ItemsControl Grid.Row="1" ItemsSource="{Binding TopFaultList}" VerticalAlignment="Center">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,5,0,5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <!-- Rank Number Badge -->
+                                    <Border Grid.Column="0" Background="#161920" Width="22" Height="22" CornerRadius="4" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Rank}" Foreground="#8E9AA7" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    
+                                    <!-- Fault Name (Left-aligned, secondary text color) -->
+                                    <TextBlock Grid.Column="1" Foreground="#8E9AA7" FontSize="12.5" VerticalAlignment="Center" Margin="12,0,0,0" FontWeight="Medium">
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource LocMultiConverter}">
+                                                <Binding Path="Name" />
+                                                <Binding Source="{x:Static root:LanguageManager.Instance}" Path="CurrentLanguage" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                    
+                                    <!-- Frequency Count (Right-aligned, conditional highlight via DataTrigger) -->
+                                    <TextBlock Grid.Column="2" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0}{1}">
+                                                <Binding Path="Count" />
+                                                <Binding Source="{x:Static root:LanguageManager.Instance}" Path="[次]" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Rank}" Value="01">
+                                                        <Setter Property="Foreground" Value="#FF3366"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Rank}" Value="02">
+                                                        <Setter Property="Foreground" Value="#FFA500"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+        </Grid>
+
+    </Grid>
+</UserControl>

@@ -1,0 +1,1235 @@
+<UserControl x:Class="MotorTestSystem.Views.HistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MotorTestSystem.Views"
+             xmlns:converters="clr-namespace:MotorTestSystem.Converters"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             xmlns:root="clr-namespace:MotorTestSystem"
+             xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
+             mc:Ignorable="d"
+             d:DesignHeight="750" d:DesignWidth="1100">
+
+    <UserControl.Resources>
+        <!-- Global Theme Colors fallback -->
+        <SolidColorBrush x:Key="BackgroundDark" Color="#13141E"/>
+        <SolidColorBrush x:Key="PanelBackground" Color="#212431"/>
+        <SolidColorBrush x:Key="AccentCyan" Color="#00D2E6"/>
+        <SolidColorBrush x:Key="AccentRed" Color="#F74C5B"/>
+        <SolidColorBrush x:Key="AccentGreen" Color="#26DE81"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#8A8D99"/>
+
+        <!-- Custom Dark Form Input Styles -->
+        <Style x:Key="DarkTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource BackgroundDark}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="#333645"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="8,0,8,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentCyan}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom ComboBoxItem style for dropdown list items -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="8,6,8,6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" SnapsToDevicePixels="True" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#2A2E3D"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#00D2E6"/>
+                                <Setter Property="Foreground" Value="#13141E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom Dark ComboBox Style -->
+        <Style x:Key="DarkComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="#181924"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#333645"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,3,5,3"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid x:Name="templateRoot" SnapsToDevicePixels="true">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition MinWidth="24" Width="0"/>
+                            </Grid.ColumnDefinitions>
+                            <Popup x:Name="PART_Popup" AllowsTransparency="true" Grid.ColumnSpan="2" Placement="Bottom" Margin="1" IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                <Border x:Name="dropDownBorder" Background="#181924" BorderBrush="#333645" BorderThickness="1" CornerRadius="4" MaxHeight="{TemplateBinding MaxDropDownHeight}" MinWidth="{Binding ActualWidth, ElementName=templateRoot}">
+                                    <ScrollViewer x:Name="DropDownScrollViewer">
+                                        <Grid x:Name="grid" RenderOptions.ClearTypeHint="Enabled">
+                                            <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                            <ToggleButton x:Name="toggleButton" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Grid.ColumnSpan="2" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="templateRoot" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" SnapsToDevicePixels="true">
+                                            <Border x:Name="splitBorder" BorderBrush="Transparent" BorderThickness="1" HorizontalAlignment="Right" Margin="0" SnapsToDevicePixels="true" Width="24">
+                                                <Path x:Name="arrow" Data="M0,0 L3.5,4 L7,0 Z" Fill="#8A8D99" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="true">
+                                                <Setter TargetName="templateRoot" Property="Background" Value="#222533"/>
+                                                <Setter TargetName="templateRoot" Property="BorderBrush" Value="#00D2E6"/>
+                                                <Setter TargetName="arrow" Property="Fill" Value="#FFFFFF"/>
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="true">
+                                                <Setter TargetName="templateRoot" Property="BorderBrush" Value="#00D2E6"/>
+                                                <Setter TargetName="arrow" Property="Fill" Value="#00D2E6"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Content="{TemplateBinding SelectionBoxItem}" ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" IsHitTestVisible="false" Margin="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom DatePickerTextBox style to remove borders/white background -->
+        <Style TargetType="DatePickerTextBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DatePickerTextBox">
+                        <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" VerticalAlignment="Center"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom Calendar Button Styles -->
+        <!-- Simplified Dark DatePicker Style (no custom Calendar/CalendarItem templates to avoid Stack overflow) -->
+        <Style x:Key="DarkDatePickerStyle" TargetType="DatePicker">
+            <Setter Property="Background" Value="#181924"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#333645"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DatePicker">
+                        <Grid x:Name="PART_Root" Height="{TemplateBinding Height}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.ColumnSpan="2" x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4"/>
+
+                            <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0" 
+                                               Background="Transparent" 
+                                               Foreground="{TemplateBinding Foreground}" 
+                                               BorderThickness="0" 
+                                               Padding="8,0,0,0" 
+                                               VerticalContentAlignment="Center" 
+                                               CaretBrush="White"
+                                               Focusable="{TemplateBinding Focusable}"/>
+
+                            <Button x:Name="PART_Button" Grid.Column="1" Width="28" Height="28" Background="Transparent" BorderThickness="0" Margin="0,0,2,0" Focusable="False">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="Transparent">
+                                            <Path Data="M19 19H5V8H19M16 1V3H8V1H6V3H5C3.89 3 3 3.89 3 5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.89 20.1 3 19 3H18V1M17 12H12V17H17V12Z" 
+                                                  Fill="#8A8D99" Width="14" Height="14" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="icon"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="icon" Property="Fill" Value="#00D2E6"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+
+                            <Popup x:Name="PART_Popup" AllowsTransparency="True" Placement="Bottom" PlacementTarget="{Binding ElementName=PART_Root}" StaysOpen="False"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Bg" Property="BorderBrush" Value="#00D2E6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 任务一：胶囊 RadioButton 样式 -->
+        <Style x:Key="CapsuleRadioStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#8A8D99"/>
+            <Setter Property="Background" Value="#181924"/>
+            <Setter Property="BorderBrush" Value="#333645"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,0,14,0"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#252937"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#0D3540"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#00D2E6"/>
+                                <Setter Property="Foreground" Value="#00D2E6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- BoolToVisibility Converter -->
+        <converters:BoolToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource BackgroundDark}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ROW 0: TITLE -->
+        <Grid Grid.Row="0" Margin="20,15,20,10">
+            <TextBlock Text="{root:Loc 数据追溯与查询}" Foreground="{DynamicResource TextPrimary}" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- ROW 1: KPI CARDS -->
+        <UniformGrid Grid.Row="1" Columns="4" Margin="20,5,20,15">
+            <!-- Card 1: 总测试数 -->
+            <local:KpiCardControl Title="{root:Loc 总测试数}" Value="{Binding TotalTestsCount}" ValueForeground="{DynamicResource TextPrimary}" Margin="0,0,8,0"/>
+
+            <!-- Card 2: 合格总数 -->
+            <local:KpiCardControl Title="{root:Loc 合格总数}" Value="{Binding PassedCount}" ValueForeground="{DynamicResource AccentGreen}" Margin="8,0,8,0"/>
+
+            <!-- Card 3: 不合格总数 -->
+            <local:KpiCardControl Title="{root:Loc 不合格总数}" Value="{Binding FailedCount}" ValueForeground="{DynamicResource AccentRed}" Margin="8,0,8,0"/>
+
+            <!-- Card 4: 良率 -->
+            <local:KpiCardControl Title="{root:Loc 良率}" Value="{Binding PassRateString}" ValueForeground="{DynamicResource AccentCyan}" Margin="8,0,0,0"/>
+        </UniformGrid>
+
+        <!-- ROW 2: FILTER BAR -->
+        <Border Grid.Row="2" Background="{DynamicResource PanelBackground}" BorderBrush="#333645" BorderThickness="1" CornerRadius="8" Margin="20,0,20,15" Padding="15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2.5*"/>
+                    <ColumnDefinition Width="1.5*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 快捷时间胶囊按钮组 (Row 0, 跨全列) -->
+                <StackPanel Grid.Row="0" Grid.ColumnSpan="5" Orientation="Horizontal" Margin="0,0,0,12">
+                    <TextBlock Text="{root:Loc 快捷筛选：}" Foreground="#8A8D99" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <RadioButton Content="{root:Loc 最近一小时}" Style="{StaticResource CapsuleRadioStyle}" Margin="0,0,6,0"
+                                 IsChecked="{Binding SelectedQuickFilter, Converter={x:Static converters:EnumToBoolConverter.Instance}, ConverterParameter=LastHour}"/>
+                    <RadioButton Content="{root:Loc 当班}" Style="{StaticResource CapsuleRadioStyle}" Margin="0,0,6,0"
+                                 IsChecked="{Binding SelectedQuickFilter, Converter={x:Static converters:EnumToBoolConverter.Instance}, ConverterParameter=CurrentShift}"/>
+                    <RadioButton Content="{root:Loc 今日}" Style="{StaticResource CapsuleRadioStyle}"
+                                 IsChecked="{Binding SelectedQuickFilter, Converter={x:Static converters:EnumToBoolConverter.Instance}, ConverterParameter=Today}"/>
+                </StackPanel>
+
+                <!-- 以下控件移至 Row 1 -->
+
+                <!-- Search Barcode (Row 1) -->
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,0">
+                    <TextBlock Text="{root:Loc 电机条码}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
+                    <Grid>
+                        <TextBox Text="{Binding SearchBarcode, UpdateSourceTrigger=PropertyChanged}" 
+                                 Style="{StaticResource DarkTextBoxStyle}" Padding="8,0,28,0">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding SearchCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <Button HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" 
+                                Width="20" Height="20" Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                Command="{Binding SearchCommand}" ToolTip="{root:Loc 搜索}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="Transparent">
+                                        <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.3,20.41L13.03,15.14C11.89,16.11 10.41,16.7 8.5,16.7A8.2,8.2 0 0,1 0.3,8.5A8.2,8.2 0 0,1 8.5,0.3M8.5,2.3A6.2,6.2 0 0,0 2.3,8.5A6.2,6.2 0 0,0 8.5,14.7A6.2,6.2 0 0,0 14.7,8.5A6.2,6.2 0 0,0 8.5,2.3Z" 
+                                              Fill="{DynamicResource TextSecondary}" Width="14" Height="14" Stretch="Fill" x:Name="searchIcon"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="searchIcon" Property="Fill" Value="{DynamicResource AccentCyan}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Result Filter (Row 1) -->
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,15,0">
+                    <TextBlock Text="{root:Loc 测试结果}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
+                    <ComboBox ItemsSource="{Binding ResultFilters}" 
+                              SelectedItem="{Binding SelectedResultFilter}" 
+                              Style="{StaticResource DarkComboBoxStyle}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource LocMultiConverter}">
+                                            <Binding Path="." />
+                                            <Binding Source="{x:Static root:LanguageManager.Instance}" Path="CurrentLanguage" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Start Date (Row 1) -->
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,15,0">
+                    <TextBlock Text="{root:Loc 开始日期}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
+                    <DatePicker SelectedDate="{Binding StartDate}" 
+                                Style="{StaticResource DarkDatePickerStyle}"/>
+                </StackPanel>
+
+                <!-- End Date (Row 1) -->
+                <StackPanel Grid.Row="1" Grid.Column="3" Margin="0,0,15,0">
+                    <TextBlock Text="{root:Loc 结束日期}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,6"/>
+                    <DatePicker SelectedDate="{Binding EndDate}" 
+                                Style="{StaticResource DarkDatePickerStyle}"/>
+                </StackPanel>
+
+                <!-- Action Buttons (Row 1) -->
+                <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <Button Content="{root:Loc 查询}" 
+                            Command="{Binding SearchCommand}" 
+                            Width="80" Height="32" 
+                            Background="{DynamicResource AccentCyan}" Foreground="Black" 
+                            FontWeight="Bold" BorderThickness="0" Margin="0,0,10,0">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button Content="{root:Loc 重置}" 
+                            Command="{Binding ResetCommand}" 
+                            Width="80" Height="32" 
+                            Background="Transparent" Foreground="{DynamicResource TextPrimary}" 
+                            BorderBrush="#333645" BorderThickness="1" FontWeight="Bold">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ROW 3: CORE CONTENT AREA -->
+        <Grid Grid.Row="3" Margin="20,0,20,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="6.8*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="3.2*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: Core DataGrid Border -->
+            <Border Grid.Column="0" Background="{DynamicResource PanelBackground}" BorderBrush="#333645" BorderThickness="1" CornerRadius="8" Padding="10">
+                <DataGrid ItemsSource="{Binding TestResults}" 
+                          SelectedItem="{Binding SelectedMotor}"
+                          CanUserSortColumns="True"
+                          AutoGenerateColumns="False" 
+                          CanUserAddRows="False" 
+                          Background="Transparent" 
+                          BorderThickness="0" 
+                          RowBackground="{DynamicResource PanelBackground}" 
+                          AlternatingRowBackground="#252937" 
+                          Foreground="{DynamicResource TextPrimary}" 
+                          GridLinesVisibility="Horizontal" 
+                          HorizontalGridLinesBrush="#333645" 
+                          HeadersVisibility="Column" 
+                          RowHeaderWidth="0" 
+                          IsReadOnly="True"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.CanContentScroll="True">
+                    
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#1F222F" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                            <Setter Property="Height" Value="38" />
+                            <Setter Property="Padding" Value="10,0,10,0" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                            <Setter Property="BorderBrush" Value="#333645"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+ 
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Height" Value="38" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#2A2E3D" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#303546" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+ 
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                        </Style>
+                    </DataGrid.CellStyle>
+ 
+                    <DataGrid.Columns>
+                        <!-- Motor Barcode -->
+                        <DataGridTemplateColumn Header="{root:Loc 电机条码}" SortMemberPath="Barcode" Width="250">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel x:Name="CellGrid" Orientation="Horizontal" Background="Transparent" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Barcode}" Foreground="{DynamicResource AccentCyan}" Cursor="Hand" VerticalAlignment="Center" Margin="10,0,5,0" FontWeight="SemiBold"/>
+                                        <Button x:Name="CopyButton" Background="Transparent" BorderThickness="0" Width="24" Height="24" Padding="0" VerticalAlignment="Center" Margin="0,0,10,0" Command="{Binding DataContext.CopyBarcodeCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding Barcode}" ToolTip="{root:Loc 复制条码}" Visibility="Hidden">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="Transparent" CornerRadius="4" x:Name="btnBorder">
+                                                        <Path Data="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" 
+                                                              Fill="{DynamicResource AccentCyan}" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="iconPath"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="btnBorder" Property="Background" Value="#22FFFFFF"/>
+                                                            <Setter TargetName="iconPath" Property="Fill" Value="#FFFFFF"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </StackPanel>
+                                    <DataTemplate.Triggers>
+                                        <Trigger SourceName="CellGrid" Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="CopyButton" Property="Visibility" Value="Visible"/>
+                                        </Trigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+ 
+                        <!-- Test Time -->
+                        <DataGridTemplateColumn Header="{root:Loc 检测时间}" SortMemberPath="TestTime" Width="160">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TestTime, StringFormat=\{0:yyyy-MM-dd HH:mm:ss\}}" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,10,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- Final Result styled Badge (OK / NG) -->
+                        <DataGridTemplateColumn Header="{root:Loc 最终结果}" Width="90">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ContentControl Content="{Binding FinalResult}">
+                                        <ContentControl.Resources>
+                                            <DataTemplate x:Key="OkTemplate">
+                                                <Border CornerRadius="4" Width="46" Height="22" Background="#143228" BorderBrush="{DynamicResource AccentGreen}" BorderThickness="1" HorizontalAlignment="Left" Margin="10,0,10,0">
+                                                    <TextBlock Text="OK" Foreground="{DynamicResource AccentGreen}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </DataTemplate>
+                                            <DataTemplate x:Key="NgTemplate">
+                                                <Border CornerRadius="4" Width="46" Height="22" Background="#32141A" BorderBrush="{DynamicResource AccentRed}" BorderThickness="1" HorizontalAlignment="Left" Margin="10,0,10,0">
+                                                    <TextBlock Text="NG" Foreground="{DynamicResource AccentRed}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ContentControl.Resources>
+                                        <ContentControl.Style>
+                                            <Style TargetType="ContentControl">
+                                                <Setter Property="ContentTemplate" Value="{StaticResource NgTemplate}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FinalResult}" Value="OK">
+                                                        <Setter Property="ContentTemplate" Value="{StaticResource OkTemplate}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ContentControl.Style>
+                                    </ContentControl>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Measurement Columns with Condition-based highlighting -->
+                        <DataGridTemplateColumn Header="{root:Loc 空载电流(A)}" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding NoLoadCurrentText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding NoLoadCurrent}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsNoLoadCurrentAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="{root:Loc 空载转速(r/min)}" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding NoLoadSpeedText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding NoLoadSpeed}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsNoLoadSpeedAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="{root:Loc 正转综合(dB)}" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding FwdNoiseText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FwdNoise}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsFwdNoiseAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="{root:Loc 反转综合(dB)}" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding RevNoiseText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RevNoise}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsRevNoiseAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="{root:Loc 负载电流(A)}" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding LoadCurrentText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding LoadCurrent}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsLoadCurrentAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="{root:Loc 负载转速(r/min)}" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding LoadSpeedText}" VerticalAlignment="Center" Margin="10,0,10,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding LoadSpeed}" Value="{x:Null}">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsLoadSpeedAbnormal}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Column Splitter with Vertical Line -->
+            <GridSplitter Grid.Column="1" Width="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" ResizeBehavior="PreviousAndNext" ShowsPreview="False">
+                <GridSplitter.Template>
+                    <ControlTemplate TargetType="GridSplitter">
+                        <Border Background="Transparent" Margin="2,0,2,0">
+                            <Rectangle Width="2" VerticalAlignment="Stretch" Fill="#333645"/>
+                        </Border>
+                    </ControlTemplate>
+                </GridSplitter.Template>
+            </GridSplitter>
+
+            <!-- Right: Single Record Detail & Action Panel -->
+            <Border Grid.Column="2" Background="{DynamicResource PanelBackground}" BorderBrush="#333645" BorderThickness="1" CornerRadius="8" Padding="15">
+                <Grid>
+                    <!-- State 1: Placeholder when no item is selected (Redrawn as Mock NG Record with Waveform) -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSelectedMotor}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header Area: Barcode & OK/NG Badge -->
+                        <Grid Grid.Row="0" Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="M260608002" ToolTip="M260608002" Foreground="{DynamicResource AccentCyan}" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            <Border Grid.Column="1" Margin="8,0,0,0" CornerRadius="4" Width="52" Height="24" Background="#32141A" BorderBrush="{DynamicResource AccentRed}" BorderThickness="1" VerticalAlignment="Center">
+                                <TextBlock Text="NG" Foreground="{DynamicResource AccentRed}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Content Area: Parameters & Waveform -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel>
+                                <TextBlock Text="{root:Loc 测试指标详细数据}" Foreground="{DynamicResource TextSecondary}" FontSize="11" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                                
+                                <!-- Detailed Parameters Grid -->
+                                <Border Background="#252937" CornerRadius="6" Padding="12" Margin="0,5,0,0">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Row 0: No Load Current & Speed -->
+                                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12">
+                                            <TextBlock Text="{root:Loc 空载电流}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="1.85 A" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource AccentRed}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+                                            <TextBlock Text="{root:Loc 空载转速}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="3050 r/min" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                        </StackPanel>
+
+                                        <!-- Row 1: Noise Fwd & Rev -->
+                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,12">
+                                            <TextBlock Text="{root:Loc 正转综合噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="68.5 dB" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource AccentRed}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,12">
+                                            <TextBlock Text="{root:Loc 反转综合噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="69.2 dB" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource AccentRed}"/>
+                                        </StackPanel>
+
+                                        <!-- Row 2: Load Current & Speed -->
+                                        <StackPanel Grid.Row="2" Grid.Column="0">
+                                            <TextBlock Text="{root:Loc 负载电流}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="4.85 A" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource AccentRed}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2" Grid.Column="1">
+                                            <TextBlock Text="{root:Loc 负载转速}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="2950 r/min" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Waveform Visualization Block -->
+                                <Grid Margin="0,15,0,15">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="140"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="140"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 空载电流波形 -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Border Width="3" Height="12" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 空载电流波形}" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '（启动冲击 → 稳态波动）'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Ellipse Width="6" Height="6" Fill="#00DFFF" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 当前电流}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '上限 (2.5A)'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Border Grid.Row="1" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
+                                        <lvc:CartesianChart Background="Transparent"
+                                                            Series="{Binding NoLoadWaveformSeries}"
+                                                            XAxes="{Binding WaveformXAxes}"
+                                                            YAxes="{Binding NoLoadWaveformYAxes}"
+                                                            TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
+                                                            TooltipTextPaint="{Binding WaveformTooltipTextPaint}"
+                                                            TooltipTextSize="11"
+                                                            ZoomMode="X"
+                                                            LegendPosition="Hidden"/>
+                                    </Border>
+
+                                    <!-- 噪音波形 -->
+                                    <Grid Grid.Row="3" Margin="0,0,0,6">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Border Width="3" Height="12" Background="#FFA500" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 噪音波形}" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '（正转 / 反转）'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Ellipse Width="6" Height="6" Fill="#FFA500" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 正转噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#A855F7" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 反转噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '上限 (70dB)'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Border Grid.Row="4" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
+                                        <lvc:CartesianChart Background="Transparent"
+                                                            Series="{Binding NoiseWaveformSeries}"
+                                                            XAxes="{Binding WaveformXAxes}"
+                                                            YAxes="{Binding NoiseWaveformYAxes}"
+                                                            TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
+                                                            TooltipTextPaint="{Binding WaveformTooltipTextPaint}"
+                                                            TooltipTextSize="11"
+                                                            ZoomMode="X"
+                                                            LegendPosition="Hidden"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <!-- Action Buttons: Simulated/Disabled -->
+                        <Grid Grid.Row="2" Margin="0,5,0,0" Opacity="0.5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Print button -->
+                            <Button Grid.Column="0" IsEnabled="False" Height="36" Background="#2B303C" Foreground="{DynamicResource TextPrimary}" BorderBrush="#3B4254" BorderThickness="1" Margin="0,0,5,0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="M18,3H6V7H18M19,12A1,1 0 0,1 18,11A1,1 0 0,1 17,12A1,1 0 0,1 18,13A1,1 0 0,1 19,12M16,19H8V14H16M19,8H5A3,3 0 0,0 2,11V17H6V21H18V17H22V11A3,3 0 0,0 19,8Z" Fill="{DynamicResource TextPrimary}" Width="14" Height="14" Stretch="Fill" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{root:Loc 打印追溯单}" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- View Report button -->
+                            <Button Grid.Column="1" IsEnabled="False" Height="36" Background="{DynamicResource AccentCyan}" Foreground="Black" BorderThickness="0" Margin="5,0,0,0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M7,20H17V18H7V20M7,16H17V14H7V16M7,12H13V10H7V12Z" Fill="Black" Width="14" Height="14" Stretch="Fill" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{root:Loc 查看完整报告}" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Grid>
+
+                    <!-- State 2: Detailed view when an item is selected -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSelectedMotor}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header Area: Barcode & OK/NG Badge -->
+                        <Grid Grid.Row="0" Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding SelectedMotor.Barcode}" ToolTip="{Binding SelectedMotor.Barcode}" Foreground="{DynamicResource AccentCyan}" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            <ContentControl Grid.Column="1" Margin="8,0,0,0" Content="{Binding SelectedMotorResult}" VerticalAlignment="Center">
+                                <ContentControl.Resources>
+                                    <DataTemplate x:Key="OkBadge">
+                                        <Border CornerRadius="4" Width="52" Height="24" Background="#143228" BorderBrush="{DynamicResource AccentGreen}" BorderThickness="1">
+                                            <TextBlock Text="OK" Foreground="{DynamicResource AccentGreen}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                    <DataTemplate x:Key="NgBadge">
+                                        <Border CornerRadius="4" Width="52" Height="24" Background="#32141A" BorderBrush="{DynamicResource AccentRed}" BorderThickness="1">
+                                            <TextBlock Text="NG" Foreground="{DynamicResource AccentRed}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ContentControl.Resources>
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource NgBadge}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedMotorResult}" Value="OK">
+                                                <Setter Property="ContentTemplate" Value="{StaticResource OkBadge}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
+                        </Grid>
+
+                        <!-- Content Area: Parameters & Waveform -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel>
+                                <TextBlock Text="{root:Loc 测试指标详细数据}" Foreground="{DynamicResource TextSecondary}" FontSize="11" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                                
+                                <!-- Detailed Parameters Grid -->
+                                <Border Background="#252937" CornerRadius="6" Padding="12" Margin="0,5,0,0">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Row 0: No Load Current & Speed -->
+                                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12">
+                                            <TextBlock Text="{root:Loc 空载电流}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.NoLoadCurrentText, StringFormat=\{0\} A}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsNoLoadCurrentAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,12">
+                                            <TextBlock Text="{root:Loc 空载转速}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.NoLoadSpeedText, StringFormat=\{0\} r/min}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsNoLoadSpeedAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <!-- Row 1: Noise Fwd & Rev -->
+                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,12">
+                                            <TextBlock Text="{root:Loc 正转综合噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.FwdNoiseText, StringFormat=\{0\} dB}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsFwdNoiseAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,12">
+                                            <TextBlock Text="{root:Loc 反转综合噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.RevNoiseText, StringFormat=\{0\} dB}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsRevNoiseAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <!-- Row 2: Load Current & Speed -->
+                                        <StackPanel Grid.Row="2" Grid.Column="0">
+                                            <TextBlock Text="{root:Loc 负载电流}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.LoadCurrentText, StringFormat=\{0\} A}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsLoadCurrentAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2" Grid.Column="1">
+                                            <TextBlock Text="{root:Loc 负载转速}" Foreground="{DynamicResource TextSecondary}" FontSize="11" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{Binding SelectedMotor.LoadSpeedText, StringFormat=\{0\} r/min}" FontSize="14" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedMotor.IsLoadSpeedAbnormal}" Value="True">
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentRed}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Waveform Visualization Block -->
+                                <Grid Margin="0,15,0,15">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="140"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="140"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 空载电流波形 -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Border Width="3" Height="12" Background="#00DFFF" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 空载电流波形}" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '（启动冲击 → 稳态波动）'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Ellipse Width="6" Height="6" Fill="#00DFFF" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 当前电流}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '上限 (2.5A)'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Border Grid.Row="1" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
+                                        <lvc:CartesianChart Background="Transparent"
+                                                            Series="{Binding NoLoadWaveformSeries}"
+                                                            XAxes="{Binding WaveformXAxes}"
+                                                            YAxes="{Binding NoLoadWaveformYAxes}"
+                                                            TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
+                                                            TooltipTextPaint="{Binding WaveformTooltipTextPaint}"
+                                                            TooltipTextSize="11"
+                                                            ZoomMode="X"
+                                                            LegendPosition="Hidden"/>
+                                    </Border>
+
+                                    <!-- 噪音波形 -->
+                                    <Grid Grid.Row="3" Margin="0,0,0,6">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Border Width="3" Height="12" Background="#FFA500" CornerRadius="1.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 噪音波形}" Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '（正转 / 反转）'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Ellipse Width="6" Height="6" Fill="#FFA500" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 正转噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#A855F7" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc 反转噪音}" Foreground="{DynamicResource TextSecondary}" FontSize="10" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                            <Ellipse Width="6" Height="6" Fill="#F74C5B" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{root:Loc '上限 (70dB)'}" Foreground="{DynamicResource TextSecondary}" FontSize="10" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Border Grid.Row="4" Background="#181924" CornerRadius="6" BorderBrush="#333645" BorderThickness="1" Padding="4">
+                                        <lvc:CartesianChart Background="Transparent"
+                                                            Series="{Binding NoiseWaveformSeries}"
+                                                            XAxes="{Binding WaveformXAxes}"
+                                                            YAxes="{Binding NoiseWaveformYAxes}"
+                                                            TooltipBackgroundPaint="{Binding WaveformTooltipBgPaint}"
+                                                            TooltipTextPaint="{Binding WaveformTooltipTextPaint}"
+                                                            TooltipTextSize="11"
+                                                            ZoomMode="X"
+                                                            LegendPosition="Hidden"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <!-- Action Buttons: Print Trace & View Full Report -->
+                        <Grid Grid.Row="2" Margin="0,5,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Print button -->
+                            <Button Grid.Column="0" Command="{Binding PrintTraceCommand}" Height="36" Background="#2B303C" Foreground="{DynamicResource TextPrimary}" BorderBrush="#3B4254" BorderThickness="1" Margin="0,0,5,0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="M18,3H6V7H18M19,12A1,1 0 0,1 18,11A1,1 0 0,1 17,12A1,1 0 0,1 18,13A1,1 0 0,1 19,12M16,19H8V14H16M19,8H5A3,3 0 0,0 2,11V17H6V21H18V17H22V11A3,3 0 0,0 19,8Z" Fill="{DynamicResource TextPrimary}" Width="14" Height="14" Stretch="Fill" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{root:Loc 打印追溯单}" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- View Report button -->
+                            <Button Grid.Column="1" Command="{Binding ViewReportCommand}" Height="36" Background="{DynamicResource AccentCyan}" Foreground="Black" BorderThickness="0" Margin="5,0,0,0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </Button.Resources>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M7,20H17V18H7V20M7,16H17V14H7V16M7,12H13V10H7V12Z" Fill="Black" Width="14" Height="14" Stretch="Fill" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{root:Loc 查看完整报告}" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ROW 4: BOTTOM PAGINATION & ACTIONS -->
+        <Grid Grid.Row="4" Margin="20,0,20,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Pagination Controls (Left) -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- Prev Page Button -->
+                <Button Content="{root:Loc '&lt; 上一页'}" 
+                        Command="{Binding PreviousPageCommand}" 
+                        Background="#2B303C" Foreground="White" BorderThickness="0" 
+                        Height="28" Padding="12,0,12,0" FontWeight="SemiBold" FontSize="11" Margin="0,0,15,0">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Page Info -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0">
+                    <TextBlock Text="{root:Loc 第}" Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
+                    <TextBlock Text="{Binding CurrentPage}" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="12" Margin="3,0,3,0"/>
+                    <TextBlock Text="{root:Loc '页 / 共'}" Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
+                    <TextBlock Text="{Binding TotalPages}" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="12" Margin="3,0,3,0"/>
+                    <TextBlock Text="{root:Loc 页}" Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
+                </StackPanel>
+
+                <!-- Next Page Button -->
+                <Button Content="{root:Loc '下一页 &gt;'}" 
+                        Command="{Binding NextPageCommand}" 
+                        Background="#2B303C" Foreground="White" BorderThickness="0" 
+                        Height="28" Padding="12,0,12,0" FontWeight="SemiBold" FontSize="11" Margin="0,0,20,0">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="4"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Total Count Info using Run for rich styling -->
+                <TextBlock VerticalAlignment="Center" xml:space="preserve"><Run Text="{root:Loc 共}" Foreground="{DynamicResource TextSecondary}"/> <Run Text="{Binding TotalTestsCount, Mode=OneWay}" Foreground="{DynamicResource AccentCyan}" FontWeight="Bold"/> <Run Text="{root:Loc 条测试数据}" Foreground="{DynamicResource TextSecondary}"/></TextBlock>
+            </StackPanel>
+
+            <!-- Export Button (Right) -->
+            <Button Grid.Column="1" 
+                    Command="{Binding ExportCommand}" 
+                    Background="{DynamicResource AccentCyan}" Foreground="Black" BorderThickness="0" 
+                    Height="32" Padding="15,0,15,0" FontWeight="Bold" FontSize="12">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="4"/>
+                    </Style>
+                </Button.Resources>
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" 
+                          Fill="Black" Width="14" Height="14" Stretch="Fill" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="{root:Loc 导出数据}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- 打印进度浮层 -->
+        <Grid Panel.ZIndex="1000"
+              Visibility="{Binding IsPrinting, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+            <Grid.Background>
+                <SolidColorBrush Color="#13141E" Opacity="0.75"/>
+            </Grid.Background>
+            <Border Background="#212431" CornerRadius="12" BorderBrush="#333645" BorderThickness="1"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Padding="40,30">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <!-- 旋转动画圆环 -->
+                    <Grid Width="32" Height="32" Margin="0,0,16,0">
+                        <Ellipse Stroke="#333645" StrokeThickness="3" Width="32" Height="32"/>
+                        <Ellipse Stroke="{DynamicResource AccentCyan}" StrokeThickness="3"
+                                 StrokeDashArray="40,100" Width="32" Height="32"
+                                 RenderTransformOrigin="0.5,0.5">
+                            <Ellipse.RenderTransform>
+                                <RotateTransform x:Name="PrintSpinnerRotate" Angle="0"/>
+                            </Ellipse.RenderTransform>
+                            <Ellipse.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="PrintSpinnerRotate"
+                                                             Storyboard.TargetProperty="Angle"
+                                                             From="0" To="360" Duration="0:0:1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Ellipse.Triggers>
+                        </Ellipse>
+                    </Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{root:Loc 正在打印追溯单}" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding PrintStatus}" Foreground="#8A8D99" FontSize="12"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
