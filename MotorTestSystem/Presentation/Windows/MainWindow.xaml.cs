@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MotorTestSystem.Infrastructure.Logging;
 using MotorTestSystem.Services;
 
 namespace MotorTestSystem;
@@ -20,6 +21,7 @@ namespace MotorTestSystem;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private static readonly IAppLogger _log = AppLogger.ForContext<MainWindow>();
     private bool _isFullscreen = false;
     private double _normalWidth = 1280;
     private double _normalHeight = 920;
@@ -184,7 +186,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Trace.WriteLine($"Logout cleanup error: {ex.Message}");
+            _log.Error(ex, "登出清理失败");
         }
 
         // 5. 显式关闭应用程序（确保进程终止）
@@ -295,7 +297,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Trace.WriteLine($"Error during shutdown: {ex.Message}");
+            _log.Error(ex, "关闭窗口时清理失败");
         }
         finally
         {

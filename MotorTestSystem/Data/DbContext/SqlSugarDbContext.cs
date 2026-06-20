@@ -1,6 +1,7 @@
 using SqlSugar;
 using System;
 using System.IO;
+using MotorTestSystem.Infrastructure.Logging;
 using MotorTestSystem.Models;
 using MotorTestSystem.Models.Entities;
 
@@ -11,6 +12,7 @@ namespace MotorTestSystem.Services
     /// </summary>
     public class SqlSugarDbContext
     {
+        private static readonly IAppLogger _log = AppLogger.ForContext<SqlSugarDbContext>();
         private static readonly object _initLock = new();
         private static bool _initialized;
 
@@ -99,7 +101,7 @@ namespace MotorTestSystem.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"Failed to set PRAGMA synchronous: {ex.Message}");
+                _log.Warning(ex, "[SQLite] 设置 PRAGMA synchronous={Mode} 失败", normalizedSync);
             }
         }
 

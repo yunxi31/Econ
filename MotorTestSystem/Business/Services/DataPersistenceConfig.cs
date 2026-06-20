@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using MotorTestSystem.Infrastructure.Logging;
 
 namespace MotorTestSystem.Services
 {
@@ -9,6 +10,7 @@ namespace MotorTestSystem.Services
     /// </summary>
     public sealed class DataPersistenceConfig
     {
+        private static readonly IAppLogger _log = AppLogger.ForContext<DataPersistenceConfig>();
         /// <summary>写入通道容量（默认 500）</summary>
         public int WriteChannelCapacity { get; set; } = 500;
 
@@ -65,7 +67,7 @@ namespace MotorTestSystem.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"Failed to load DataPersistence config: {ex.Message}");
+                _log.Error(ex, "加载 DataPersistence 配置失败，使用默认值");
                 return new DataPersistenceConfig();
             }
         }

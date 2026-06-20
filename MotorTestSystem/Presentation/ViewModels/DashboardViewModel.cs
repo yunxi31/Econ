@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
+using MotorTestSystem.Infrastructure.Logging;
 using MotorTestSystem.Models;
 using MotorTestSystem.Services;
 using SkiaSharp;
@@ -16,6 +17,7 @@ namespace MotorTestSystem.ViewModels
 {
     public partial class DashboardViewModel : ViewModelBase
     {
+        private static readonly IAppLogger _log = AppLogger.ForContext<DashboardViewModel>();
         private readonly IMotorTestRepository _repository;
         private readonly BackendRuntime _runtime;
         private readonly DispatcherTimer _refreshTimer;
@@ -309,19 +311,11 @@ namespace MotorTestSystem.ViewModels
             // 订阅 PLC 轮询事件，实时刷新
             _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
 
-            // 首次加载：异步启动，避免在 UI 线程同步等待造成死锁
-            Console.WriteLine($"[DEBUG-DVM] Constructor: queueing initial refresh. Thread ID: {Thread.CurrentThread.ManagedThreadId}");
+            // 首次加载
             _dispatcher.InvokeAsync(async () =>
             {
-                Console.WriteLine($"[DEBUG-DVM] Constructor: dispatcher invoked initial refresh. Thread ID: {Thread.CurrentThread.ManagedThreadId}");
-                try
-                {
-                    await RefreshAllDataAsync();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[DashboardViewModel] Initial refresh failed: {ex.Message}");
-                }
+                try { await RefreshAllDataAsync(); }
+                catch (Exception ex) { _log.Warning(ex, "[Dashboard] 初始化刷新失败"); }
             });
 
             _refreshTimer = new DispatcherTimer
@@ -334,11 +328,8 @@ namespace MotorTestSystem.ViewModels
 
         private void OnSnapshotReceived(object? sender, StationSnapshot snapshot)
         {
-            // 收到 PLC 数据时触发刷新（节流：避免高频刷新）
-            Console.WriteLine($"[DEBUG-DVM] OnSnapshotReceived called, queueing refresh on dispatcher. Thread ID: {Thread.CurrentThread.ManagedThreadId}");
             _dispatcher.InvokeAsync(async () =>
             {
-                Console.WriteLine($"[DEBUG-DVM] Dispatcher invoked action. Thread ID: {Thread.CurrentThread.ManagedThreadId}");
                 try
                 {
                     await RefreshAllDataAsync();
@@ -346,21 +337,15 @@ namespace MotorTestSystem.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[DashboardViewModel] Snapshot refresh failed: {ex.Message}");
+                    _log.Warning(ex, "[Dashboard] 快照刷新失败");
                 }
             });
         }
 
         private async void OnRefreshTimerTick(object? sender, EventArgs e)
         {
-            try
-            {
-                await RefreshAllDataAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[DashboardViewModel] Timer refresh failed: {ex.Message}");
-            }
+            try { await RefreshAllDataAsync(); }
+            catch (Exception ex) { _log.Warning(ex, "[Dashboard] 定时刷新失败"); }
         }
 
         #region Refresh Methods
@@ -809,7 +794,7 @@ namespace MotorTestSystem.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"[Dashboard] PersistenceMonitor refresh error: {ex.Message}");
+                _log.Warning(ex, "[Dashboard] PersistenceMonitor 刷新失败");
             }
         }
 
@@ -839,14 +824,13 @@ namespace MotorTestSystem.ViewModels
                     if (retried) successCount++; else failCount++;
                 }
 
-                System.Diagnostics.Trace.WriteLine(
-                    $"Manual dead letter retry: {successCount} succeeded, {failCount} failed");
+                _log.Information("[Dashboard] 死信队列手动重试: 成功={Ok} 失败={Fail}", successCount, failCount);
 
                 await RefreshPersistenceMonitorAsync();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"Manual dead letter retry error: {ex.Message}");
+                _log.Error(ex, "[Dashboard] 死信队列重试异常");
             }
         }
 

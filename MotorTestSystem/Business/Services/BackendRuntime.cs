@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using MotorTestSystem.Infrastructure.Logging;
 using MotorTestSystem.Models;
 using MotorTestSystem.Models.Entities;
 
@@ -9,6 +10,7 @@ namespace MotorTestSystem.Services
 {
     public sealed class BackendRuntime : IDisposable
     {
+        private static readonly IAppLogger _log = AppLogger.ForContext<BackendRuntime>();
         private static readonly Random _rng = new(42);
         private readonly INotificationService _notificationService;
 
@@ -224,13 +226,11 @@ namespace MotorTestSystem.Services
                         failCount++;
                 }
 
-                System.Diagnostics.Trace.WriteLine(
-                    $"Dead letter retry completed: {successCount} succeeded, {failCount} failed");
+                _log.Info("死信队列补传完成：成功={Success} 失败={Fail}", successCount, failCount);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine(
-                    $"Dead letter retry error during startup: {ex.Message}");
+                _log.Error(ex, "死信队列启动补传失败");
             }
         }
 

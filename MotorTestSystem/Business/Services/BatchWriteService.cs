@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using MotorTestSystem.Infrastructure.Logging;
 using MotorTestSystem.Models;
 
 namespace MotorTestSystem.Services
@@ -13,6 +14,7 @@ namespace MotorTestSystem.Services
     /// </summary>
     public sealed class BatchWriteService : IDisposable
     {
+        private static readonly IAppLogger _log = AppLogger.ForContext<BatchWriteService>();
         private readonly IMotorTestRepository _repository;
         private readonly ChannelReader<StageTestData> _channelReader;
         private readonly CancellationTokenSource _cts;
@@ -99,7 +101,7 @@ namespace MotorTestSystem.Services
             catch (OperationCanceledException) { }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"BatchWriteService error: {ex.Message}");
+                _log.Error(ex, "BatchWriteService 处理队列异常，消费循环退出");
             }
 
             await FlushRemainingAsync().ConfigureAwait(false);
@@ -129,7 +131,8 @@ namespace MotorTestSystem.Services
                 {
                     if (attempt == MaxRetryCount)
                     {
-                        System.Diagnostics.Trace.WriteLine($"Bulk upsert failed after {MaxRetryCount + 1} attempts: {ex.Message}");
+                        _log.Error(ex, "BulkUpsert 已尝试 {Attempts} 次全部失败，进入死信队列. BatchSize={Size}",
+                            MaxRetryCount + 1, batch.Count);
 
                         if (_deadLetterQueue != null)
                         {
@@ -145,7 +148,7 @@ namespace MotorTestSystem.Services
                     }
 
                     int delayMs = (int)Math.Pow(2, attempt) * 1000;
-                    System.Diagnostics.Trace.WriteLine($"Bulk upsert attempt {attempt + 1} failed, retrying in {delayMs}ms: {ex.Message}");
+                    _log.Warning("BulkUpsert 第 {Attempt} 次失败，{Delay}ms 后重试. {ExMsg}", attempt + 1, delayMs, ex.Message);
                     await Task.Delay(delayMs, cancellationToken).ConfigureAwait(false);
                 }
             }
@@ -169,17 +172,18 @@ namespace MotorTestSystem.Services
 
                     if (utilization >= 0.95)
                     {
-                        System.Diagnostics.Trace.WriteLine(
-                            $"[BATCH-WRITE] CRITICAL: Write channel utilization={utilization:P1}, dropped={droppedCount}");
+                        _log.Error(
+                            "[BatchWrite] CRITICAL 通道水位={Utilization:P1} 丢弃数={Dropped}",
+                            utilization, droppedCount);
                     }
                     else if (utilization >= 0.80)
                     {
-                        // 每 5 秒记录一次，避免刷屏
                         if (DateTime.UtcNow - _lastHighUtilizationWarning > TimeSpan.FromSeconds(5))
                         {
                             _lastHighUtilizationWarning = DateTime.UtcNow;
-                            System.Diagnostics.Trace.WriteLine(
-                                $"[BATCH-WRITE] WARNING: Write channel utilization={utilization:P1}, dropped={droppedCount}");
+                            _log.Warning(
+                                "[BatchWrite] WARNING 通道水位={Utilization:P1} 丢弃数={Dropped}",
+                                utilization, droppedCount);
                         }
                     }
                 }
@@ -187,7 +191,7 @@ namespace MotorTestSystem.Services
             catch (OperationCanceledException) { }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"BatchWriteService monitor error: {ex.Message}");
+                _log.Error(ex, "BatchWriteService 监控任务异常退出");
             }
         }
 
@@ -206,7 +210,7 @@ namespace MotorTestSystem.Services
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Trace.WriteLine($"Error during final flush: {ex.Message}");
+                    _log.Error(ex, "FlushRemaining 最终刷新失败，进入死信队列. Count={Count}", remaining.Count);
                     if (_deadLetterQueue != null)
                     {
                         try { await _deadLetterQueue.EnqueueAsync(remaining.AsReadOnly(), $"Flush failure: {ex.Message}", ex.GetType().FullName).ConfigureAwait(false); }
@@ -225,14 +229,14 @@ namespace MotorTestSystem.Services
         {
             _cts.Cancel();
             try { await _runTask.ConfigureAwait(false); }
-            catch (Exception ex) { System.Diagnostics.Trace.WriteLine($"Error stopping BatchWriteService: {ex.Message}"); }
+            catch (Exception ex) { _log.Warning("StopAsync 异常: {Msg}", ex.Message); }
         }
 
         public void Dispose()
         {
             _cts.Cancel();
             try { _runTask.Wait(TimeSpan.FromSeconds(FlushTimeoutSeconds + 2)); }
-            catch (Exception ex) { System.Diagnostics.Trace.WriteLine($"Error disposing BatchWriteService: {ex.Message}"); }
+            catch (Exception ex) { _log.Warning("Dispose 异常: {Msg}", ex.Message); }
             finally { _cts.Dispose(); }
         }
     }

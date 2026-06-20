@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using MotorTestSystem.Infrastructure.Logging;
 using MotorTestSystem.Models;
 
 namespace MotorTestSystem.Services
@@ -14,6 +15,7 @@ namespace MotorTestSystem.Services
     /// </summary>
     public sealed class NotificationWriter : IDisposable
     {
+        private static readonly IAppLogger _log = AppLogger.ForContext<NotificationWriter>();
         private readonly ChannelReader<NotificationItem> _channelReader;
         private readonly INotificationService _notificationService;
         private readonly CancellationTokenSource _cts;
@@ -79,9 +81,7 @@ namespace MotorTestSystem.Services
                             }
                             catch (Exception ex)
                             {
-                                System.Diagnostics.Trace.WriteLine(
-                                    $"NotificationWriter batch write error: {ex.Message}");
-                                // 单条写入降级
+                                _log.Error(ex, "NotificationWriter 批量写入失败，尝试逐条写入");
                                 foreach (var item in batch)
                                 {
                                     try { _notificationService.Add(item); }
@@ -98,7 +98,7 @@ namespace MotorTestSystem.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"NotificationWriter fatal error: {ex.Message}");
+                _log.Error(ex, "NotificationWriter 致命错误，消费循环已退出");
             }
         }
 

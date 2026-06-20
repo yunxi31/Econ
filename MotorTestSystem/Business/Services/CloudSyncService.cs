@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using MotorTestSystem.Infrastructure.Logging;
 using MotorTestSystem.Models;
 
 namespace MotorTestSystem.Services
@@ -11,6 +12,7 @@ namespace MotorTestSystem.Services
     /// </summary>
     public sealed class CloudSyncService : ICloudSyncService, IDisposable
     {
+        private static readonly IAppLogger _log = AppLogger.ForContext<CloudSyncService>();
         private readonly SqlSugarDbContext _dbContext;
         private CancellationTokenSource? _cts;
         private Task? _syncTask;
@@ -107,8 +109,8 @@ namespace MotorTestSystem.Services
                                 .UpdateColumns(r => new { r.RetryCount, r.LastAttempt, r.SyncStatus })
                                 .ExecuteCommandAsync(cancellationToken);
 
-                            System.Diagnostics.Trace.WriteLine(
-                                $"CloudSync: Failed to sync record {record.Id}: {ex.Message}");
+                            _log.Warning(ex, "CloudSync: 同步记录失败. RecordId={Id} RetryCount={Retry}",
+                                record.Id, record.RetryCount);
                         }
                     }
 
