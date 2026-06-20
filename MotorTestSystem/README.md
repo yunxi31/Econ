@@ -191,7 +191,7 @@ CREATE TABLE MotorTestResult (
 - [x] 海康威视 SDK 集成预留
 - [ ] ModbusTCP 汇川驱动接入
 - [ ] 云同步端点实现
-- [ ] Excel 报表导出（ClosedXML）
+- [x] Excel 报表导出（MiniExcel）
 - [ ] 全局未处理异常捕获与结构化日志
 
 ---

@@ -177,7 +177,7 @@ SQLite 写入失败时序列化到本地 DLQ 文件，重启后自动回放，�
 - [x] 海康威视 SDK 集成
 - [x] 多语言支持（LanguageManager）
 - [ ] 云同步端点实现
-- [ ] Excel 报表导出（ClosedXML）
+- [x] Excel 报表导出（MiniExcel）
 - [ ] 全局未处理异常捕获与结构化日志
 
 ---

@@ -141,16 +141,19 @@ namespace MotorTestSystem.ViewModels
         [ObservableProperty]
         private int _unreadCount;
 
+        private readonly IDispatcherService _dispatcherService;
+
         /// <summary>
         /// 无参构造（兼容旧调用方式，使用内置 Mock 数据）
         /// </summary>
-        public NotificationCenterViewModel() : this(null) { }
+        public NotificationCenterViewModel() : this(null, null) { }
 
         /// <summary>
         /// 依赖注入构造（推荐）
         /// </summary>
-        public NotificationCenterViewModel(INotificationService? notificationService)
+        public NotificationCenterViewModel(INotificationService? notificationService, IDispatcherService? dispatcherService = null)
         {
+            _dispatcherService = dispatcherService ?? new MotorTestSystem.Presentation.Services.WpfDispatcherService();
             _notificationService = notificationService ?? new InMemoryNotificationService();
 
             if (_notificationService != null)
@@ -179,71 +182,62 @@ namespace MotorTestSystem.ViewModels
 
         private void OnServiceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            // CollectionChanged 可能从后台线程触发（PLC 轮询），必须回到 UI 线程
-            var dispatcher = Application.Current?.Dispatcher;
-            if (dispatcher != null && !dispatcher.CheckAccess())
+            _dispatcherService.Invoke(() =>
             {
-                dispatcher.Invoke(() => OnServiceCollectionChanged(sender, e));
-                return;
-            }
-
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null)
-                    {
-                        foreach (NotificationItem item in e.NewItems)
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        if (e.NewItems != null)
                         {
-                            if (!_vmMap.ContainsKey(item.Id))
+                            foreach (NotificationItem item in e.NewItems)
                             {
-                                var vm = new NotificationItemViewModel(item);
-                                _allNotificationVms.Insert(0, vm); // 最新在前
-                                _vmMap[item.Id] = vm;
+                                if (!_vmMap.ContainsKey(item.Id))
+                                {
+                                    var vm = new NotificationItemViewModel(item);
+                                    _allNotificationVms.Insert(0, vm); // 最新在前
+                                    _vmMap[item.Id] = vm;
+                                }
                             }
                         }
-                    }
-                    break;
+                        break;
 
-                case NotifyCollectionChangedAction.Remove:
-                    if (e.OldItems != null)
-                    {
-                        foreach (NotificationItem item in e.OldItems)
+                    case NotifyCollectionChangedAction.Remove:
+                        if (e.OldItems != null)
                         {
-                            if (_vmMap.Remove(item.Id, out var vm))
+                            foreach (NotificationItem item in e.OldItems)
                             {
-                                _allNotificationVms.Remove(vm);
+                                if (_vmMap.Remove(item.Id, out var vm))
+                                {
+                                    _allNotificationVms.Remove(vm);
+                                }
                             }
                         }
-                    }
-                    break;
+                        break;
 
-                case NotifyCollectionChangedAction.Reset:
-                    _allNotificationVms.Clear();
-                    _vmMap.Clear();
-                    foreach (var item in _notificationService!.Notifications)
-                    {
-                        var vm = new NotificationItemViewModel(item);
-                        _allNotificationVms.Add(vm);
-                        _vmMap[item.Id] = vm;
-                    }
-                    break;
-            }
+                    case NotifyCollectionChangedAction.Reset:
+                        _allNotificationVms.Clear();
+                        _vmMap.Clear();
+                        foreach (var item in _notificationService!.Notifications)
+                        {
+                            var vm = new NotificationItemViewModel(item);
+                            _allNotificationVms.Add(vm);
+                            _vmMap[item.Id] = vm;
+                        }
+                        break;
+                }
 
-            UpdateCounts();
-            FilterNotifications();
+                UpdateCounts();
+                FilterNotifications();
+            });
         }
 
         private void OnNotificationReceived(object? sender, NotificationItem item)
         {
-            // 新通知到达时刷新筛选和计数 — 事件可能来自后台线程，必须 Dispatch 到 UI
-            var dispatcher = Application.Current?.Dispatcher;
-            if (dispatcher != null && !dispatcher.CheckAccess())
+            _dispatcherService.Invoke(() =>
             {
-                dispatcher.Invoke(() => OnNotificationReceived(sender, item));
-                return;
-            }
-            UpdateCounts();
-            FilterNotifications();
+                UpdateCounts();
+                FilterNotifications();
+            });
         }
 
         private void OnUnreadCountChanged(object? sender, int newCount)

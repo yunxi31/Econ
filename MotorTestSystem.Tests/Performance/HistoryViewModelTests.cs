@@ -184,6 +184,7 @@ namespace MotorTestSystem.Tests.Performance
             action();
             return Task.CompletedTask;
         }
+        public Task InvokeAsync(Func<Task> action) => action();
         public Task<T> InvokeAsync<T>(Func<T> func) => Task.FromResult(func());
     }
 }

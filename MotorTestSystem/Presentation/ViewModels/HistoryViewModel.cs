@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
+using Microsoft.Win32;
 using System.Windows.Xps;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -487,11 +488,11 @@ namespace MotorTestSystem.ViewModels
             SearchCommand.Execute(null);
         }
 
-        public HistoryViewModel(IMotorTestRepository repository)
+        public HistoryViewModel(IMotorTestRepository repository, IDispatcherService? dispatcherService = null)
             : this(
                   repository,
                   new MotorTestSystem.Presentation.Services.WpfDialogService(),
-                  new MotorTestSystem.Presentation.Services.WpfDispatcherService())
+                  dispatcherService ?? new MotorTestSystem.Presentation.Services.WpfDispatcherService())
         {
         }
 
@@ -625,54 +626,38 @@ namespace MotorTestSystem.ViewModels
         {
             if (_cachedResults == null || _cachedResults.Count == 0)
             {
-                await _dialogService.ShowMessageAsync("当前没有符合条件的测试数据可供导出！", "导出提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                await _dialogService.ShowMessageAsync(
+                    "当前没有符合条件的测试数据可供导出！",
+                    "导出提示", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            string exportPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "电机电性能测试数据导出.csv");
+            // 让用户选择保存路径
+            var dlg = new SaveFileDialog
+            {
+                Title            = "导出 Excel 报表",
+                Filter           = "Excel 工作簿 (*.xlsx)|*.xlsx",
+                DefaultExt       = ".xlsx",
+                FileName         = $"电机电性能测试数据_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+            };
+
+            if (dlg.ShowDialog() != true) return;   // 用户取消
+
+            string exportPath = dlg.FileName;
             try
             {
-                using var sw = new StreamWriter(exportPath, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
-                sw.WriteLine("Barcode,TestTime,FinalResult,NoLoadCurrent(A),NoLoadSpeed(r/min),FwdNoise(dB),RevNoise(dB),LoadCurrent(A),LoadSpeed(r/min)");
+                int count = await ExcelExportService.ExportAsync(_cachedResults, exportPath);
 
-                var allModels = _cachedResults.Select(r => new MotorTestRecordModel
-                {
-                    Barcode = r.Barcode,
-                    TestTime = r.TestTime,
-                    FinalResult = r.FinalResult,
-                    NoLoadCurrent = r.NoLoadCurrent,
-                    NoLoadSpeed = r.NoLoadSpeed,
-                    ShaftLength = r.ShaftLength,
-                    KnurlDiameter = r.KnurlDiameter,
-                    NoLoadResult = r.NoLoadResult,
-                    FwdNoise = r.FwdNoise,
-                    RevNoise = r.RevNoise,
-                    NoiseDiff = r.NoiseDiff,
-                    NoiseResult = r.NoiseResult,
-                    LoadCurrent = r.LoadCurrent,
-                    LoadSpeed = r.LoadSpeed,
-                    LoadResult = r.LoadResult
-                }).ToList();
-
-                foreach (var r in allModels)
-                {
-                    sw.WriteLine(string.Join(",",
-                         Escape(r.Barcode),
-                         r.TestTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                         r.FinalResult,
-                         r.NoLoadCurrentText,
-                         r.NoLoadSpeedText,
-                         r.FwdNoiseText,
-                         r.RevNoiseText,
-                         r.LoadCurrentText,
-                         r.LoadSpeedText));
-                }
-
-                await _dialogService.ShowMessageAsync($"成功导出 {allModels.Count} 条记录至桌面:\n{exportPath}", "数据导出成功", MessageBoxButton.OK, (MessageBoxImage)99);
+                await _dialogService.ShowMessageAsync(
+                    $"成功导出 {count} 条记录至:\n{exportPath}",
+                    "数据导出成功", MessageBoxButton.OK, (MessageBoxImage)99);
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowMessageAsync($"导出数据失败: {ex.Message}", "导出错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                await _dialogService.ShowMessageAsync(
+                    $"导出数据失败: {ex.Message}",
+                    "导出错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -751,12 +736,6 @@ namespace MotorTestSystem.ViewModels
             }
         }
 
-        private static string Escape(object? value)
-        {
-            string text = value?.ToString() ?? string.Empty;
-            return text.Contains(',') || text.Contains('"') || text.Contains('\n')
-                ? $"\"{text.Replace("\"", "\"\"")}\""
-                : text;
-        }
+
     }
 }

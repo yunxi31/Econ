@@ -86,10 +86,13 @@ namespace MotorTestSystem.ViewModels
         [ObservableProperty]
         private int _unreadCount;
 
-        public LogCenterViewModel() : this(null) { }
+        private readonly IDispatcherService _dispatcherService;
 
-        public LogCenterViewModel(INotificationService? notificationService)
+        public LogCenterViewModel() : this(null, null) { }
+
+        public LogCenterViewModel(INotificationService? notificationService, IDispatcherService? dispatcherService = null)
         {
+            _dispatcherService = dispatcherService ?? new MotorTestSystem.Presentation.Services.WpfDispatcherService();
             _notificationService = notificationService ?? new InMemoryNotificationService();
 
             if (_notificationService != null)
@@ -112,69 +115,62 @@ namespace MotorTestSystem.ViewModels
 
         private void OnServiceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            var dispatcher = Application.Current?.Dispatcher;
-            if (dispatcher != null && !dispatcher.CheckAccess())
+            _dispatcherService.Invoke(() =>
             {
-                dispatcher.Invoke(() => OnServiceCollectionChanged(sender, e));
-                return;
-            }
-
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null)
-                    {
-                        foreach (NotificationItem item in e.NewItems)
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        if (e.NewItems != null)
                         {
-                            if (!_vmMap.ContainsKey(item.Id))
+                            foreach (NotificationItem item in e.NewItems)
                             {
-                                var vm = new NotificationItemViewModel(item);
-                                _allNotificationVms.Insert(0, vm);
-                                _vmMap[item.Id] = vm;
+                                if (!_vmMap.ContainsKey(item.Id))
+                                {
+                                    var vm = new NotificationItemViewModel(item);
+                                    _allNotificationVms.Insert(0, vm);
+                                    _vmMap[item.Id] = vm;
+                                }
                             }
                         }
-                    }
-                    break;
+                        break;
 
-                case NotifyCollectionChangedAction.Remove:
-                    if (e.OldItems != null)
-                    {
-                        foreach (NotificationItem item in e.OldItems)
+                    case NotifyCollectionChangedAction.Remove:
+                        if (e.OldItems != null)
                         {
-                            if (_vmMap.Remove(item.Id, out var vm))
+                            foreach (NotificationItem item in e.OldItems)
                             {
-                                _allNotificationVms.Remove(vm);
+                                if (_vmMap.Remove(item.Id, out var vm))
+                                {
+                                    _allNotificationVms.Remove(vm);
+                                }
                             }
                         }
-                    }
-                    break;
+                        break;
 
-                case NotifyCollectionChangedAction.Reset:
-                    _allNotificationVms.Clear();
-                    _vmMap.Clear();
-                    foreach (var item in _notificationService!.Notifications)
-                    {
-                        var vm = new NotificationItemViewModel(item);
-                        _allNotificationVms.Add(vm);
-                        _vmMap[item.Id] = vm;
-                    }
-                    break;
-            }
+                    case NotifyCollectionChangedAction.Reset:
+                        _allNotificationVms.Clear();
+                        _vmMap.Clear();
+                        foreach (var item in _notificationService!.Notifications)
+                        {
+                            var vm = new NotificationItemViewModel(item);
+                            _allNotificationVms.Add(vm);
+                            _vmMap[item.Id] = vm;
+                        }
+                        break;
+                }
 
-            UpdateCounts();
-            FilterNotifications();
+                UpdateCounts();
+                FilterNotifications();
+            });
         }
 
         private void OnNotificationReceived(object? sender, NotificationItem item)
         {
-            var dispatcher = Application.Current?.Dispatcher;
-            if (dispatcher != null && !dispatcher.CheckAccess())
+            _dispatcherService.Invoke(() =>
             {
-                dispatcher.Invoke(() => OnNotificationReceived(sender, item));
-                return;
-            }
-            UpdateCounts();
-            FilterNotifications();
+                UpdateCounts();
+                FilterNotifications();
+            });
         }
 
         private void OnUnreadCountChanged(object? sender, int newCount)

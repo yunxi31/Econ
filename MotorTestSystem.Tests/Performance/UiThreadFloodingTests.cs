@@ -15,9 +15,12 @@ namespace MotorTestSystem.Tests.Performance
 {
     public class UiThreadFloodingTests
     {
+        public static Exception LastAppCreateException;
+
         [Fact]
         public async Task TestUiThreadFlooding_ShouldExposePerformanceBottleneck()
         {
+            LastAppCreateException = null;
             // Run the test in an STA thread to support WPF Dispatcher
             await StaHelper.RunAsync(async () =>
             {
@@ -57,7 +60,7 @@ namespace MotorTestSystem.Tests.Performance
                     eventChannel
                 );
 
-                var viewModel = new DashboardViewModel(mockRepo, runtime);
+                var viewModel = new DashboardViewModel(mockRepo, runtime, new TestDispatcherService(Dispatcher.CurrentDispatcher));
 
                 // Act
                 var sw = Stopwatch.StartNew();
@@ -83,25 +86,35 @@ namespace MotorTestSystem.Tests.Performance
                             Result = "OK"
                         }
                     };
+                    Console.WriteLine($"[TEST-DEBUG] Invoking OnSnapshotReceived for A{i + 1}");
                     method.Invoke(viewModel, new object[] { runtime.PollingService, snapshot });
                 }
 
                 // Process all pending Dispatcher operations
+                Console.WriteLine("[TEST-DEBUG] Before DoEvents");
                 StaHelper.DoEvents();
+                Console.WriteLine($"[TEST-DEBUG] After DoEvents, UiThreadQueryCount = {mockRepo.UiThreadQueryCount}, NonUiThreadQueryCount = {mockRepo.NonUiThreadQueryCount}");
                 sw.Stop();
 
                 double durationSeconds = sw.Elapsed.TotalSeconds;
-                if (durationSeconds < 0.1) durationSeconds = 0.1; // Prevent division by zero / extreme values
+                if (durationSeconds < 0.1) durationSeconds = 0.1;
 
                 double uiThreadDbQueryRate = mockRepo.UiThreadQueryCount / durationSeconds;
                 double uiThreadBlockingTime = mockRepo.TotalUiThreadBlockingTimeMs;
 
-                // Assert (Bug Condition validation)
-                // Before fix, every snapshot triggers 4 DB queries on the UI thread.
-                // 6 snapshots * 4 queries = 24 queries in total.
-                // Assert rate > 6 times/sec and blocking time > 100ms.
-                Assert.True(uiThreadDbQueryRate > 6, $"Expected UI thread DB query rate > 6, but was {uiThreadDbQueryRate}");
-                Assert.True(uiThreadBlockingTime > 100, $"Expected UI thread blocking time > 100ms, but was {uiThreadBlockingTime}ms");
+                if (uiThreadDbQueryRate <= 6 || uiThreadBlockingTime <= 100)
+                {
+                    var diagMsg = $"[DIAG] Current Thread ID: {Thread.CurrentThread.ManagedThreadId}, " +
+                                  $"Application.Current is null: {Application.Current == null}, " +
+                                  $"App.Current.Dispatcher Thread ID: {Application.Current?.Dispatcher?.Thread?.ManagedThreadId}, " +
+                                  $"Dispatcher.CurrentDispatcher Thread ID: {Dispatcher.CurrentDispatcher?.Thread?.ManagedThreadId}, " +
+                                  $"UiThreadQueryCount: {mockRepo.UiThreadQueryCount}, " +
+                                  $"NonUiThreadQueryCount: {mockRepo.NonUiThreadQueryCount}, " +
+                                  $"uiThreadDbQueryRate: {uiThreadDbQueryRate}, " +
+                                  $"uiThreadBlockingTime: {uiThreadBlockingTime}, " +
+                                  $"LastAppCreateException: {LastAppCreateException}";
+                    throw new Exception(diagMsg);
+                }
             });
         }
 
@@ -149,17 +162,19 @@ namespace MotorTestSystem.Tests.Performance
                 try
                 {
                     ResetApplicationStaticFields();
+                    Exception appCreateEx = null;
                     if (Application.Current == null)
                     {
                         try
                         {
                             new Application();
                         }
-                        catch (InvalidOperationException)
+                        catch (Exception ex)
                         {
-                            // Ignore if Application was already created in AppDomain
+                            appCreateEx = ex;
                         }
                     }
+                    UiThreadFloodingTests.LastAppCreateException = appCreateEx;
 
                     var dispatcher = Dispatcher.CurrentDispatcher;
                     var syncContext = new DispatcherSynchronizationContext(dispatcher);
@@ -333,6 +348,65 @@ namespace MotorTestSystem.Tests.Performance
             var client = new MockPlcClient(config);
             Clients[config.Id] = client;
             return client;
+        }
+    }
+
+    public class TestDispatcherService : IDispatcherService
+    {
+        private readonly Dispatcher _dispatcher;
+
+        public TestDispatcherService(Dispatcher dispatcher)
+        {
+            _dispatcher = dispatcher;
+        }
+
+        public void Invoke(Action action)
+        {
+            if (_dispatcher.CheckAccess())
+            {
+                action();
+            }
+            else
+            {
+                _dispatcher.Invoke(action);
+            }
+        }
+
+        public Task InvokeAsync(Action action)
+        {
+            if (_dispatcher.CheckAccess())
+            {
+                action();
+                return Task.CompletedTask;
+            }
+            else
+            {
+                return _dispatcher.InvokeAsync(action).Task;
+            }
+        }
+
+        public Task InvokeAsync(Func<Task> action)
+        {
+            if (_dispatcher.CheckAccess())
+            {
+                return action();
+            }
+            else
+            {
+                return _dispatcher.InvokeAsync(action).Task.Unwrap();
+            }
+        }
+
+        public Task<T> InvokeAsync<T>(Func<T> func)
+        {
+            if (_dispatcher.CheckAccess())
+            {
+                return Task.FromResult(func());
+            }
+            else
+            {
+                return _dispatcher.InvokeAsync(func).Task;
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ namespace MotorTestSystem.ViewModels
     public partial class MainViewModel : ViewModelBase
     {
         private readonly BackendRuntime _runtime;
+        private readonly IDispatcherService _dispatcher;
         private readonly Dictionary<string, bool> _onlineStations = new(StringComparer.OrdinalIgnoreCase);
         private readonly DispatcherTimer _clockTimer;
 
@@ -70,23 +71,24 @@ namespace MotorTestSystem.ViewModels
         public ObservableCollection<StationState> HeaderStations { get; } = new();
 
         public MainViewModel()
-            : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult())
+            : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult(), null)
         {
         }
 
-        public MainViewModel(BackendRuntime runtime)
+        public MainViewModel(BackendRuntime runtime, IDispatcherService dispatcher = null)
         {
             _runtime = runtime;
+            _dispatcher = dispatcher ?? new MotorTestSystem.Presentation.Services.WpfDispatcherService();
             TotalStationCount = _runtime.StationConfigs.Count;
             OnlineStationCount = 0;
 
-            DashboardVM = new DashboardViewModel(_runtime.Repository, _runtime);
-            MonitorVM = new MonitorViewModel(_runtime);
-            HistoryVM = new HistoryViewModel(_runtime.Repository);
+            DashboardVM = new DashboardViewModel(_runtime.Repository, _runtime, _dispatcher);
+            MonitorVM = new MonitorViewModel(_runtime, _dispatcher);
+            HistoryVM = new HistoryViewModel(_runtime.Repository, _dispatcher);
             ConfigVM = new ConfigViewModel(_runtime);
             UserVM = new UserViewModel(_runtime.UserService, _runtime.AuthService);
-            NotificationVM = new NotificationCenterViewModel(_runtime.NotificationService);
-            LogCenterVM = new LogCenterViewModel(_runtime.NotificationService);
+            NotificationVM = new NotificationCenterViewModel(_runtime.NotificationService, _dispatcher);
+            LogCenterVM = new LogCenterViewModel(_runtime.NotificationService, _dispatcher);
 
             var allStations = MonitorVM.NoLoadStations
                 .Concat(MonitorVM.NoiseStations)
@@ -239,14 +241,7 @@ namespace MotorTestSystem.ViewModels
 
         private void OnSnapshotReceived(object? sender, StationSnapshot snapshot)
         {
-            var dispatcher = Application.Current?.Dispatcher;
-            if (dispatcher == null || dispatcher.CheckAccess())
-            {
-                ApplyOnlineState(snapshot);
-                return;
-            }
-
-            dispatcher.InvokeAsync(() => ApplyOnlineState(snapshot));
+            _dispatcher.InvokeAsync(() => ApplyOnlineState(snapshot));
         }
 
         private void ApplyOnlineState(StationSnapshot snapshot)

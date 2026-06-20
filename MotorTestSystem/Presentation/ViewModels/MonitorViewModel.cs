@@ -12,6 +12,7 @@ namespace MotorTestSystem.ViewModels
     public partial class MonitorViewModel : ViewModelBase
     {
         private readonly BackendRuntime _runtime;
+        private readonly IDispatcherService _dispatcher;
         private readonly Dictionary<string, StationState> _stationsById = new(StringComparer.OrdinalIgnoreCase);
 
         public ObservableCollection<StationState> NoLoadStations { get; } = new();
@@ -35,13 +36,14 @@ namespace MotorTestSystem.ViewModels
         #endregion
 
         public MonitorViewModel()
-            : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult())
+            : this(BackendRuntime.GetSharedAsync().GetAwaiter().GetResult(), null)
         {
         }
 
-        public MonitorViewModel(BackendRuntime runtime)
+        public MonitorViewModel(BackendRuntime runtime, IDispatcherService dispatcher = null)
         {
             _runtime = runtime;
+            _dispatcher = dispatcher ?? new MotorTestSystem.Presentation.Services.WpfDispatcherService();
             BuildStationStates();
 
             _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
@@ -256,16 +258,9 @@ namespace MotorTestSystem.ViewModels
             }
         }
 
-        private static void RunOnUiThread(Action action)
+        private void RunOnUiThread(Action action)
         {
-            var dispatcher = Application.Current?.Dispatcher;
-            if (dispatcher == null || dispatcher.CheckAccess())
-            {
-                action();
-                return;
-            }
-
-            dispatcher.InvokeAsync(action);
+            _dispatcher.InvokeAsync(action);
         }
 
         private bool _isDisposedByBase;

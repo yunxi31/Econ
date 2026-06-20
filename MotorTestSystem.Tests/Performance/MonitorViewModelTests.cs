@@ -126,7 +126,7 @@ namespace MotorTestSystem.Tests.Performance
                 }
 
                 // Assert
-                Assert.Contains("A4: 噪音超标", viewModel.Alerts);
+                Assert.True(viewModel.Alerts.Any(a => a.Message == "A4: 噪音超标"));
             });
         }
 

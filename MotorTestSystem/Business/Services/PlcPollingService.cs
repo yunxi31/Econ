@@ -125,7 +125,7 @@ namespace MotorTestSystem.Services
             {
                 try
                 {
-                    bool connected = await client.ConnectAsync(cancellationToken);
+                    bool connected = await client.ConnectAsync(cancellationToken).ConfigureAwait(false);
                     if (!connected)
                     {
                         int failures = IncrementFailure(stationId);
@@ -137,11 +137,11 @@ namespace MotorTestSystem.Services
                             CompletionSignal = false
                         });
 
-                        await Task.Delay(GetBackoffDelay(failures), cancellationToken);
+                        await Task.Delay(GetBackoffDelay(failures), cancellationToken).ConfigureAwait(false);
                         continue;
                     }
 
-                    var snapshot = await client.ReadSnapshotAsync(cancellationToken);
+                    var snapshot = await client.ReadSnapshotAsync(cancellationToken).ConfigureAwait(false);
 
                     // ---- 序列号跳跃检测（重连后检测数据是否连续） ----
                     if (snapshot.SequenceNumber.HasValue)
@@ -164,20 +164,20 @@ namespace MotorTestSystem.Services
                     {
                         if (_eventChannel != null)
                         {
-                            await _eventChannel.WriteWriter.WriteAsync(snapshot.CompletedData, cancellationToken);
+                            await _eventChannel.WriteWriter.WriteAsync(snapshot.CompletedData, cancellationToken).ConfigureAwait(false);
                         }
                         else
                         {
-                            await _repository.UpsertStageResultAsync(snapshot.CompletedData, cancellationToken);
+                            await _repository.UpsertStageResultAsync(snapshot.CompletedData, cancellationToken).ConfigureAwait(false);
                         }
-                        await client.ResetCompletionSignalAsync(cancellationToken);
+                        await client.ResetCompletionSignalAsync(cancellationToken).ConfigureAwait(false);
                         LogReceived?.Invoke(this, $"{stationId} queued {snapshot.CompletedData.Barcode} {snapshot.CompletedData.Stage} {snapshot.CompletedData.Result}");
                     }
 
                     ResetFailure(stationId);
 
                     Publish(snapshot);
-                    await Task.Delay(_pollInterval, cancellationToken);
+                    await Task.Delay(_pollInterval, cancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -194,7 +194,7 @@ namespace MotorTestSystem.Services
                         CompletionSignal = false
                     });
                     LogReceived?.Invoke(this, $"{stationId} polling error: {ex.Message}");
-                    await Task.Delay(GetBackoffDelay(failures), cancellationToken);
+                    await Task.Delay(GetBackoffDelay(failures), cancellationToken).ConfigureAwait(false);
                 }
             }
         }

@@ -19,7 +19,7 @@ namespace MotorTestSystem.ViewModels
         private readonly IMotorTestRepository _repository;
         private readonly BackendRuntime _runtime;
         private readonly DispatcherTimer _refreshTimer;
-        private readonly Dispatcher _dispatcher;
+        private readonly IDispatcherService _dispatcher;
 
         #region KPI Card Properties
 
@@ -203,11 +203,11 @@ namespace MotorTestSystem.ViewModels
 
         private static BackendRuntime GetRuntime() => BackendRuntime.GetSharedAsync().GetAwaiter().GetResult();
 
-        public DashboardViewModel(IMotorTestRepository repository, BackendRuntime runtime)
+        public DashboardViewModel(IMotorTestRepository repository, BackendRuntime runtime, IDispatcherService dispatcher = null)
         {
             _repository = repository;
             _runtime = runtime;
-            _dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+            _dispatcher = dispatcher ?? new MotorTestSystem.Presentation.Services.WpfDispatcherService();
 
             OutputSeries = new System.Collections.ObjectModel.ObservableCollection<ISeries>
             {
@@ -310,8 +310,10 @@ namespace MotorTestSystem.ViewModels
             _runtime.PollingService.SnapshotReceived += OnSnapshotReceived;
 
             // 首次加载：异步启动，避免在 UI 线程同步等待造成死锁
-            Application.Current?.Dispatcher?.InvokeAsync(async () =>
+            Console.WriteLine($"[DEBUG-DVM] Constructor: queueing initial refresh. Thread ID: {Thread.CurrentThread.ManagedThreadId}");
+            _dispatcher.InvokeAsync(async () =>
             {
+                Console.WriteLine($"[DEBUG-DVM] Constructor: dispatcher invoked initial refresh. Thread ID: {Thread.CurrentThread.ManagedThreadId}");
                 try
                 {
                     await RefreshAllDataAsync();
@@ -333,8 +335,10 @@ namespace MotorTestSystem.ViewModels
         private void OnSnapshotReceived(object? sender, StationSnapshot snapshot)
         {
             // 收到 PLC 数据时触发刷新（节流：避免高频刷新）
-            Application.Current?.Dispatcher?.InvokeAsync(async () =>
+            Console.WriteLine($"[DEBUG-DVM] OnSnapshotReceived called, queueing refresh on dispatcher. Thread ID: {Thread.CurrentThread.ManagedThreadId}");
+            _dispatcher.InvokeAsync(async () =>
             {
+                Console.WriteLine($"[DEBUG-DVM] Dispatcher invoked action. Thread ID: {Thread.CurrentThread.ManagedThreadId}");
                 try
                 {
                     await RefreshAllDataAsync();

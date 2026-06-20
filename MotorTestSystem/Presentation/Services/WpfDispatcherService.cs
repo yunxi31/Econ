@@ -32,6 +32,18 @@ namespace MotorTestSystem.Presentation.Services
             }
         }
 
+        public Task InvokeAsync(Func<Task> action)
+        {
+            if (Application.Current == null || Application.Current.Dispatcher.CheckAccess())
+            {
+                return action();
+            }
+            else
+            {
+                return Application.Current.Dispatcher.InvokeAsync(action).Task.Unwrap();
+            }
+        }
+
         public Task<T> InvokeAsync<T>(Func<T> func)
         {
             if (Application.Current == null || Application.Current.Dispatcher.CheckAccess())
