@@ -69,7 +69,7 @@ Econ/
 │   ├── PropertyTests/
 │   └── StressTests/
 ├── docs/                     # 仓库级文档（审查报告、协议文档）
-└── AGENTS.md                 # AI 协作规范
+
 ```
 
 ---
