@@ -195,12 +195,12 @@ CREATE TABLE MotorTestResult (
 
 ## 📝 待办 / Roadmap
 
-- [ ] 接入真实 PLC 驱动（S7NetPlus / HslCommunication）
+- [x] 接入真实 PLC 驱动（S7NetPlus / HslCommunication）
 - [ ] 接入 SQL Server，实现异步 UPSERT 入库
 - [ ] 接入海康威视 SDK，实现真实视频预览
-- [ ] 增加全局 `UnhandledException` 捕获与日志记录
-- [ ] 实现用户登录与权限管理（操作员 / 管理员）
-- [ ] 报表导出为 Excel（使用 ClosedXML）
+- [x] 增加全局 `UnhandledException` 捕获与日志记录
+- [x] 实现用户登录与权限管理（操作员 / 管理员）
+- [x] 报表导出为 Excel（使用 MiniExcel）
 
 ---
 

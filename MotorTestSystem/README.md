@@ -189,10 +189,10 @@ CREATE TABLE MotorTestResult (
 - [x] 节流 Channel 驱动 DashboardViewModel（无 UI 线程阻塞）
 - [x] RBAC 权限控制（操作员 / 管理员）
 - [x] 海康威视 SDK 集成预留
-- [ ] ModbusTCP 汇川驱动接入
+- [x] ModbusTCP 汇川驱动接入
 - [ ] 云同步端点实现
 - [x] Excel 报表导出（MiniExcel）
-- [ ] 全局未处理异常捕获与结构化日志
+- [x] 全局未处理异常捕获与结构化日志
 
 ---
 
